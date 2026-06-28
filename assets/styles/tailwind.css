@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* 显式声明扫描路径，避免 Nuxt 虚拟模块导致 JIT 漏扫 */
+@source "../pages/";
+@source "../components/";
+@source "../layouts/";
+@source "../app.vue";
+
+@custom-variant dark (&:where(.dark, .dark *));

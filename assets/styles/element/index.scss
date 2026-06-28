@@ -1,0 +1,45 @@
+/* ============================================================
+   MornheIsland — Element Plus SCSS 主题
+
+   通过 @forward 覆盖 Element Plus 源码 SCSS 变量，
+   编译阶段注入，light/dark 色阶由 EP 自动计算。
+   ============================================================ */
+
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #A6C2F7,
+    ),
+    'danger': (
+      'base': #E84545,
+    ),
+  ),
+  $bg-color: (
+    'page': #F8F9FA,
+    '': #FFFFFF,
+    'overlay': #FFFFFF,
+  ),
+  $text-color: (
+    'primary': #1A1C20,
+    'regular': #35373B,
+    'secondary': #6C6E72,
+    'placeholder': #A0A3A8,
+    'disabled': #C8C9CC,
+  ),
+  $border-color: (
+    '': #DEE0E3,
+    'light': #EBEDF0,
+    'lighter': #F0F2F5,
+    'extra-light': #F5F7FA,
+  ),
+  $fill-color: (
+    '': #F0F2F5,
+    'light': #F5F7FA,
+    'lighter': #FAFAFA,
+    'extra-light': #FAFCFF,
+    'blank': #FFFFFF,
+  ),
+);
+
+/* 暗黑模式变量 */
+@use 'element-plus/theme-chalk/src/dark/css-vars.scss' as *;

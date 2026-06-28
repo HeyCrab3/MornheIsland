@@ -1,0 +1,32 @@
+/* ============================================================
+   MornheIsland — 业务品牌 Token（Layer 1）
+   **************************************************************
+   框架无关的品牌色变量。组件中用 var(--mi-brand) 等。
+   换 UI 库时只需改 assets/styles/element/index.scss 的映射层。
+   ============================================================ */
+
+:root {
+  --mi-brand:              #A6C2F7;
+  --mi-brand-deep:         #859BC6;
+  --mi-brand-light:        #D3E1FB;
+
+  --mi-accent:             #4D3B8E;
+  --mi-accent-light:       #9B8FC2;
+  --mi-accent-bg:          #E8E5F5;
+
+  --mi-danger:             #E84545;
+  --mi-danger-light:       #F4A2A2;
+  --mi-danger-bg:          #FDECEC;
+
+  --mi-bg-page:            #F8F9FA;
+  --mi-bg-white:           #FFFFFF;
+
+  --mi-text-primary:       #1A1C20;
+  --mi-text-regular:       #35373B;
+  --mi-text-secondary:     #6C6E72;
+  --mi-text-placeholder:   #A0A3A8;
+  --mi-text-disabled:      #C8C9CC;
+
+  --mi-border:             #DEE0E3;
+  --mi-border-light:       #EBEDF0;
+}
