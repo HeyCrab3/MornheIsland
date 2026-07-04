@@ -19,7 +19,7 @@
         v-for="(p, index) in periods"
         :key="p.id"
         draggable="true"
-        class="flex items-center gap-2 mb-2 bg-white rounded border p-3 cursor-default flex-wrap"
+        class="flex items-center gap-2 mb-2 bg-white dark:bg-neutral-600 rounded border p-3 cursor-default flex-wrap dark:border-neutral-500"
         :class="{ 'opacity-40': dragIndex === index }"
         @dragstart="onDragStart($event, index)"
         @dragover.prevent="onDragOver($event, index)"

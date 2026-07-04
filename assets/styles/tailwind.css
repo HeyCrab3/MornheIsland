@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* 显式声明扫描路径，避免 Nuxt 虚拟模块导致 JIT 漏扫 */
 @source "../pages/";

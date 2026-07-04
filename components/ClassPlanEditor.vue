@@ -38,15 +38,15 @@
           <table class="border-collapse w-full">
             <thead>
               <tr>
-                <th class="border p-2 bg-gray-50 text-sm w-24">节次</th>
-                <th v-for="d in activeDays" :key="d" class="border p-2 bg-gray-50 text-sm min-w-28">
+                <th class="border p-2 bg-gray-50 dark:bg-gray-600 text-sm w-24">节次</th>
+                <th v-for="d in activeDays" :key="d" class="border p-2 bg-gray-50 dark:bg-gray-600 text-sm min-w-28">
                   {{ DAYS.find(x => x.value === d)?.label }}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(tp, tpi) in timePoints" :key="tpi">
-                <td class="border p-2 text-xs text-gray-500 bg-gray-50 align-top">
+                <td class="border p-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-600 align-top">
                   <div class="font-medium">{{ tp.TimePointName }}</div>
                   <div class="text-gray-400">{{ tp.Start }}-{{ tp.End }}</div>
                 </td>
@@ -236,7 +236,6 @@ onMounted(fetchResources);
 
 <style scoped>
 .subject-chip {
-  background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 6px 10px;

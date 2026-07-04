@@ -3,7 +3,8 @@
     ><div class="h-full flex flex-col overflow-hidden">
       <!-- ==================== Header ==================== -->
       <header
-        class="h-14 shrink-0 flex items-center justify-between px-5 border-b border-neutral-200 bg-white"
+        class="h-14 shrink-0 flex items-center justify-between px-5 border-b dark:border-none"
+        style="border-color: var(--mi-border)"
       >
         <div class="flex items-center gap-3">
           <span
@@ -14,7 +15,10 @@
           </span>
         </div>
         <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-500">{{ userStore.userName }}</span>
+          <el-button circle text @click="dark.toggle">
+            <el-icon size="18"><Sunny v-if="dark.isDark.value" /><Moon v-else /></el-icon>
+          </el-button>
+          <span style="color: var(--mi-text-secondary)">{{ userStore.userName }}</span>
           <el-button text size="small" @click="logout">退出登录</el-button>
         </div>
       </header>
@@ -23,7 +27,8 @@
       <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar -->
         <aside
-          class="w-52 shrink-0 border-r border-neutral-200 overflow-y-auto bg-white"
+          class="w-52 shrink-0 overflow-y-auto"
+          style="background: var(--mi-bg-white);"
         >
           <el-menu
             :default-active="activeIndex"
@@ -43,7 +48,7 @@
               </template>
               <el-menu-item index="/classplan">
                 <el-icon><Notebook /></el-icon>
-                <span>课表库</span>
+                <span>档案库</span>
               </el-menu-item>
               <el-menu-item index="/timelayout">
                 <el-icon><Timer /></el-icon>
@@ -51,7 +56,7 @@
               </el-menu-item>
               <el-menu-item index="/subjects">
                 <el-icon><Collection /></el-icon>
-                <span>科目库</span>
+                <span>课程表库</span>
               </el-menu-item>
               <el-menu-item index="/policy">
                 <el-icon><Lock /></el-icon>
@@ -90,7 +95,6 @@
         <!-- Main content -->
         <main
           class="flex-1 overflow-y-auto p-6"
-          style="background: var(--mi-bg-page)"
         >
           <slot />
         </main>
@@ -98,11 +102,12 @@
 
       <!-- Footer -->
       <footer
-        class="h-8 p-4 shrink-0 flex items-center justify-center text-xs text-gray-400 border-t border-neutral-100 bg-white"
+        class="h-8 p-4 shrink-0 flex items-center justify-center text-xs border-t dark:border-neutral-700"
+        style="color: var(--mi-text-placeholder)"
       >
         <span>©2019-2026 Crab Studio. All rights reserved.</span>
         <a href="https://beian.miit.gov.cn/" target="_blank" class="text-neutral-400 ml-4">鲁ICP备2020045185号-2</a>
-        <span class="ml-4">v{{ runtimeConfig.public.VERSION }} <a target="_blank" :href="`https://github.com/HeyCrab3/MornheIsland/tree/${runtimeConfig.public.COMMIT_REF}`"><img :src="GitHubImage" alt="GitHub" class="inline-block w-4 h-4 mx-1 relative bottom-0.5" />{{ runtimeConfig.public.COMMIT_REF.substring(0,8) }}({{ runtimeConfig.public.COMMIT_DATE }})</a></span>
+        <span class="ml-4">v{{ runtimeConfig.public.VERSION }} <a target="_blank" :href="`https://github.com/HeyCrab3/MornheIsland/tree/${runtimeConfig.public.COMMIT_REF}`"><img :src="GitHubImage" alt="GitHub" class="inline-block w-4 h-4 mx-1 relative bottom-0.5 dark:invert" />{{ runtimeConfig.public.COMMIT_REF.substring(0,8) }}({{ runtimeConfig.public.COMMIT_DATE }})</a></span>
       </footer>
     </div></el-watermark
   >
@@ -120,8 +125,11 @@ import {
   Notebook,
   Lock,
   User,
+  Sunny,
+  Moon,
 } from "@element-plus/icons-vue";
 
+const dark = useDarkMode();
 import GitHubImage from '@/assets/images/github.svg'
 
 const route = useRoute();

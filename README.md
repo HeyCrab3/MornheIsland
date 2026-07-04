@@ -2,11 +2,15 @@
 
 <div align="center">
 
+![banner](https://coss.crabapi.cn/crabmtr/file/mornheisland/Github%20Banner.png)
+
 # <img src="https://coss.crabapi.cn/crabmtr/mmexport1782563887148.gif" alt="Good 莫宁" height="28"/> MornheIsland · 莫宁岛
 
 一款第三方的 ClassIsland 集控平台，支持一班一策 / 一机一策
 
-[![Stars](https://img.shields.io/github/stars/HeyCrab3/MornheIsland?label=Stars)](https://github.com/HeyCrab3/MornheIsland)![GitHub Repo size](https://img.shields.io/github/repo-size/HeyCrab3/MornheIsland?style=flat-square&color=3cb371)[![GitHub Repo Languages](https://img.shields.io/github/languages/top/HeyCrab3/MornheIsland?style=flat-square)](https://github.com/HeyCrab3/MornheIsland/search)
+[![Stars](https://img.shields.io/github/stars/HeyCrab3/MornheIsland?label=Stars)](https://github.com/HeyCrab3/MornheIsland)
+![GitHub Repo size](https://img.shields.io/github/repo-size/HeyCrab3/MornheIsland?style=flat-square&color=3cb371)
+[![GitHub Repo Languages](https://img.shields.io/github/languages/top/HeyCrab3/MornheIsland?style=flat-square)](https://github.com/HeyCrab3/MornheIsland/search)
 
 </div>
 
