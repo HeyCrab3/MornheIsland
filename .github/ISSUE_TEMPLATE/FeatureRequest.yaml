@@ -2,7 +2,6 @@ name: "新功能请求"
 description: "提出一项新的功能。"
 title: "[Feature] "
 labels: ["enhancement"]
-type: "Feature"
 body:
   - type: markdown
     attributes:
