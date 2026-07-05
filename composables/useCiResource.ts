@@ -60,6 +60,7 @@ export function useCiResourceEditor(collection: string, label: string) {
   const id = route.params.id as string;
   const doc = ref<any>(null);
   const loading = ref(false);
+  const dataReady = ref(false);
 
   const authHeaders = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -72,6 +73,7 @@ export function useCiResourceEditor(collection: string, label: string) {
         headers: authHeaders(),
       });
       doc.value = res.data;
+      nextTick(() => { dataReady.value = true; });
     } finally {
       loading.value = false;
     }
@@ -94,7 +96,7 @@ export function useCiResourceEditor(collection: string, label: string) {
 
   onMounted(fetchDoc);
 
-  return { doc, loading, save, authHeaders };
+  return { doc, loading, dataReady, save, authHeaders };
 }
 
 /** 所有资源类型及其标签 */

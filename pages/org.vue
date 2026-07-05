@@ -19,7 +19,7 @@
       <el-table-column label="配置文件" min-width="300">
         <template #default="{ row }">
           <div class="flex items-center gap-2">
-            <code class="text-xs bg-gray-100 px-2 py-1 rounded flex-1 truncate">
+            <code class="text-xs bg-gray-100 dark:bg-neutral-600 px-2 py-1 rounded flex-1 truncate">
               {{ buildPreset(row) }}
             </code>
             <el-button text type="primary" @click="copyPreset(row)">

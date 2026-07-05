@@ -21,7 +21,7 @@ export default defineNuxtConfig({
         execSync("git rev-parse HEAD").toString().trim() ||
         "未知",
       RUNTIME: process.env.NODE_ENV || "production",
-      VERSION: "0.0.1-alpha.1",
+      VERSION: "0.0.2",
       COMMIT_DATE:
         process.env.COMMIT_DATE ||
         execSync("git show -s --format=%ci").toString().trim() ||
@@ -76,5 +76,25 @@ export default defineNuxtConfig({
       style: ["html, body, #__nuxt { height: 100%; margin: 0 }"],
     },
   },
-  modules: ["@pinia/nuxt", "@element-plus/nuxt"],
+  gtag: {
+    id: "G-JCN9611G2C",
+    // enabled: process.env.NODE_ENV === 'production',
+  },
+  pwa: {
+    manifest: {
+      name: "MornheIsland · 莫宁岛",
+      short_name: "MornheIsland",
+      description: "ClassIsland 集控服务",
+      theme_color: "#A6C2F7",
+    },
+  },
+  modules: [
+    "@pinia/nuxt",
+    "@element-plus/nuxt",
+    "@nuxt/content",
+    "nuxt-gtag",
+    "@vite-pwa/nuxt",
+    "nuxt-echarts",
+    "@nuxt/content",
+  ],
 });

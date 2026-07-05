@@ -9,7 +9,7 @@
               <el-row :gutter="16">
                 <el-col :span="12" v-for="f in policyFields" :key="f.key">
                   <div
-                    class="flex items-center justify-between py-2 border-b border-gray-100"
+                    class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700"
                   >
                     <div>
                       <div class="text-sm">{{ f.label }}</div>

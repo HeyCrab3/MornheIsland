@@ -1,0 +1,61 @@
+/* ============================================================
+   MornheIsland — 业务品牌 Token（Layer 1）
+   框架无关。暗色模式在 .dark 下重新定义。
+   ============================================================ */
+
+:root {
+  --mi-brand:              #A6C2F7;
+  --mi-brand-deep:         #859BC6;
+  --mi-brand-light:        #D3E1FB;
+
+  --mi-accent:             #4D3B8E;
+  --mi-accent-light:       #9B8FC2;
+  --mi-accent-bg:          #E8E5F5;
+
+  --mi-danger:             #E84545;
+  --mi-danger-light:       #F4A2A2;
+  --mi-danger-bg:          #FDECEC;
+
+  --mi-bg-page:            #F8F9FA;
+  --mi-bg-white:           #FFFFFF;
+  --mi-bg-card:            #FFFFFF;
+
+  --mi-text-primary:       #1A1C20;
+  --mi-text-regular:       #35373B;
+  --mi-text-secondary:     #6C6E72;
+  --mi-text-placeholder:   #A0A3A8;
+  --mi-text-disabled:      #C8C9CC;
+
+  --mi-border:             #DEE0E3;
+  --mi-border-light:       #EBEDF0;
+}
+
+/* ============================================================
+   暗色模式
+   ============================================================ */
+.dark {
+  --mi-brand:              #A6C2F7;
+  --mi-brand-deep:         #B8CDF5;
+  --mi-brand-light:        #3A4A6B;
+
+  --mi-accent:             #9B8FC2;
+  --mi-accent-light:       #3A2E5E;
+  --mi-accent-bg:          #2A2040;
+
+  --mi-danger:             #F06060;
+  --mi-danger-light:       #6B2A2A;
+  --mi-danger-bg:          #3A1A1A;
+
+  --mi-bg-page:            #1A1C20;
+  --mi-bg-white:           #25272B;
+  --mi-bg-card:            #25272B;
+
+  --mi-text-primary:       #E8E9EB;
+  --mi-text-regular:       #C8C9CC;
+  --mi-text-secondary:     #9A9CA0;
+  --mi-text-placeholder:   #6C6E72;
+  --mi-text-disabled:     #4A4C50;
+
+  --mi-border:             #3A3C40;
+  --mi-border-light:       #2E3034;
+}

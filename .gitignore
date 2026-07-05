@@ -23,4 +23,5 @@ logs
 .env.*
 !.env.example
 nginx.conf
-.gitignore
+nginx-static.conf
+yarn.lock

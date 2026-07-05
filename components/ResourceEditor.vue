@@ -121,7 +121,7 @@
 import { More } from "@element-plus/icons-vue";
 
 const props = defineProps<{ collection: string; label: string }>();
-const { doc, loading, save } = useCiResourceEditor(props.collection, props.label);
+const { doc, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
 const { isDirty } = useUnsavedGuard();
 
 const jsonText = ref("");
@@ -183,11 +183,16 @@ async function doRestore(version: number) {
 }
 
 watch(doc, (d) => {
-  if (d) editName.value = d.name || "";
+  if (!d) return;
+  editName.value = d.name || "";
   if (d?.data) jsonText.value = JSON.stringify(d.data, null, 2);
-}, { immediate: true });
+});
 
-watch([jsonText, editName], () => { isDirty.value = true; }, { deep: true });
+let dirtySkip = true;
+watch(jsonText, () => {
+  if (dirtySkip) { dirtySkip = false; return; }
+  isDirty.value = true;
+});
 
 async function onNameChange() {
   if (!doc.value || editName.value === doc.value.name) return;

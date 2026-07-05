@@ -1,6 +1,6 @@
 <template>
-  <ResourceList collection="subjects" label="科目" />
+  <ResourceList collection="subjects" label="课程表" />
 </template>
 <script setup lang="ts">
-definePageMeta({ title: "科目库", protected: true });
+definePageMeta({ title: "课程表库", protected: true });
 </script>

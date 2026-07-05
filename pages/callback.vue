@@ -40,16 +40,14 @@ const login = async () => {
         const state = raw.get("state") || undefined;
         const loginChannel = raw.get("loginChannel") || undefined;
 
-      console.log("code:", code, "state:", state, "loginChannel:", loginChannel);
-
         if (!code || !state || !loginChannel) {
-            // 处理登录缺参数
-            ElMessageBox.alert("缺少必要参数", "错误", {
-                type: "error",
-            }).then(() => {
-                router.push("/login");
-            });
-            // 直接返回
+            ElMessageBox.alert("缺少必要参数", "错误", { type: "error" })
+              .then(() => router.push("/login"));
+            return;
+        }
+        if (loginChannel !== "1" && loginChannel !== "2") {
+            ElMessageBox.alert(`无效的登录渠道：${loginChannel}`, "错误", { type: "error" })
+              .then(() => router.push("/login"));
             return;
         }
         // 处理登录
