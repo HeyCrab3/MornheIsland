@@ -1,7 +1,7 @@
 name: "Bug 反馈"
 description: "在使用 MornheIsland 的过程中遇到了 Bug。"
 title: "[Bug] "
-labels: ["Bug"]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
