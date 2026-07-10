@@ -10,14 +10,14 @@
       <el-form label-position="top" @submit.prevent="doSave">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="班级标识" required>
-              <el-input v-model="form.identity" disabled />
-              <span class="text-xs text-gray-400">创建后不可修改</span>
+            <el-form-item label="班级名称" required>
+              <el-input v-model="form.name" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="班级名称" required>
-              <el-input v-model="form.name" />
+            <el-form-item label="班级标识">
+              <el-input v-model="form.identity" disabled />
+              <span class="text-xs text-gray-400">创建后不可修改</span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -25,38 +25,10 @@
         <el-divider content-position="left">关联资源</el-divider>
 
         <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="课表">
-              <el-select v-model="form.classplanId" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources.classplans" :key="r._id" :label="`${r.name} (v${r.version})`" :value="r._id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="时间表">
-              <el-select v-model="form.timelayoutId" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources.timelayouts" :key="r._id" :label="`${r.name} (v${r.version})`" :value="r._id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="科目">
-              <el-select v-model="form.subjectsId" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources.subjects" :key="r._id" :label="`${r.name} (v${r.version})`" :value="r._id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="应用设置">
-              <el-select v-model="form.settingsId" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources.settings" :key="r._id" :label="`${r.name} (v${r.version})`" :value="r._id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="策略">
-              <el-select v-model="form.policyId" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources.policies" :key="r._id" :label="r.name" :value="r._id" />
+          <el-col :span="12" v-for="sel in selectFields" :key="sel.key">
+            <el-form-item :label="sel.label">
+              <el-select v-model="form[sel.key]" clearable placeholder="不关联" class="w-full">
+                <el-option v-for="r in resources[sel.resKey]" :key="r._id" :label="`${r.name}${r.version ? ' (v'+r.version+')' : ''}`" :value="r._id" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -78,22 +50,21 @@ const loading = ref(false);
 const saving = ref(false);
 const cls = ref<any>(null);
 
-const form = reactive({
-  identity: "",
-  name: "",
-  classplanId: null as string | null,
-  timelayoutId: null as string | null,
-  subjectsId: null as string | null,
-  settingsId: null as string | null,
-  policyId: null as string | null,
+const selectFields = [
+  { key: "classplanId", label: "档案", resKey: "classplans" as const },
+  { key: "timelayoutId", label: "时间表", resKey: "timelayouts" as const },
+  { key: "subjectsId", label: "课程表", resKey: "subjects" as const },
+  { key: "settingsId", label: "应用设置", resKey: "settings" as const },
+  { key: "policyId", label: "策略", resKey: "policies" as const },
+] as const;
+
+const form = reactive<Record<string, string>>({
+  identity: "", name: "",
+  classplanId: "", timelayoutId: "", subjectsId: "", settingsId: "", policyId: "",
 });
 
 const resources = reactive<Record<string, any[]>>({
-  classplans: [],
-  timelayouts: [],
-  subjects: [],
-  settings: [],
-  policies: [],
+  classplans: [], timelayouts: [], subjects: [], settings: [], policies: [],
 });
 
 function authHeaders() {
@@ -103,7 +74,6 @@ function authHeaders() {
 async function fetchAll() {
   loading.value = true;
   try {
-    // 并行加载班级详情和所有资源列表
     const [classRes, ...resourceResults] = await Promise.all([
       $fetch(`/api/v1/console/ci/class/${id}`, { headers: authHeaders() }),
       ...["classplan", "timelayout", "subjects", "settings", "policy"].map((t) =>
@@ -113,17 +83,28 @@ async function fetchAll() {
 
     const data = (classRes as any).data;
     cls.value = data;
-    form.identity = data.identity;
-    form.name = data.name;
-    form.classplanId = data.classplan?._id ?? data.classplanId ?? null;
-    form.timelayoutId = data.timelayout?._id ?? data.timelayoutId ?? null;
-    form.subjectsId = data.subjects?._id ?? data.subjectsId ?? null;
-    form.settingsId = data.settings?._id ?? data.settingsId ?? null;
-    form.policyId = data.policy?._id ?? data.policyId ?? null;
+    form.identity = data.identity || "";
+    form.name = data.name || "";
 
-    const keys = ["classplans", "timelayouts", "subjects", "settings", "policies"];
+    const resKeys = ["classplans", "timelayouts", "subjects", "settings", "policies"];
     resourceResults.forEach((r: any, i: number) => {
-      resources[keys[i]] = r.data || [];
+      resources[resKeys[i]] = (r.data || []).map((item: any) => ({ ...item, _id: String(item._id) }));
+    });
+
+    // 填充已关联的 ID
+    const refKeys = ["classplanId", "timelayoutId", "subjectsId", "settingsId", "policyId"];
+    refKeys.forEach((k) => {
+      const populated = data[k.replace("Id", "")]; // data.classplan, data.timelayout etc
+      const raw = data[k]; // data.classplanId etc
+      const rawStr = (() => {
+        if (!raw) return "";
+        if (typeof raw === "string") return raw;
+        if (raw._id) return String(raw._id);
+        if (raw.$oid) return raw.$oid;
+        return String(raw);
+      })();
+      form[k] = populated?._id || rawStr;
+      console.log(form[k], populated, raw, rawStr);
     });
   } finally {
     loading.value = false;
@@ -146,7 +127,7 @@ async function doSave() {
       },
     });
     ElMessage.success("已保存");
-  } catch {
+  } catch (e: any) {
     ElMessage.error("保存失败");
   } finally {
     saving.value = false;

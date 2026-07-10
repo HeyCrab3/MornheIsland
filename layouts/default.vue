@@ -36,11 +36,18 @@
             router
             class="border-r-0 h-full"
           >
+            <!-- 主版块 -->
             <el-menu-item index="/">
               <el-icon><HomeFilled /></el-icon>
               <span>仪表盘</span>
             </el-menu-item>
 
+            <el-menu-item index="/quickcreate">
+              <el-icon><MagicStick /></el-icon>
+              <span>快速创建</span>
+            </el-menu-item>
+
+            <!-- 各分支板块 -->
             <el-sub-menu index="library">
               <template #title>
                 <el-icon><Collection /></el-icon>
@@ -127,6 +134,7 @@ import {
   User,
   Sunny,
   Moon,
+  MagicStick,
 } from "@element-plus/icons-vue";
 
 const dark = useDarkMode();

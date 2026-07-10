@@ -110,9 +110,10 @@ function doSave() {
       IsOutDoor: s.isOutDoor,
     };
   }
-  // 补默认的 AttachedObjects 等（ClassIsland 需要这些字段）
+  // 补默认字段（ClassIsland 需要）
   Object.values(data).forEach((sub: any) => {
     if (!sub.AttachedObjects) sub.AttachedObjects = {};
+    if (sub.IsActive === undefined) sub.IsActive = false;
   });
   emit("save", data);
 }

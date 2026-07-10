@@ -90,28 +90,30 @@ function onSubjectsChange() {
 }
 
 function loadPeriods() {
-  // ClassIsland 格式 { "uuid": { Name, TimePoints: [...] } }
+  // ClassIsland 格式 { "uuid": { Name, Layouts: [...] } }
   const raw = props.modelValue || {};
   const entries = Object.entries(raw);
-  let timePoints: any[] = [];
+  let layouts: any[] = [];
   let layoutUuid = "";
 
   if (entries.length > 0) {
     const [uuid, layout]: [string, any] = entries[0] as any;
     layoutUuid = uuid;
-    timePoints = layout.TimePoints || [];
+    layouts = layout.Layouts || layout.TimePoints || [];
     selectedSubjectsId.value = layout.subjectsId || "";
   }
 
-  periods.value = timePoints.map((tp: any, i: number) => ({
-    id: i,
-    name: tp.TimePointName || "",
-    startVal: tp.Start || "",
-    endVal: tp.End || "",
-    defaultSubject: tp.defaultSubject || "",
-  }));
+  // 只取上课段 (TimeType === 0)
+  periods.value = layouts
+    .filter((tp: any) => tp.TimeType === 0 || tp.TimeType === undefined)
+    .map((tp: any, i: number) => ({
+      id: i,
+      name: tp.TimePointName || "",
+      startVal: tp.StartTime || tp.Start || "",
+      endVal: tp.EndTime || tp.End || "",
+      defaultSubject: tp.defaultSubject || "",
+    }));
 
-  // 保存 UUID 供保存时使用
   (periods as any)._layoutUuid = layoutUuid;
 
   if (selectedSubjectsId.value) onSubjectsChange();
@@ -143,16 +145,38 @@ function onDragEnd() { dragIndex.value = -1; }
 
 function doSave() {
   const uuid = (periods as any)._layoutUuid || generateUUID();
+  // 生成 Layouts：上课段 + 课间段交替，兼容 ClassIsland
+  const layouts: any[] = [];
+  const sorted = [...periods.value].sort((a, b) => (a.startVal || "").localeCompare(b.startVal || ""));
+  for (let i = 0; i < sorted.length; i++) {
+    const p = sorted[i];
+    const prevEnd = i > 0 ? sorted[i - 1].endVal : "";
+    // 如果前一段结束和当前段开始之间有间隔，插入课间
+    if (prevEnd && p.startVal && prevEnd !== p.startVal) {
+      layouts.push({
+        StartSecond: "", EndSecond: "",
+        StartTime: prevEnd, EndTime: p.startVal, TimeType: 1,
+        IsHideDefault: false,
+        DefaultClassId: "00000000-0000-0000-0000-000000000000", BreakName: "",
+        ActionSet: null, AttachedObjects: {}, IsActive: false,
+      });
+    }
+    layouts.push({
+      StartSecond: "", EndSecond: "",
+      StartTime: p.startVal || "00:00:00", EndTime: p.endVal || "00:00:00",
+      TimeType: 0,
+      IsHideDefault: false,
+      DefaultClassId: "00000000-0000-0000-0000-000000000000",
+      BreakName: "",
+      ActionSet: null,
+      AttachedObjects: {},
+      IsActive: false,
+      _name: p.name,               // 编辑器内部用，以后加载时恢复名称
+      _defaultSubject: p.defaultSubject || undefined,
+    });
+  }
   const data: any = {
-    [uuid]: {
-      Name: "",
-      TimePoints: periods.value.map((p) => ({
-        Start: p.startVal || "00:00:00",
-        End: p.endVal || "00:00:00",
-        TimePointName: p.name,
-        defaultSubject: p.defaultSubject || undefined,
-      })),
-    },
+    [uuid]: { Name: "", Layouts: layouts },
   };
   if (selectedSubjectsId.value) data[uuid].subjectsId = selectedSubjectsId.value;
   emit("save", data);

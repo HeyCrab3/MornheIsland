@@ -93,6 +93,7 @@ const DAYS = [
   { value: "Saturday", label: "周六", weekDay: 6 },
   { value: "Sunday", label: "周日", weekDay: 0 },
 ];
+
 const activeDays = ref(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
 
 const timelayouts = ref<any[]>([]);
@@ -116,6 +117,7 @@ function authHeaders() {
 async function fetchResources() {
   loading.value = true;
   try {
+    activeDays.value = []
     const [tlRes, sjRes] = await Promise.all([
       $fetch("/api/v1/console/ci/timelayout/list", { headers: authHeaders() }),
       $fetch("/api/v1/console/ci/subjects/list", { headers: authHeaders() }),
@@ -138,6 +140,7 @@ async function fetchResources() {
         entry.Classes.forEach((cls: any, i: number) => {
           grid[dayKey][i] = cls?.SubjectId || null;
         });
+        activeDays.value.push(dayKey);
       }
 
       if (props.modelValue.timelayoutId) {
@@ -154,7 +157,16 @@ async function fetchResources() {
 function loadTimePoints(data: any) {
   const entries = Object.entries(data);
   if (entries.length > 0) {
-    timePoints.value = (entries[0][1] as any).TimePoints || [];
+    const layout = entries[0][1] as any;
+    const layouts = layout.Layouts || layout.TimePoints || [];
+    timePoints.value = layouts
+    .filter((tp: any) => tp.TimeType === 0 || tp.TimeType === undefined)
+    .map((tp: any) => ({
+      Start: tp.StartTime || tp.Start || "",
+      End: tp.EndTime || tp.End || "",
+      TimePointName: tp.TimePointName || "",
+      defaultSubject: tp.defaultSubject || "",
+    }));
   }
 }
 
@@ -215,15 +227,23 @@ function doSave() {
     const classes = [];
     for (let i = 0; i < timePoints.value.length; i++) {
       const subUuid = grid[d]?.[i] || null;
-      classes.push(subUuid ? { SubjectId: subUuid } : null);
+      classes.push(subUuid
+        ? { SubjectId: subUuid, IsChangedClass: false, IsEnabled: true, AttachedObjects: {}, IsActive: false }
+        : { SubjectId: null, IsChangedClass: false, IsEnabled: false, AttachedObjects: {}, IsActive: false }
+      );
     }
     classPlans[uuid] = {
       TimeLayoutId: tlUuid,
-      TimeRule: { WeekDay: dayInfo.weekDay, WeekCountDiv: 0 },
+      TimeRule: { WeekDay: dayInfo.weekDay, WeekCountDiv: 0, WeekCountDivTotal: 2, IsActive: false },
       Classes: classes,
       Name: dayInfo.label,
       IsOverlay: false,
+      OverlaySourceId: null,
+      OverlaySetupTime: new Date().toISOString(),
       IsEnabled: true,
+      AssociatedGroup: "00000000-0000-0000-0000-000000000000",
+      AttachedObjects: {},
+      IsActive: false,
     };
   }
 
