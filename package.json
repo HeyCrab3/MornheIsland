@@ -28,7 +28,7 @@
     "better-sqlite3": "^12.11.1",
     "echarts": "^6.0.0",
     "element-plus": ">=2",
-    "nuxt": "^3.21.8",
+    "nuxt": "^3.21.10",
     "nuxt-echarts": "1.0.1",
     "nuxt-gtag": "4.1.0",
     "pinia": "^3.0.4",
