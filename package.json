@@ -15,6 +15,7 @@
   "dependencies": {
     "@element-plus/icons-vue": ">=0.2.6",
     "@element-plus/nuxt": "1.1.5",
+    "@fingerprint/vue": "^2.0.0",
     "@fingerprintjs/fingerprintjs": "^5.2.0",
     "@nuxt/content": "3.15.0",
     "@pinia/nuxt": "0.11.3",
