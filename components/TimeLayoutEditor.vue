@@ -54,7 +54,7 @@
 import { Plus, Rank, Delete } from "@element-plus/icons-vue";
 import { generateUUID } from "@/util/uuid";
 
-const props = defineProps<{ modelValue: any }>();
+const props = defineProps<{ modelValue: any; name?: string }>();
 const emit = defineEmits<{ save: [data: any] }>();
 const saving = ref(false);
 const loading = ref(false);
@@ -176,7 +176,7 @@ function doSave() {
     });
   }
   const data: any = {
-    [uuid]: { Name: "", Layouts: layouts },
+    [uuid]: { Name: props.name || "时间表", Layouts: layouts },
   };
   if (selectedSubjectsId.value) data[uuid].subjectsId = selectedSubjectsId.value;
   emit("save", data);

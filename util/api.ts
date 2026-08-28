@@ -24,6 +24,18 @@ api.interceptors.response.use(
   (response) => {
     // 统一处理响应数据格式
     if (response.data.code !== 0) {
+      // 会话过期 / 未授权：后端当前以 HTTP 200 + code:401 返回，
+      // 必须在这里（而非 error 分支）统一清 token 并跳登录。
+      if (response.data.code === 401) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+        }
+        // 抛出 INVALID_TOKEN_MSG，让 store 的 logout() 兜底
+        throw new Error(INVALID_TOKEN_MSG);
+      }
       const errorMsg = response.data.msg;
       if (errorMsg !== INVALID_TOKEN_MSG) {
         message.error(errorMsg);

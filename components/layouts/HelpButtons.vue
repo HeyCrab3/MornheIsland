@@ -1,7 +1,7 @@
 <template>
   <Transition name="slide-up">
     <template v-if="showExtra">
-      <div class="fixed bottom-40 right-10">
+      <div class="fixed bottom-20 right-10">
         <div class="help-list">
           <el-button
             round
@@ -69,7 +69,7 @@
     </template>
   </Transition>
   <el-button circle size="large" type="primary" @click="showExtra = !showExtra">
-    <el-icon><More v-if="!showExtra" /><Close v-else /></el-icon>
+    <el-icon><Transition name="fade"><More v-if="!showExtra" /><Close v-else /></Transition></el-icon>
   </el-button>
   <el-dialog title="诊断信息" v-model="showDialog">
     <el-alert

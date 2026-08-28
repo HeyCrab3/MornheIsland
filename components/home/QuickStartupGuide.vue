@@ -39,24 +39,6 @@
       </el-collapse-item>
     </el-collapse>
   </el-card>
-
-  <!-- 全部完成后：折叠的完成提示 -->
-  <el-card class="mb-4" shadow="hover" v-else>
-    <el-collapse v-model="collapseActive">
-      <el-collapse-item name="guide">
-        <template #title>
-          <div class="flex items-center justify-between w-full pr-4">
-            <span class="font-medium">快速上手指南</span>
-            <el-tag size="small" type="success">恭喜，已全部完成</el-tag>
-          </div>
-        </template>
-        <div class="text-center py-4">
-          <div class="text-green-500 text-lg font-medium mb-1">全部完成！</div>
-          <div class="text-sm text-gray-400">可以开始下发配置了</div>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
-  </el-card>
 </template>
 
 <script setup lang="ts">
@@ -115,13 +97,13 @@ const guideSteps = [
     title: "下发到设备",
     desc: "最后一步：生成配置文件，放到 ClassIsland 设备上即可自动加载。",
     tips: [
-      "进入「组织设置」页面，找到刚创建的班级",
-      "复制该班级的配置文件内容（ManagementPreset.json）",
+      "进入「班级列表」，点对应班级的「下发」按钮复制配置",
+      "或进入班级详情，在「部署下发」卡片复制/下载配置文件",
       "将配置文件放到教室电脑的 ClassIsland 应用目录下",
       "启动 ClassIsland，在设置中点击「加入管理」即可生效",
     ],
-    action: "去生成配置",
-    link: "/org",
+    action: "去下发配置",
+    link: "/classes",
   },
 ];
 

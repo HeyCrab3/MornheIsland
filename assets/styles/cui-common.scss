@@ -205,3 +205,25 @@ html {
 body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* ============================================================
+   全局产品化：卡片圆角 + 柔和阴影 + 按钮圆角
+   ============================================================ */
+.el-card {
+    border-radius: var(--mi-radius-lg);
+    border: 1px solid var(--mi-border-light);
+    box-shadow: var(--mi-shadow-sm);
+}
+.el-card.is-always-shadow,
+.el-card.is-hover-shadow:hover {
+    box-shadow: var(--mi-shadow-md);
+}
+.el-button {
+    border-radius: var(--mi-radius-sm);
+}
+.el-dialog {
+    border-radius: var(--mi-radius-lg);
+}
+.el-dialog__header {
+    font-weight: 600;
+}

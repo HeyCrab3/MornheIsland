@@ -29,4 +29,19 @@
 
   --mi-border:             #DEE0E3;
   --mi-border-light:       #EBEDF0;
+
+  /* 圆角 */
+  --mi-radius-sm:          8px;
+  --mi-radius-md:          12px;
+  --mi-radius-lg:          16px;
+  --mi-radius-xl:          20px;
+
+  /* 柔和阴影（产品向，非后台硬阴影） */
+  --mi-shadow-sm:          0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --mi-shadow-md:          0 4px 8px -2px rgba(16, 24, 40, 0.06), 0 2px 4px -2px rgba(16, 24, 40, 0.05);
+  --mi-shadow-lg:          0 12px 24px -8px rgba(16, 24, 40, 0.12), 0 4px 8px -4px rgba(16, 24, 40, 0.06);
+
+  /* 品牌渐变（蓝紫 → 深紫） */
+  --mi-gradient:           linear-gradient(135deg, #A6C2F7 0%, #9B8FC2 100%);
+  --mi-gradient-strong:    linear-gradient(135deg, #859BC6 0%, #4D3B8E 100%);
 }

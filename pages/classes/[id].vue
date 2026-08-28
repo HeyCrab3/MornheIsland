@@ -1,10 +1,14 @@
 <template>
   <div>
-    <el-page-header @back="navigateTo('/classes')" class="mb-4">
-      <template #content>
-        <span class="text-lg font-medium">{{ cls?.name || cls?.identity || '班级详情' }}</span>
-      </template>
-    </el-page-header>
+    <div class="flex items-center gap-3 mb-5">
+      <el-button circle text @click="navigateTo('/classes')">
+        <el-icon><ArrowLeft /></el-icon>
+      </el-button>
+      <div>
+        <h1 class="text-xl font-semibold">{{ cls?.name || cls?.identity || '班级详情' }}</h1>
+        <div class="text-xs text-gray-400 font-mono mt-0.5">{{ cls?.identity }}</div>
+      </div>
+    </div>
 
     <el-card v-loading="loading" class="max-w-2xl">
       <el-form label-position="top" @submit.prevent="doSave">
@@ -38,11 +42,43 @@
         <el-button type="primary" :loading="saving" @click="doSave">保存</el-button>
       </el-form>
     </el-card>
+
+    <!-- 部署下发 -->
+    <el-card v-if="cls" class="max-w-2xl mt-4">
+      <template #header>
+        <span class="font-medium">部署下发</span>
+      </template>
+
+      <el-alert type="info" :closable="false" show-icon class="mb-4">
+        <template #title>部署步骤</template>
+        <ol class="m-0 pl-4 text-sm">
+          <li>先保存上方的班级名称与关联资源</li>
+          <li>复制或下载下方配置文件，保存为 <code>ManagementPreset.json</code></li>
+          <li>将该文件放到教室电脑的 ClassIsland 应用目录下</li>
+          <li>启动 ClassIsland → 设置 → 加入管理，即可自动拉取配置</li>
+        </ol>
+      </el-alert>
+
+      <pre class="text-xs bg-gray-50 dark:bg-neutral-700 p-3 rounded overflow-auto max-h-48 mb-3">{{ presetText }}</pre>
+
+      <div class="flex gap-2">
+        <el-button type="primary" @click="copyPreset">
+          <el-icon class="mr-1"><CopyDocument /></el-icon>复制配置
+        </el-button>
+        <el-button @click="downloadPreset">
+          <el-icon class="mr-1"><Download /></el-icon>下载配置文件
+        </el-button>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ArrowLeft, CopyDocument, Download } from "@element-plus/icons-vue";
+
 definePageMeta({ title: "班级详情", protected: true });
+
+const { buildPreset, copyPreset: doCopyPreset, downloadPreset: doDownloadPreset } = useManagementPreset();
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -54,7 +90,6 @@ const selectFields = [
   { key: "classplanId", label: "档案", resKey: "classplans" as const },
   { key: "timelayoutId", label: "时间表", resKey: "timelayouts" as const },
   { key: "subjectsId", label: "课程表", resKey: "subjects" as const },
-  { key: "settingsId", label: "应用设置", resKey: "settings" as const },
   { key: "policyId", label: "策略", resKey: "policies" as const },
 ] as const;
 
@@ -104,7 +139,6 @@ async function fetchAll() {
         return String(raw);
       })();
       form[k] = populated?._id || rawStr;
-      console.log(form[k], populated, raw, rawStr);
     });
   } finally {
     loading.value = false;
@@ -132,6 +166,16 @@ async function doSave() {
   } finally {
     saving.value = false;
   }
+}
+
+const presetText = computed(() => (cls.value ? buildPreset(cls.value) : ""));
+
+function copyPreset() {
+  if (cls.value) doCopyPreset(cls.value);
+}
+
+function downloadPreset() {
+  if (cls.value) doDownloadPreset(cls.value);
 }
 
 onMounted(fetchAll);

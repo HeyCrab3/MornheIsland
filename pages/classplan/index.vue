@@ -12,6 +12,7 @@
       <p class="text-sm text-gray-500 mb-3">
         拖入或选择 .yaml/.yml 文件，自动创建课程表、时间表和课表。
         <br><span class="text-orange-500">注意：含「临时」字样的临时层不会被导入。</span>
+        <br><span class="text-red-500">目前受到 CSES 的本身限制，两周以上的多周轮换课表不能被任何应用导出，因此也无法被莫宁岛接受，这个问题与本平台无关。</span>
       </p>
 
       <!-- 拖拽区域 -->

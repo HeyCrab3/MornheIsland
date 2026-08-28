@@ -1,6 +1,6 @@
 <template>
   <div v-loading="loading">
-    <div class="mb-4 flex items-center gap-4">
+    <div class="mb-4 flex items-center gap-4 flex-wrap">
       <span class="text-sm font-medium">时间表：</span>
       <el-select v-model="selectedTimelayoutId" placeholder="必选" @change="onTimelayoutChange" class="w-48">
         <el-option v-for="t in timelayouts" :key="t._id" :label="t.name" :value="t._id" />
@@ -9,6 +9,29 @@
       <el-select v-model="selectedSubjectsId" placeholder="必选" @change="onSubjectsChange" class="w-48">
         <el-option v-for="s in subjectsList" :key="s._id" :label="s.name" :value="s._id" />
       </el-select>
+    </div>
+
+    <!-- 周次轮换：每周 / 单周 / 双周 -->
+    <div class="mb-4 flex items-center gap-3">
+      <span class="text-sm font-medium">周次：</span>
+      <el-radio-group v-model="activeWeekDiv" @change="forceRender++">
+        <el-radio-button v-for="t in WEEK_TABS" :key="t.value" :value="t.value">
+          {{ t.label }}
+        </el-radio-button>
+      </el-radio-group>
+      <el-dropdown @command="copyWeekTo">
+        <el-button size="small" text type="primary">
+          复制当前周到…<el-icon class="ml-1"><ArrowDown /></el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-for="opt in otherWeeks" :key="opt.value" :command="opt.value">
+              {{ opt.label }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <span class="text-xs text-gray-400">每周 = 不轮换；单周 + 双周 = 两周轮换</span>
     </div>
 
     <template v-if="timePoints.length > 0 && subjectPool.length > 0">
@@ -74,6 +97,7 @@
 
 <script setup lang="ts">
 import { generateUUID } from "@/util/uuid";
+import { ArrowDown } from "@element-plus/icons-vue";
 
 interface SubEntry { uuid: string; name: string }
 interface TimePoint { Start: string; End: string; TimePointName: string; defaultSubject?: string }
@@ -94,6 +118,13 @@ const DAYS = [
   { value: "Sunday", label: "周日", weekDay: 0 },
 ];
 
+// 周次三档：0=每周, 1=单周, 2=双周
+const WEEK_TABS = [
+  { value: 0, label: "每周" },
+  { value: 1, label: "单周" },
+  { value: 2, label: "双周" },
+] as const;
+
 const activeDays = ref(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
 
 const timelayouts = ref<any[]>([]);
@@ -104,11 +135,24 @@ const timePoints = ref<TimePoint[]>([]);
 const subjectPool = ref<SubEntry[]>([]);
 const pickedSubject = ref("");
 
-// grid: { "Monday": ["uuid1", null, "uuid2", ...] } — index = timePoint index
-const grid = reactive<Record<string, (string | null)[]>>({});
+// 当前编辑的周次
+const activeWeekDiv = ref<0 | 1 | 2>(0);
 
-// UUID map for existing classplan entries
-const existingUuids: Record<string, string> = {};
+// 三套 grid：grids[weekDiv][dayKey] = [科目 uuid per 节次]
+const grids = reactive<Record<0 | 1 | 2, Record<string, (string | null)[]>>>({ 0: {}, 1: {}, 2: {} });
+
+// 已有 entry 的 uuid：existingUuids[weekDiv][dayKey] = uuid
+const existingUuids = reactive<Record<0 | 1 | 2, Record<string, string>>>({ 0: {}, 1: {}, 2: {} });
+
+const otherWeeks = computed(() => WEEK_TABS.filter((t) => t.value !== activeWeekDiv.value));
+
+function currentGrid(): Record<string, (string | null)[]> {
+  return grids[activeWeekDiv.value];
+}
+
+function weekLabel(v: number): string {
+  return v === 0 ? "每周" : v === 1 ? "单周" : "双周";
+}
 
 function authHeaders() {
   return { Authorization: `Bearer ${localStorage.getItem("token")}` };
@@ -117,7 +161,11 @@ function authHeaders() {
 async function fetchResources() {
   loading.value = true;
   try {
-    activeDays.value = []
+    activeDays.value = [];
+    // 重置三周数据，避免切换资源时残留旧数据
+    grids[0] = {}; grids[1] = {}; grids[2] = {};
+    existingUuids[0] = {}; existingUuids[1] = {}; existingUuids[2] = {};
+
     const [tlRes, sjRes] = await Promise.all([
       $fetch("/api/v1/console/ci/timelayout/list", { headers: authHeaders() }),
       $fetch("/api/v1/console/ci/subjects/list", { headers: authHeaders() }),
@@ -129,18 +177,21 @@ async function fetchResources() {
       selectedTimelayoutId.value = props.modelValue.timelayoutId || "";
       selectedSubjectsId.value = props.modelValue.subjectsId || "";
 
-      // 恢复已有 grid 数据
+      // 恢复已有 grid 数据（按 WeekCountDiv 分到 每周/单周/双周）
       const entries = Object.entries(props.modelValue.classPlans || props.modelValue || {});
       for (const [uuid, entry] of entries as [string, any][]) {
         if (!entry?.TimeRule || !entry?.Classes) continue;
         const dayKey = DAYS.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
         if (!dayKey) continue;
-        existingUuids[dayKey] = uuid;
-        if (!grid[dayKey]) grid[dayKey] = [];
+        if (!activeDays.value.includes(dayKey)) activeDays.value.push(dayKey);
+
+        const wd = entry.TimeRule.WeekCountDiv as number;
+        const div: 0 | 1 | 2 = (wd === 1 || wd === 2) ? wd : 0;
+        existingUuids[div][dayKey] = uuid;
+        if (!grids[div][dayKey]) grids[div][dayKey] = [];
         entry.Classes.forEach((cls: any, i: number) => {
-          grid[dayKey][i] = cls?.SubjectId || null;
+          grids[div][dayKey][i] = cls?.SubjectId || null;
         });
-        activeDays.value.push(dayKey);
       }
 
       if (props.modelValue.timelayoutId) {
@@ -189,7 +240,7 @@ function onSubjectsChange() {
 }
 
 function getCellSubject(dayKey: string, tpi: number): string | null {
-  return grid[dayKey]?.[tpi] || null;
+  return currentGrid()[dayKey]?.[tpi] || null;
 }
 
 function getCellSubjectName(dayKey: string, tpi: number): string {
@@ -199,6 +250,7 @@ function getCellSubjectName(dayKey: string, tpi: number): string {
 }
 
 function setCell(dayKey: string, tpi: number) {
+  const grid = currentGrid();
   if (!pickedSubject.value) {
     // 清除
     if (grid[dayKey]) grid[dayKey][tpi] = null;
@@ -210,9 +262,29 @@ function setCell(dayKey: string, tpi: number) {
   grid[dayKey][tpi] = sub.uuid;
 }
 
+// 某周某天是否有填课（用于决定是否生成该条目）
+function isDayFilled(div: 0 | 1 | 2, dayKey: string): boolean {
+  const arr = grids[div]?.[dayKey] || [];
+  return arr.some((x) => x != null && x !== "");
+}
+
+// 复制当前周到目标周
+function copyWeekTo(dst: number) {
+  const src = activeWeekDiv.value;
+  const target = dst as 0 | 1 | 2;
+  for (const d of activeDays.value) {
+    grids[target][d] = [...(grids[src]?.[d] || [])];
+  }
+  // 清空目标周 uuid，保存时重新生成，避免与源周共享 uuid
+  existingUuids[target] = {};
+  ElMessage.success(`已将「${weekLabel(src)}」复制到「${weekLabel(target)}」`);
+  forceRender.value++;
+}
+
 function doSave() {
   if (!selectedTimelayoutId.value) return ElMessage.warning("请先选择时间表");
   if (!selectedSubjectsId.value) return ElMessage.warning("请先选择课程表");
+  if (!activeDays.value.length) return ElMessage.warning("请至少选择一个上课日");
 
   const classPlans: Record<string, any> = {};
   const tlUuid = (() => {
@@ -223,28 +295,39 @@ function doSave() {
 
   for (const d of activeDays.value) {
     const dayInfo = DAYS.find((x) => x.value === d)!;
-    const uuid = existingUuids[d] || generateUUID();
-    const classes = [];
-    for (let i = 0; i < timePoints.value.length; i++) {
-      const subUuid = grid[d]?.[i] || null;
-      classes.push(subUuid
-        ? { SubjectId: subUuid, IsChangedClass: false, IsEnabled: true, AttachedObjects: {}, IsActive: false }
-        : { SubjectId: null, IsChangedClass: false, IsEnabled: false, AttachedObjects: {}, IsActive: false }
-      );
+    for (const div of [0, 1, 2] as const) {
+      // 该周该天没填 → 不生成条目（ClassIsland 会回退到「每周」或显示无课）
+      if (!isDayFilled(div, d)) continue;
+
+      const uuid = existingUuids[div][d] || generateUUID();
+      existingUuids[div][d] = uuid;
+      const g = grids[div][d] || [];
+      const classes = [];
+      for (let i = 0; i < timePoints.value.length; i++) {
+        const subUuid = g[i] || null;
+        classes.push(subUuid
+          ? { SubjectId: subUuid, IsChangedClass: false, IsEnabled: true, AttachedObjects: {}, IsActive: false }
+          : { SubjectId: null, IsChangedClass: false, IsEnabled: false, AttachedObjects: {}, IsActive: false }
+        );
+      }
+      classPlans[uuid] = {
+        TimeLayoutId: tlUuid,
+        TimeRule: { WeekDay: dayInfo.weekDay, WeekCountDiv: div, WeekCountDivTotal: 2, IsActive: false },
+        Classes: classes,
+        Name: `${dayInfo.label}·${weekLabel(div)}`,
+        IsOverlay: false,
+        OverlaySourceId: null,
+        OverlaySetupTime: new Date().toISOString(),
+        IsEnabled: true,
+        AssociatedGroup: "00000000-0000-0000-0000-000000000000",
+        AttachedObjects: {},
+        IsActive: false,
+      };
     }
-    classPlans[uuid] = {
-      TimeLayoutId: tlUuid,
-      TimeRule: { WeekDay: dayInfo.weekDay, WeekCountDiv: 0, WeekCountDivTotal: 2, IsActive: false },
-      Classes: classes,
-      Name: dayInfo.label,
-      IsOverlay: false,
-      OverlaySourceId: null,
-      OverlaySetupTime: new Date().toISOString(),
-      IsEnabled: true,
-      AssociatedGroup: "00000000-0000-0000-0000-000000000000",
-      AttachedObjects: {},
-      IsActive: false,
-    };
+  }
+
+  if (Object.keys(classPlans).length === 0) {
+    return ElMessage.warning("课表为空，请先填入课程");
   }
 
   const data: any = { classPlans, timelayoutId: selectedTimelayoutId.value, subjectsId: selectedSubjectsId.value };

@@ -1,52 +1,41 @@
 <template>
   <div v-loading="loading">
-    <el-page-header @back="navigateTo(`/${collection}`)" class="mb-4">
-      <template #content>
-        <span class="text-lg font-medium">{{
-          doc?.name || `${label}编辑`
-        }}</span>
-        <el-tag size="small" class="ml-2" v-if="doc">v{{ doc.version }}</el-tag>
-      </template>
-      <!-- 更多功能 -->
-      <template #extra>
-        <div class="flex items-center">
-          <el-dropdown placement="bottom-end">
-            <el-button type="primary" circle
-              ><el-icon><more /></el-icon
-            ></el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">关联资源管理</el-dropdown-item>
-                <el-dropdown-item @click="showLinkedClasses = true">关联班级管理</el-dropdown-item>
-                <el-dropdown-item @click="showHistory = !showHistory">历史版本</el-dropdown-item>
-                <el-dropdown-item divided @click="doCopy">复制</el-dropdown-item>
-                <el-dropdown-item @click="doDelete"><span class="text-red-500">删除</span></el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+    <!-- 头部 -->
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-3 min-w-0">
+        <el-button circle text @click="navigateTo(`/${collection}`)">
+          <el-icon><ArrowLeft /></el-icon>
+        </el-button>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-semibold truncate">{{ doc?.name || `${label}编辑` }}</h1>
+            <el-tag v-if="doc" size="small" effect="plain" round>v{{ doc.version }}</el-tag>
+          </div>
+          <div class="text-xs text-gray-400 mt-0.5" v-if="doc">
+            创建于 {{ fmt(doc.createdAt) }} · 更新于 {{ fmt(doc.updatedAt) }}
+          </div>
         </div>
-      </template>
-    </el-page-header>
+      </div>
+      <el-dropdown placement="bottom-end" trigger="click" class="shrink-0">
+        <el-button text><el-icon><More /></el-icon></el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">关联资源管理</el-dropdown-item>
+            <el-dropdown-item @click="showLinkedClasses = true">关联班级管理</el-dropdown-item>
+            <el-dropdown-item @click="showHistory = true">历史版本</el-dropdown-item>
+            <el-dropdown-item divided @click="doCopy">复制</el-dropdown-item>
+            <el-dropdown-item @click="doDelete"><span class="text-red-500">删除</span></el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
 
-    <!-- 元数据 -->
-    <div class="flex gap-6 mb-6 text-sm text-gray-500" v-if="doc">
-      <span>创建：{{ fmt(doc.createdAt) }}</span>
-      <span>更新：{{ fmt(doc.updatedAt) }}</span>
-      <span v-if="doc.usedBy?.length">
-        被
-        <strong class="text-[var(--mi-accent)]">{{ doc.usedBy.length }}</strong>
-        个班级使用：
-        <el-tag
-          v-for="c in doc.usedBy"
-          :key="c._id"
-          size="small"
-          class="ml-1"
-          type="info"
-        >
-          {{ c.name || c.identity }}
-        </el-tag>
-      </span>
-      <span v-else class="text-gray-400">未被任何班级引用</span>
+    <!-- 被引用 -->
+    <div v-if="doc?.usedBy?.length" class="mb-5 flex flex-wrap items-center gap-1.5 text-sm text-gray-500">
+      <span>被 {{ doc.usedBy.length }} 个班级使用：</span>
+      <el-tag v-for="c in doc.usedBy" :key="c._id" size="small" type="info" effect="plain">
+        {{ c.name || c.identity }}
+      </el-tag>
     </div>
 
     <!-- 自定义编辑器 -->
@@ -118,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { More } from "@element-plus/icons-vue";
+import { More, ArrowLeft } from "@element-plus/icons-vue";
 
 const props = defineProps<{ collection: string; label: string }>();
 const { doc, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
