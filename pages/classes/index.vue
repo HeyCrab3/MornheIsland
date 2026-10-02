@@ -187,7 +187,7 @@ import ResponsiveDrawer from "@/components/ui/ResponsiveDrawer.vue";
 
 definePageMeta({ title: "班级管理", protected: true });
 
-const { downloadPreset, defaultGrpcAddress } = useManagementPreset();
+const { downloadPreset, defaultGrpcAddress, loadGrpcEndpoint, grpcEndpoint } = useManagementPreset();
 const {
   url: bootstrapUrl,
   loaded: bootstrapLoaded,
@@ -220,10 +220,16 @@ function linkedCount(cls: any): number {
   return RESOURCE_KEYS.filter((k) => cls[k]).length;
 }
 
-function openPreset(cls: any) {
+async function openPreset(cls: any) {
   currentActiveRow.value = cls;
   if (!grpcAddress.value) grpcAddress.value = defaultGrpcAddress();
   if (!bootstrapLoaded.value) fetchBootstrapUrl();
+  // 服务端可能配了 public_grpc_address，拿到后刷新默认值
+  if (!grpcEndpoint.value.loaded) {
+    const initial = grpcAddress.value;
+    await loadGrpcEndpoint();
+    if (grpcAddress.value === initial) grpcAddress.value = defaultGrpcAddress();
+  }
   showPreset.value = true;
 }
 

@@ -89,6 +89,21 @@
           <el-input v-model="grpcAddress" size="small" placeholder="如 http://your-host:20722">
             <template #prepend>gRPC 地址</template>
           </el-input>
+          <div class="text-xs text-gray-500 mt-2 leading-relaxed">
+            客户端会<b>直连</b>这个地址建长连接，它不走 443、也不经过 /api 代理。
+            只放行 443 的环境下客户端连不上，集控模式下连「加入」都会失败。
+            若已用 nginx 把 gRPC 反代到 443 并上了 TLS，请填 <code>https://域名</code>；
+            想在所有班级统一改，可在后端 config 里设 <code>public_grpc_address</code>。
+          </div>
+          <el-alert
+            v-if="grpcEndpoint.loaded && !grpcEndpoint.isConfigured"
+            type="warning"
+            :closable="false"
+            show-icon
+            class="mt-2"
+            title="当前用的是推断地址（控制台域名 + 端口），不一定可达"
+            description="这只是按控制台域名推出来的。请确认该端口对教室网络放行，否则改用 nginx 反代 443 并在 config 里配置 public_grpc_address。"
+          />
         </div>
       </div>
 
@@ -120,7 +135,7 @@ import { ArrowLeft, CopyDocument, Download, QuestionFilled } from "@element-plus
 
 definePageMeta({ title: "班级详情", protected: true });
 
-const { buildPreset, copyPreset: doCopyPreset, downloadPreset: doDownloadPreset, defaultGrpcAddress } = useManagementPreset();
+const { buildPreset, copyPreset: doCopyPreset, downloadPreset: doDownloadPreset, defaultGrpcAddress, loadGrpcEndpoint, grpcEndpoint } = useManagementPreset();
 const {
   url: bootstrapUrl,
   fetchUrl: fetchBootstrapUrl,
@@ -242,9 +257,13 @@ function downloadPreset() {
   if (cls.value) doDownloadPreset(cls.value, presetMode.value, grpcAddress.value);
 }
 
-onMounted(() => {
+onMounted(async () => {
   grpcAddress.value = defaultGrpcAddress();
+  const initial = grpcAddress.value;
   fetchAll();
   fetchBootstrapUrl();
+  await loadGrpcEndpoint();
+  // 拿到服务端配置后再刷新一次，但不要覆盖用户已经手改过的值
+  if (grpcAddress.value === initial) grpcAddress.value = defaultGrpcAddress();
 });
 </script>
