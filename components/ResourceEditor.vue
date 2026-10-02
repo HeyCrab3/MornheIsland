@@ -47,13 +47,13 @@
       <el-input v-model="jsonText" type="textarea" :rows="18" placeholder="粘贴 JSON 数据" />
     </template>
 
-    <!-- 历史版本 Drawer -->
-    <el-drawer v-model="showHistory" title="历史版本" size="400px">
-      <div v-if="historyList.length === 0" class="p-4 text-sm text-gray-400 text-center">暂无历史版本</div>
+    <!-- 历史版本（桌面 Dialog / 移动底部抽屉） -->
+    <ResponsiveDrawer v-model:open="showHistory" title="历史版本">
+      <div v-if="historyList.length === 0" class="py-4 text-sm text-gray-400 text-center">暂无历史版本</div>
       <div
         v-for="h in historyList"
         :key="h.version"
-        class="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 text-sm cursor-pointer"
+        class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm cursor-pointer"
         @click="previewHistory(h)"
       >
         <div>
@@ -66,48 +66,147 @@
           <el-button size="small" text type="primary" @click.stop="doRestore(h.version)">恢复</el-button>
         </div>
       </div>
-    </el-drawer>
+    </ResponsiveDrawer>
 
-    <!-- 历史版本预览 -->
-    <el-dialog v-model="previewVisible" title="版本预览" width="600px">
-      <pre class="bg-gray-50 p-4 rounded text-xs overflow-auto max-h-96">{{ previewJson }}</pre>
+    <!-- 历史版本预览（按类型结构化展示） -->
+    <ResponsiveDrawer v-model:open="previewVisible" :title="`版本预览 · v${previewVersion}`">
+      <!-- 时间表 -->
+      <div v-if="collection === 'timelayout'">
+        <div v-if="previewLayouts.length" class="space-y-0.5">
+          <div
+            v-for="(tp, i) in previewLayouts"
+            :key="i"
+            class="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm"
+          >
+            <span class="w-6 text-xs text-gray-400 shrink-0">{{ i + 1 }}</span>
+            <span class="font-medium">{{ tp.name || '未命名' }}</span>
+            <span class="text-xs text-gray-400 ml-auto">{{ tp.start }} - {{ tp.end }}</span>
+          </div>
+        </div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无时段</div>
+      </div>
+
+      <!-- 科目 -->
+      <div v-else-if="collection === 'subjects'">
+        <div v-if="previewSubjects.length" class="space-y-0.5">
+          <div
+            v-for="s in previewSubjects"
+            :key="s.uuid"
+            class="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm"
+          >
+            <span class="font-medium">{{ s.name }}</span>
+            <span class="text-xs text-gray-400">{{ s.teacherName || '无教师' }}</span>
+            <el-tag v-if="s.isOutDoor" size="small" type="warning" class="ml-auto">室外</el-tag>
+          </div>
+        </div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无科目</div>
+      </div>
+
+      <!-- 课表：星期 × 节次 网格 -->
+      <div v-else-if="collection === 'classplan'">
+        <div v-if="previewActiveDays.length && previewTimePoints.length">
+          <div v-for="weekTab in WEEK_TABS" :key="weekTab.value">
+            <template v-if="hasWeekData(weekTab.value)">
+              <div class="text-sm font-medium mb-1.5 text-gray-600 dark:text-gray-300">{{ weekTab.label }}</div>
+              <table class="border-collapse w-full mb-3 text-xs">
+                <thead>
+                  <tr>
+                    <th class="border p-1.5 bg-gray-50 dark:bg-gray-700 font-medium">节次</th>
+                    <th v-for="d in previewActiveDays" :key="d.value" class="border p-1.5 bg-gray-50 dark:bg-gray-700 font-medium">{{ d.label }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(tp, tpi) in previewTimePoints" :key="tpi">
+                    <td class="border p-1.5 text-gray-500 whitespace-nowrap">
+                      <div>{{ tp.name }}</div>
+                      <div class="text-[10px] text-gray-400">{{ tp.start }}</div>
+                    </td>
+                    <td v-for="d in previewActiveDays" :key="d.value" class="border p-1.5 text-center">
+                      {{ cellName(weekTab.value, d.value, tpi) || '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
+          </div>
+        </div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无课表数据</div>
+      </div>
+
+      <!-- 设置 / 策略：JSON 配置 -->
+      <pre v-else class="bg-gray-50 dark:bg-neutral-700 p-4 rounded text-xs overflow-auto max-h-[45vh]">{{ previewJson }}</pre>
+
       <template #footer>
         <el-button @click="previewVisible = false">关闭</el-button>
         <el-button type="primary" @click="doRestore(previewVersion); previewVisible = false">恢复此版本</el-button>
       </template>
-    </el-dialog>
+    </ResponsiveDrawer>
 
     <!-- 关联资源管理（仅课表） -->
-    <el-dialog v-model="showLinkedResources" title="关联资源" width="450px">
-      <div class="text-sm space-y-3" v-if="linkedRes">
+    <ResponsiveDrawer v-model:open="showLinkedResources" title="关联资源">
+      <div class="text-sm space-y-3 py-2">
         <div class="flex items-center justify-between">
           <span>时间表：</span>
-          <span v-if="linkedRes.timelayout">{{ linkedRes.timelayout.name }}</span>
+          <span v-if="linkedRes?.timelayout">{{ linkedRes.timelayout.name }}</span>
           <span v-else class="text-gray-400">未关联</span>
         </div>
         <div class="flex items-center justify-between">
           <span>课程表：</span>
-          <span v-if="linkedRes.subjects">{{ linkedRes.subjects.name }}</span>
+          <span v-if="linkedRes?.subjects">{{ linkedRes.subjects.name }}</span>
           <span v-else class="text-gray-400">未关联</span>
         </div>
       </div>
-    </el-dialog>
+    </ResponsiveDrawer>
 
     <!-- 关联班级管理 -->
-    <el-dialog v-model="showLinkedClasses" title="关联班级" width="450px">
-      <div v-if="linkedClasses.length > 0" class="space-y-2">
-        <div v-for="c in linkedClasses" :key="c._id" class="flex items-center justify-between">
-          <span>{{ c.name || c.identity }}</span>
+    <ResponsiveDrawer v-model:open="showLinkedClasses" title="关联班级">
+      <div v-if="linkedClasses.length > 0" class="space-y-0.5 py-1">
+        <div
+          v-for="c in linkedClasses"
+          :key="c._id"
+          class="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0"
+        >
+          <span class="text-sm">{{ c.name || c.identity }}</span>
           <el-button size="small" text type="primary" @click="navigateTo(`/classes/${c._id}`)">管理</el-button>
         </div>
       </div>
-      <div v-else class="text-center text-gray-400 py-4">未被任何班级引用</div>
-    </el-dialog>
+      <div v-else class="text-center text-gray-400 py-6">未被任何班级引用</div>
+    </ResponsiveDrawer>
+
+    <!-- 通用确认框 -->
+    <AlertDialog v-model:open="confirmOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{{ confirmState.title }}</AlertDialogTitle>
+          <AlertDialogDescription>{{ confirmState.description }}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogAction
+            :class="confirmState.danger ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''"
+            @click="runConfirm"
+          >
+            {{ confirmState.confirmText }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { More, ArrowLeft } from "@element-plus/icons-vue";
+import ResponsiveDrawer from "@/components/ui/ResponsiveDrawer.vue";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const props = defineProps<{ collection: string; label: string }>();
 const { doc, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
@@ -119,7 +218,7 @@ const editName = ref("");
 const showHistory = ref(false);
 const historyList = ref<any[]>([]);
 const previewVisible = ref(false);
-const previewJson = ref("");
+const previewData = ref<any>(null);
 const previewVersion = ref(0);
 
 function authHeaders() {
@@ -145,17 +244,23 @@ async function previewHistory(h: any) {
     const res: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}/history/${h.version}`, {
       headers: authHeaders(),
     });
-    previewJson.value = JSON.stringify(res.data?.data, null, 2);
+    previewData.value = res.data?.data;
     previewVersion.value = h.version;
     previewVisible.value = true;
+    if (props.collection === "classplan") {
+      await loadClassplanPreview(previewData.value);
+    }
   } catch { ElMessage.error("加载版本失败"); }
 }
 
 async function doRestore(version: number) {
+  askConfirm("确认恢复", `确定恢复到 v${version}？当前内容将存入历史。`, "恢复", () => doRestoreConfirmed(version));
+}
+
+async function doRestoreConfirmed(version: number) {
   const route = useRoute();
   const id = route.params.id as string;
   try {
-    await ElMessageBox.confirm(`确定恢复到 v${version}？当前内容将存入历史。`, "确认恢复", { type: "warning" });
     const res: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}/restore/${version}`, {
       method: "POST",
       headers: authHeaders(),
@@ -194,6 +299,122 @@ async function onNameChange() {
 
 function fmt(d: string) {
   return d ? new Date(d).toLocaleString("zh-CN") : "-";
+}
+
+// ── 版本预览：按资源类型结构化展示 ──
+const previewJson = computed(() =>
+  previewData.value ? JSON.stringify(previewData.value, null, 2) : ""
+);
+
+const previewLayouts = computed(() => {
+  if (props.collection !== "timelayout" || !previewData.value) return [];
+  const entries: any[] = Object.values(previewData.value);
+  const layout = entries[0] as any;
+  const layouts = layout?.Layouts || layout?.TimePoints || [];
+  return layouts
+    .filter((tp: any) => tp.TimeType === 0 || tp.TimeType === undefined)
+    .map((tp: any) => ({
+      name: tp.TimePointName || "",
+      start: tp.StartTime || tp.Start || "",
+      end: tp.EndTime || tp.End || "",
+    }));
+});
+
+const previewSubjects = computed(() => {
+  if (props.collection !== "subjects" || !previewData.value) return [];
+  return Object.entries(previewData.value)
+    .map(([uuid, s]: [string, any]) => ({
+      uuid,
+      name: s.Name || "",
+      teacherName: s.TeacherName || "",
+      isOutDoor: !!s.IsOutDoor,
+    }))
+    .filter((s) => s.name);
+});
+
+const DAYS = [
+  { value: "Monday", label: "周一", weekDay: 1 },
+  { value: "Tuesday", label: "周二", weekDay: 2 },
+  { value: "Wednesday", label: "周三", weekDay: 3 },
+  { value: "Thursday", label: "周四", weekDay: 4 },
+  { value: "Friday", label: "周五", weekDay: 5 },
+  { value: "Saturday", label: "周六", weekDay: 6 },
+  { value: "Sunday", label: "周日", weekDay: 0 },
+];
+
+const WEEK_TABS = [
+  { value: 0, label: "每周" },
+  { value: 1, label: "单周" },
+  { value: 2, label: "双周" },
+];
+
+const previewTimePoints = ref<any[]>([]);
+const previewSubjectMap = ref<Record<string, string>>({});
+
+const previewClassGrid = computed(() => {
+  if (props.collection !== "classplan" || !previewData.value) return { 0: {}, 1: {}, 2: {} };
+  const cps = previewData.value.classPlans || {};
+  const grid: Record<number, Record<string, (string | null)[]>> = { 0: {}, 1: {}, 2: {} };
+  for (const [, cp] of Object.entries(cps) as [string, any][]) {
+    if (!cp?.TimeRule || !cp?.Classes) continue;
+    const dayKey = DAYS.find((d) => d.weekDay === cp.TimeRule.WeekDay)?.value;
+    if (!dayKey) continue;
+    const wd = cp.TimeRule.WeekCountDiv;
+    const div = wd === 1 || wd === 2 ? wd : 0;
+    if (!grid[div][dayKey]) grid[div][dayKey] = [];
+    cp.Classes.forEach((cls: any, i: number) => {
+      grid[div][dayKey][i] = cls?.SubjectId ? (previewSubjectMap.value[cls.SubjectId] || null) : null;
+    });
+  }
+  return grid;
+});
+
+const previewActiveDays = computed(() => {
+  const days = new Set<string>();
+  (Object.values(previewClassGrid.value) as any[]).forEach((g) => {
+    Object.keys(g || {}).forEach((d) => days.add(d));
+  });
+  return DAYS.filter((d) => days.has(d.value));
+});
+
+function hasWeekData(div: number) {
+  return Object.keys(previewClassGrid.value[div] || {}).length > 0;
+}
+
+function cellName(div: number, dayKey: string, tpi: number) {
+  return previewClassGrid.value[div]?.[dayKey]?.[tpi] || "";
+}
+
+async function loadClassplanPreview(data: any) {
+  previewTimePoints.value = [];
+  previewSubjectMap.value = {};
+  if (data?.timelayoutId) {
+    try {
+      const tl: any = await $fetch(`/api/v1/console/ci/timelayout/${data.timelayoutId}`, { headers: authHeaders() });
+      const d = tl.data?.data || tl.data || {};
+      const entries: any[] = Object.values(d);
+      const layout = entries[0] as any;
+      const layouts = layout?.Layouts || layout?.TimePoints || [];
+      previewTimePoints.value = layouts
+        .filter((tp: any) => tp.TimeType === 0 || tp.TimeType === undefined)
+        .map((tp: any) => ({
+          name: tp.TimePointName || "",
+          start: tp.StartTime || tp.Start || "",
+          end: tp.EndTime || tp.End || "",
+        }));
+    } catch { /* */ }
+  }
+  if (data?.subjectsId) {
+    try {
+      const sj: any = await $fetch(`/api/v1/console/ci/subjects/${data.subjectsId}`, { headers: authHeaders() });
+      const d = sj.data?.data || sj.data || {};
+      const map: Record<string, string> = {};
+      Object.entries(d).forEach(([uuid, s]: [string, any]) => {
+        if (s?.Name) map[uuid] = s.Name;
+      });
+      previewSubjectMap.value = map;
+    } catch { /* */ }
+  }
 }
 
 async function doSave(raw?: any) {
@@ -261,10 +482,13 @@ async function doCopy() {
 
 async function doDelete() {
   if (!doc.value) return;
+  askConfirm("删除确认", `确定删除「${doc.value.name}」？此操作不可撤销。`, "删除", () => doDeleteConfirmed(), true);
+}
+
+async function doDeleteConfirmed() {
+  const route = useRoute();
+  const id = route.params.id as string;
   try {
-    await ElMessageBox.confirm(`确定删除「${doc.value.name}」？此操作不可撤销。`, "删除确认", { type: "error", confirmButtonText: "删除" });
-    const route = useRoute();
-    const id = route.params.id as string;
     await $fetch(`/api/v1/console/ci/${props.collection}/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
@@ -275,6 +499,25 @@ async function doDelete() {
     const msg = e?.response?._data?.msg;
     if (msg) ElMessageBox.alert(msg, "无法删除", { type: "warning" });
   }
+}
+
+// ── 通用确认框状态 ──
+const confirmOpen = ref(false);
+const confirmState = ref({
+  title: "",
+  description: "",
+  confirmText: "确定",
+  danger: false,
+  onConfirm: null as null | (() => void),
+});
+
+function askConfirm(title: string, description: string, confirmText: string, onConfirm: () => void, danger = false) {
+  confirmState.value = { title, description, confirmText, danger, onConfirm };
+  confirmOpen.value = true;
+}
+
+function runConfirm() {
+  confirmState.value.onConfirm?.();
 }
 
 onMounted(() => { fetchHistory(); loadLinkedInfo(); });

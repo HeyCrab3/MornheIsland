@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AssemblyName>MornheIsland.CiPlugin</AssemblyName>
+    <RootNamespace>MornheIsland.CiPlugin</RootNamespace>
+    <Version>2.0.1.0</Version>
+    <!-- ClassIsland 安装目录（提供 ClassIsland*.dll 与 Microsoft.Extensions.*.dll）；可通过 -p:ClassIslandDir=... 覆盖 -->
+    <ClassIslandDir Condition="'$(ClassIslandDir)' == ''">I:\Downloads\ClassIsland_app_windows_x64_full_folder\app-2.1.0.1-4</ClassIslandDir>
+  </PropertyGroup>
+
+  <!--
+    所有由宿主提供的程序集都用 Private=false：只用于编译，不复制到输出、不进 .deps.json。
+
+    这里必须用宿主目录里的 DLL 而不是 NuGet 包：宿主实际携带的是
+    Microsoft.Extensions.DependencyInjection.Abstractions / Logging.Abstractions 10.0.0.0，
+    而 NuGet 上 net8.0 能解析到的只有 8.0.0。若按 8.0.0 编译并把副本打进 .cipx，
+    PluginLoadContext 会从插件目录加载 8.0.0，导致 PluginBase.Initialize 的
+    IServiceCollection 来自另一个程序集标识，类型不算实现了抽象方法，加载即抛：
+      TypeLoadException: Method 'Initialize' ... does not have an implementation
+  -->
+  <ItemGroup>
+    <Reference Include="ClassIsland">
+      <HintPath>$(ClassIslandDir)\ClassIsland.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ClassIsland.Core">
+      <HintPath>$(ClassIslandDir)\ClassIsland.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ClassIsland.Shared">
+      <HintPath>$(ClassIslandDir)\ClassIsland.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>$(ClassIslandDir)\Google.Protobuf.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+      <HintPath>$(ClassIslandDir)\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>$(ClassIslandDir)\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>$(ClassIslandDir)\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="manifest.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

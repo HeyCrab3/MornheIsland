@@ -25,3 +25,12 @@ logs
 nginx.conf
 nginx-static.conf
 yarn.lock
+
+# Chores
+mgmtserver
+classisland
+
+# Temp
+ci-plugin/bin
+ci-plugin/cipx
+ci-plugin/obj

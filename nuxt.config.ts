@@ -21,7 +21,7 @@ export default defineNuxtConfig({
         execSync("git rev-parse HEAD").toString().trim() ||
         "未知",
       RUNTIME: process.env.NODE_ENV || "production",
-      VERSION: "0.1.0",
+      VERSION: "0.2.0",
       COMMIT_DATE:
         process.env.COMMIT_DATE ||
         execSync("git show -s --format=%ci").toString().trim() ||
@@ -78,15 +78,35 @@ export default defineNuxtConfig({
   },
   gtag: {
     id: "G-JCN9611G2C",
-    // enabled: process.env.NODE_ENV === 'production',
+    enabled: process.env.NODE_ENV === 'production',
   },
   pwa: {
+    registerType: "autoUpdate",
     manifest: {
       name: "MornheIsland · 莫宁岛",
       short_name: "MornheIsland",
       description: "ClassIsland 集控服务",
       theme_color: "#A6C2F7",
+      display: "standalone",
+      icons: [
+        {
+          src: "https://coss.crabapi.cn/crabmtr/mmexport1782563887148.gif",
+          sizes: "192x192 512x512",
+          type: "image/gif",
+        },
+      ],
     },
+    workbox: {
+      navigateFallback: "/",
+      globPatterns: ["**/*.{js,css,html,png,svg,ico,gif,woff2}"],
+    },
+    devOptions: {
+      enabled: false,
+    },
+  },
+  shadcn: {
+    prefix: "",
+    componentDir: "./components/ui",
   },
   modules: [
     "@pinia/nuxt",
@@ -96,5 +116,6 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
     "nuxt-echarts",
     "@nuxt/content",
+    "shadcn-nuxt",
   ],
 });

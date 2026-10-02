@@ -8,3 +8,77 @@
 @source "../app.vue";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   shadcn-vue 主题变量（对齐 MornheIsland 品牌色）
+   ============================================================ */
+:root {
+  --background: #ffffff;
+  --foreground: #1a1c20;
+  --card: #ffffff;
+  --card-foreground: #1a1c20;
+  --popover: #ffffff;
+  --popover-foreground: #1a1c20;
+  --primary: #859bc6;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f7fa;
+  --secondary-foreground: #35373b;
+  --muted: #f5f7fa;
+  --muted-foreground: #6c6e72;
+  --accent: #f5f7fa;
+  --accent-foreground: #35373b;
+  --destructive: #e84545;
+  --destructive-foreground: #ffffff;
+  --border: #dee0e3;
+  --input: #dee0e3;
+  --ring: #a6c2f7;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: #1a1c20;
+  --foreground: #f8f9fa;
+  --card: #23252a;
+  --card-foreground: #f8f9fa;
+  --popover: #23252a;
+  --popover-foreground: #f8f9fa;
+  --primary: #a6c2f7;
+  --primary-foreground: #1a1c20;
+  --secondary: #2a2c31;
+  --secondary-foreground: #f8f9fa;
+  --muted: #2a2c31;
+  --muted-foreground: #a0a3a8;
+  --accent: #2a2c31;
+  --accent-foreground: #f8f9fa;
+  --destructive: #f4a2a2;
+  --destructive-foreground: #1a1c20;
+  --border: #35373b;
+  --input: #35373b;
+  --ring: #a6c2f7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}

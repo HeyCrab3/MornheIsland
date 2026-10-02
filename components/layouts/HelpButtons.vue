@@ -121,7 +121,7 @@ const showDialog = ref(false);
 const diagnosedData = {
     userAgent: navigator.userAgent,
     platform: navigator.platform,
-    userId: store.userId,
+    userId: store.user_data.userId,
     time: new Date().toISOString(),
 }
 

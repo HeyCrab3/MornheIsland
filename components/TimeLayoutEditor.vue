@@ -1,13 +1,21 @@
 <template>
   <div class="max-w-3xl" v-loading="loading">
-    <div class="mb-4 flex items-center gap-4">
+    <el-alert
+      v-if="mobile"
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-4"
+      title="时间表编辑建议在电脑上进行，以下为只读预览。"
+    />
+    <div v-if="!mobile" class="mb-4 flex items-center gap-4">
       <span class="text-sm font-medium">关联课程表：</span>
       <el-select v-model="selectedSubjectsId" placeholder="选择课程表（可选）" clearable @change="onSubjectsChange" class="w-52">
         <el-option v-for="s in subjectsList" :key="s._id" :label="s.name" :value="s._id" />
       </el-select>
     </div>
 
-    <div class="flex items-center justify-between mb-4">
+    <div v-if="!mobile" class="flex items-center justify-between mb-4">
       <div class="text-sm text-gray-500">拖拽排序修改时间，保存后自动生成 ClassIsland 格式</div>
       <el-button size="small" @click="addPeriod">
         <el-icon><Plus /></el-icon>添加时段
@@ -18,7 +26,7 @@
       <div
         v-for="(p, index) in periods"
         :key="p.id"
-        draggable="true"
+        :draggable="!mobile"
         class="flex items-center gap-2 mb-2 bg-white dark:bg-neutral-600 rounded border p-3 cursor-default flex-wrap dark:border-neutral-500"
         :class="{ 'opacity-40': dragIndex === index }"
         @dragstart="onDragStart($event, index)"
@@ -28,31 +36,32 @@
       >
         <el-icon class="cursor-grab text-gray-400"><Rank /></el-icon>
         <span class="text-xs text-gray-400 w-6">{{ index + 1 }}</span>
-        <el-input v-model="p.name" placeholder="名称" size="small" class="flex-1 min-w-24" />
-        <el-time-picker v-model="p.startVal" placeholder="开始" size="small" format="HH:mm:ss" value-format="HH:mm:ss" style="width:110px" />
+        <el-input v-model="p.name" placeholder="名称" size="small" class="flex-1 min-w-24" :disabled="mobile" />
+        <el-time-picker v-model="p.startVal" placeholder="开始" size="small" format="HH:mm:ss" value-format="HH:mm:ss" style="width:110px" :disabled="mobile" />
         <span class="text-gray-300 text-xs">—</span>
-        <el-time-picker v-model="p.endVal" placeholder="结束" size="small" format="HH:mm:ss" value-format="HH:mm:ss" style="width:110px" />
+        <el-time-picker v-model="p.endVal" placeholder="结束" size="small" format="HH:mm:ss" value-format="HH:mm:ss" style="width:110px" :disabled="mobile" />
         <el-select
           v-model="p.defaultSubject"
           :placeholder="selectedSubjectsId ? '默认科目' : '请先关联课程表'"
-          :disabled="!selectedSubjectsId"
+          :disabled="!selectedSubjectsId || mobile"
           size="small" clearable style="width:130px"
         >
           <el-option v-for="sn in subjectNames" :key="sn" :label="sn" :value="sn" />
         </el-select>
-        <el-button text size="small" type="danger" @click="periods.splice(index, 1)">
+        <el-button v-if="!mobile" text size="small" type="danger" @click="periods.splice(index, 1)">
           <el-icon><Delete /></el-icon>
         </el-button>
       </div>
     </div>
 
-    <el-button type="primary" :loading="saving" class="mt-4" @click="doSave">保存</el-button>
+    <el-button v-if="!mobile" type="primary" :loading="saving" class="mt-4" @click="doSave">保存</el-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Plus, Rank, Delete } from "@element-plus/icons-vue";
 import { generateUUID } from "@/util/uuid";
+import isMobile from "@/util/is-mobile";
 
 const props = defineProps<{ modelValue: any; name?: string }>();
 const emit = defineEmits<{ save: [data: any] }>();
@@ -64,6 +73,7 @@ const dragIndex = ref(-1);
 const subjectsList = ref<any[]>([]);
 const selectedSubjectsId = ref("");
 const subjectNames = ref<string[]>([]);
+const mobile = ref(false);
 
 function authHeaders() {
   return { Authorization: `Bearer ${localStorage.getItem("token")}` };
@@ -182,5 +192,5 @@ function doSave() {
   emit("save", data);
 }
 
-onMounted(() => { fetchSubjectsList(); loadPeriods(); });
+onMounted(() => { mobile.value = !!isMobile(); fetchSubjectsList(); loadPeriods(); });
 </script>

@@ -1,0 +1,8 @@
+id: mornheisland.ciplugin
+name: 莫宁岛集控扩展
+description: 配合莫宁岛集控平台，实现远程指令接收与插件分发。
+entranceAssembly: "MornheIsland.CiPlugin.dll"
+url: https://github.com/HeyCrab3/MornheIsland
+apiVersion: 2.0.0.0
+version: 2.0.1.0
+author: Crab Studio

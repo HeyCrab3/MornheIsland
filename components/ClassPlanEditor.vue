@@ -1,6 +1,14 @@
 <template>
   <div v-loading="loading">
-    <div class="mb-4 flex items-center gap-4 flex-wrap">
+    <el-alert
+      v-if="mobile"
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-4"
+      title="课表网格编辑在手机上体验有限，以下为只读预览，请在电脑上编辑。"
+    />
+    <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
       <span class="text-sm font-medium">时间表：</span>
       <el-select v-model="selectedTimelayoutId" placeholder="必选" @change="onTimelayoutChange" class="w-48">
         <el-option v-for="t in timelayouts" :key="t._id" :label="t.name" :value="t._id" />
@@ -12,7 +20,7 @@
     </div>
 
     <!-- 周次轮换：每周 / 单周 / 双周 -->
-    <div class="mb-4 flex items-center gap-3">
+    <div v-if="!mobile" class="mb-4 flex items-center gap-3">
       <span class="text-sm font-medium">周次：</span>
       <el-radio-group v-model="activeWeekDiv" @change="forceRender++">
         <el-radio-button v-for="t in WEEK_TABS" :key="t.value" :value="t.value">
@@ -35,13 +43,13 @@
     </div>
 
     <template v-if="timePoints.length > 0 && subjectPool.length > 0">
-      <div class="mb-3 flex items-center gap-2">
+      <div v-if="!mobile" class="mb-3 flex items-center gap-2">
         <span class="text-sm text-gray-500">上课日：</span>
         <el-checkbox-group v-model="activeDays" size="small" :options="DAYS" @change="forceRender++"/>
       </div>
 
       <div class="flex gap-4">
-        <div class="w-32 shrink-0">
+        <div v-if="!mobile" class="w-32 shrink-0">
           <div class="text-sm font-medium mb-2">科目</div>
           <div class="space-y-1">
             <div
@@ -88,7 +96,7 @@
         </div>
       </div>
 
-      <el-button type="primary" :loading="saving" class="mt-4" @click="doSave">保存课表</el-button>
+      <el-button v-if="!mobile" type="primary" :loading="saving" class="mt-4" @click="doSave">保存课表</el-button>
     </template>
 
     <el-empty v-else :description="!timePoints.length ? '请先选择时间表' : '请先选择课程表'" />
@@ -98,6 +106,7 @@
 <script setup lang="ts">
 import { generateUUID } from "@/util/uuid";
 import { ArrowDown } from "@element-plus/icons-vue";
+import isMobile from "@/util/is-mobile";
 
 interface SubEntry { uuid: string; name: string }
 interface TimePoint { Start: string; End: string; TimePointName: string; defaultSubject?: string }
@@ -134,6 +143,7 @@ const selectedSubjectsId = ref("");
 const timePoints = ref<TimePoint[]>([]);
 const subjectPool = ref<SubEntry[]>([]);
 const pickedSubject = ref("");
+const mobile = ref(false);
 
 // 当前编辑的周次
 const activeWeekDiv = ref<0 | 1 | 2>(0);
@@ -250,6 +260,7 @@ function getCellSubjectName(dayKey: string, tpi: number): string {
 }
 
 function setCell(dayKey: string, tpi: number) {
+  if (mobile.value) return;
   const grid = currentGrid();
   if (!pickedSubject.value) {
     // 清除
@@ -334,7 +345,10 @@ function doSave() {
   emit("save", data);
 }
 
-onMounted(fetchResources);
+onMounted(() => {
+  mobile.value = !!isMobile();
+  fetchResources();
+});
 </script>
 
 <style scoped>

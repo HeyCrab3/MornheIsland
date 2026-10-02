@@ -31,7 +31,7 @@
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t dark:border-neutral-700 flex items-center justify-end gap-1.5">
+          <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-end gap-1.5">
             <el-button size="small" text type="primary" @click.stop="navigateTo(`/${collection}/${item._id}`)">
               编辑
             </el-button>
