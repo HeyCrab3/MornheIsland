@@ -97,8 +97,20 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      navigateFallback: "/",
-      globPatterns: ["**/*.{js,css,html,png,svg,ico,gif,woff2}"],
+      // 本应用是 SSR（nitro node-server），没有可以作为外壳的 index.html：
+      // 绝不能让 SW 接管导航请求。
+      //
+      // 原来这里写的 navigateFallback: "/" 会被 vite-plugin-pwa 加进预缓存清单、
+      // 并注册一条 NavigationRoute，把所有导航（含 /callback）都回退到缓存的首页。
+      // 结果就是登录回调拿不到真实路由——用户点了登录却回不来。
+      // 生成的 sw.js 里确实有 NavigationRoute / createHandlerBoundToURL，可复现。
+      //
+      // 必须显式写 undefined：vite-plugin-pwa 的默认值是 "index.html"，
+      // 而它是用 Object.assign 合并的（值为 undefined 的键同样会覆盖默认值），
+      // 写 null 会被 workbox 的 schema 拒掉，所以用 undefined。
+      navigateFallback: undefined,
+      // 同理不预缓存 html，避免旧页面被长期缓存
+      globPatterns: ["**/*.{js,css,png,svg,ico,gif,woff2}"],
     },
     devOptions: {
       enabled: false,
