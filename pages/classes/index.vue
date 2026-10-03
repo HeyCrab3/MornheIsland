@@ -142,11 +142,12 @@
               <template #prepend>gRPC 地址</template>
             </el-input>
             <div class="text-xs text-gray-400 mt-1">集控服务器模式支持实时通知 / 刷新数据 / 分发插件</div>
+            <GrpcProxyNotice :address="grpcAddress" />
           </div>
         </div>
 
         <!-- 插件分发的前提：先手动装一次引导插件 -->
-        <el-alert v-if="bootstrapUrl" type="info" :closable="false" class="mb-4">
+        <el-alert v-if="bootstrapUrl && presetMode === 'grpc'" type="info" :closable="false" class="my-4">
           <template #title>需要用平台分发插件？先给机器装引导插件</template>
           <div class="text-xs leading-relaxed">
             ClassIsland 不支持由服务端安装插件，每台机器要先手动装一次引导插件，装好后它才收得到分发的插件。

@@ -104,6 +104,7 @@
             title="当前用的是推断地址（控制台域名 + 端口），不一定可达"
             description="这只是按控制台域名推出来的。请确认该端口对教室网络放行，否则改用 nginx 反代 443 并在 config 里配置 public_grpc_address。"
           />
+          <GrpcProxyNotice :address="grpcAddress" />
         </div>
       </div>
 
