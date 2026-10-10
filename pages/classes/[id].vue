@@ -30,10 +30,21 @@
 
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12" v-for="sel in selectFields" :key="sel.key">
-            <el-form-item :label="sel.label">
-              <el-select v-model="form[sel.key]" clearable placeholder="不关联" class="w-full">
-                <el-option v-for="r in resources[sel.resKey]" :key="r._id" :label="`${r.name}${r.version ? ' (v'+r.version+')' : ''}`" :value="r._id" />
+            <el-form-item :label="sel.label" :required="sel.required">
+              <el-select
+                v-model="form[sel.key]"
+                clearable
+                :placeholder="sel.required ? '请选择' : '不关联（可选）'"
+                class="w-full"
+              >
+                <el-option
+                  v-for="r in resources[sel.listKey]"
+                  :key="r._id"
+                  :label="`${r.name}${r.version ? ' (v' + r.version + ')' : ''}`"
+                  :value="r._id"
+                />
               </el-select>
+              <span v-if="!sel.required" class="text-xs text-gray-400">可选，空着就不下发该资源</span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -44,7 +55,7 @@
     </el-card>
 
     <!-- 部署下发 -->
-    <el-card class="max-w-2xl mt-4" v-if="allResourcesLinked">
+    <el-card class="max-w-2xl mt-4" v-if="canDeploy">
       <template #header>
         <span class="font-medium">部署下发</span>
       </template>
@@ -125,7 +136,10 @@
       </template>
 
       <el-alert type="warning" :closable="false" show-icon>
-        <template #title>请先关联所有资源后再下发配置，否则将导致一些意想不到的错误</template>
+        <template #title>
+          请先关联{{ missingRequired.map((s) => s.label).join("、") || "必填资源" }}后再下发配置
+        </template>
+        档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。
       </el-alert>
     </el-card>
   </div>
@@ -153,11 +167,21 @@ const cls = ref<any>({
   policyId: null,
 });
 
+/**
+ * 关联资源字段。type 同时决定「拉哪个 list 接口」和「结果写进哪个 key」，
+ * 两者共用一个声明，避免下标对不上。
+ *
+ * 之前这里是手写下标映射：请求了 5 个资源类型（含 settings）却只有 4 个 key，
+ * 于是「设置」的列表被写进了 policies，「策略」下拉框里显示的其实是设置；
+ * 真正的策略列表被写到了 resources[undefined]，页面上根本读不到。
+ *
+ * required 决定「部署下发」的门槛，也是表单上的必填标记；策略可选。
+ */
 const selectFields = [
-  { key: "classplanId", label: "档案", resKey: "classplans" as const },
-  { key: "timelayoutId", label: "时间表", resKey: "timelayouts" as const },
-  { key: "subjectsId", label: "课程表", resKey: "subjects" as const },
-  { key: "policyId", label: "策略", resKey: "policies" as const },
+  { key: "classplanId", label: "档案", type: "classplan", listKey: "classplans", required: true },
+  { key: "timelayoutId", label: "时间表", type: "timelayout", listKey: "timelayouts", required: true },
+  { key: "subjectsId", label: "课程表", type: "subjects", listKey: "subjects", required: true },
+  { key: "policyId", label: "策略", type: "policy", listKey: "policies", required: false },
 ] as const;
 
 const form = reactive<Record<string, string>>({
@@ -178,8 +202,8 @@ async function fetchAll() {
   try {
     const [classRes, ...resourceResults] = await Promise.all([
       $fetch(`/api/v1/console/ci/class/${id}`, { headers: authHeaders() }),
-      ...["classplan", "timelayout", "subjects", "settings", "policy"].map((t) =>
-        $fetch(`/api/v1/console/ci/${t}/list`, { headers: authHeaders() }),
+      ...selectFields.map((s) =>
+        $fetch(`/api/v1/console/ci/${s.type}/list`, { headers: authHeaders() }),
       ),
     ]);
 
@@ -188,9 +212,8 @@ async function fetchAll() {
     form.identity = data.identity || "";
     form.name = data.name || "";
 
-    const resKeys = ["classplans", "timelayouts", "subjects", "policies"];
     resourceResults.forEach((r: any, i: number) => {
-      resources[resKeys[i]] = (r.data || []).map((item: any) => ({ ...item, _id: String(item._id) }));
+      resources[selectFields[i].listKey] = (r.data || []).map((item: any) => ({ ...item, _id: String(item._id) }));
     });
 
     // 填充已关联的 ID
@@ -213,6 +236,10 @@ async function fetchAll() {
 }
 
 async function doSave() {
+  if (missingRequired.value.length) {
+    ElMessage.warning(`请先关联：${missingRequired.value.map((s) => s.label).join("、")}（策略可选）`);
+    return;
+  }
   saving.value = true;
   try {
     await $fetch(`/api/v1/console/ci/class/${id}`, {
@@ -234,13 +261,12 @@ async function doSave() {
   }
 }
 
-const allResourcesLinked = computed(
-  () =>
-    !!form.classplanId &&
-    !!form.timelayoutId &&
-    !!form.subjectsId &&
-    !!form.policyId,
+const missingRequired = computed(() =>
+  selectFields.filter((s) => s.required && !form[s.key]),
 );
+
+/** 必填资源（档案 / 时间表 / 课程表）齐了才允许下发配置；策略可选 */
+const canDeploy = computed(() => missingRequired.value.length === 0);
 
 // 加入模式：serverless（静态清单）/ grpc（集控服务器）
 const presetMode = ref<"serverless" | "grpc">("serverless");

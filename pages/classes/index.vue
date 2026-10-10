@@ -54,14 +54,17 @@
             <div
               class="flex items-center justify-between text-xs text-gray-400 mb-1.5"
             >
-              <span>资源关联</span>
-              <span>{{ linkedCount(cls) }} / 4</span>
+              <span>必填资源</span>
+              <span>{{ requiredLinked(cls) }} / {{ REQUIRED_KEYS.length }}</span>
             </div>
             <el-progress
-              :percentage="linkedCount(cls) * 25"
+              :percentage="(requiredLinked(cls) / REQUIRED_KEYS.length) * 100"
               :show-text="false"
               :stroke-width="6"
             />
+            <div class="mt-1.5 text-xs text-gray-400">
+              {{ cls.policyId ? "已关联策略" : "未关联策略（可选）" }}
+            </div>
           </div>
 
           <div class="mt-4 flex items-center gap-1.5">
@@ -72,14 +75,14 @@
             >
               管理
             </el-button>
-            <template v-if="linkedCount(cls) == 4">
+            <template v-if="canDeploy(cls)">
               <el-button size="small" @click="openPreset(cls)">
                 <el-icon class="mr-0.5"><Download /></el-icon>部署配置
               </el-button>
             </template>
             <template v-else>
               <el-tooltip
-                content="请先关联所有资源后再下发配置"
+                content="请先关联档案、时间表、课程表后再下发配置（策略可选）"
                 placement="top"
               >
                 <el-button size="small" disabled>
@@ -209,16 +212,22 @@ const classes = ref<any[]>([]);
 
 const form = reactive({ identity: "", name: "", orgName: "" });
 
-const RESOURCE_KEYS = [
-  "classplanId",
-  "timelayoutId",
-  "subjectsId",
-  "settingsId",
-  "policyId",
-];
+/**
+ * 下发前必须关联的资源（和班级详情页的 required 字段保持一致）。
+ * 策略可选，不计入门槛。
+ *
+ * 注意这里刻意不包含 settingsId：详情页没有「设置」入口，只有备份导入会带进来，
+ * 而旧代码把它算进 linkedCount、模板却写死 /4 和 ==4，
+ * 于是一旦某班从备份恢复了设置，计数变成 5，部署按钮就永久置灰。
+ */
+const REQUIRED_KEYS = ["classplanId", "timelayoutId", "subjectsId"];
 
-function linkedCount(cls: any): number {
-  return RESOURCE_KEYS.filter((k) => cls[k]).length;
+function requiredLinked(cls: any): number {
+  return REQUIRED_KEYS.filter((k) => cls[k]).length;
+}
+
+function canDeploy(cls: any): boolean {
+  return requiredLinked(cls) === REQUIRED_KEYS.length;
 }
 
 async function openPreset(cls: any) {
