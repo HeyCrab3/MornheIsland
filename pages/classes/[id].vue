@@ -142,6 +142,8 @@
         档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。
       </el-alert>
     </el-card>
+
+    <Cw2CentralPanel :class-id="id" />
   </div>
 </template>
 
