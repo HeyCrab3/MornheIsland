@@ -7,6 +7,30 @@
       在这里查看当前账号下关联的资源情况。
     </p>
 
+    <!-- 考试安排入口：看板里的考试覆盖规则不显眼，这里给个明显入口 -->
+    <el-card shadow="hover" class="exam-entry mb-6">
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="exam-entry-icon">
+          <el-icon :size="20" color="#fff"><EditPen /></el-icon>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="font-semibold text-base">考试安排</div>
+          <div class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+            设置哪一天考什么科目、几点到几点。按账号保存，本账号下所有班级的看板共用，
+            考试时段会覆盖与之重合的标准课时。
+          </div>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <el-button type="primary" @click="navigateTo('/exams')">
+            <el-icon class="mr-1"><EditPen /></el-icon>配置考试安排
+          </el-button>
+          <el-button @click="openBoard">
+            <el-icon class="mr-1"><Picture /></el-icon>查看看板
+          </el-button>
+        </div>
+      </div>
+    </el-card>
+
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="mb-2">
       <el-col :xs="12" :sm="12" :md="6" v-for="card in statCards" :key="card.label">
@@ -104,10 +128,16 @@
 </template>
 
 <script setup lang="ts">
-import { School, Monitor, Notebook, Lock } from "@element-plus/icons-vue";
+import { School, Monitor, Notebook, Lock, EditPen, Picture } from "@element-plus/icons-vue";
 import { usePlatformStore } from "#imports";
 
 definePageMeta({ title: "仪表盘", protected: true });
+
+/** 看板是独立裸页面，新标签页打开，别把控制台顶掉 */
+function openBoard() {
+  if (!import.meta.client) return;
+  window.open("/board", "_blank", "noopener");
+}
 
 const platform = usePlatformStore()
 const stats = reactive({
@@ -245,6 +275,25 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* 考试安排入口卡片：用品牌色描边 + 淡底，和普通统计卡区分开 */
+.exam-entry {
+  border-radius: var(--mi-radius-lg);
+  border: 1px solid var(--mi-brand);
+  background: var(--mi-brand-light);
+}
+.exam-entry :deep(.el-card__body) {
+  padding: 16px 20px;
+}
+.exam-entry-icon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #a6c2f7 0%, #859bc6 100%);
+}
 .stat-card {
   border-radius: var(--mi-radius-lg);
 }

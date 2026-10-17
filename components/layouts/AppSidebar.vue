@@ -24,12 +24,15 @@
             v-for="item in group.items"
             :key="item.path"
             :to="item.path"
+            :target="item.target"
+            :rel="item.target ? 'noopener noreferrer' : undefined"
             class="nav-item text-gray-400 dark:text-gray-300"
             :class="{ active: isActive(item) }"
             @click="onNavClick"
           >
             <el-icon :size="17"><component :is="item.icon" /></el-icon>
             <span>{{ item.label }}</span>
+            <span v-if="item.target" class="text-[10px] opacity-50 ml-auto">↗</span>
           </NuxtLink>
         </div>
       </div>
@@ -80,6 +83,8 @@ import {
   SwitchButton,
   Grid,
   Download,
+  Picture,
+  Calendar,
 } from "@element-plus/icons-vue";
 
 const dark = useDarkMode();
@@ -88,12 +93,22 @@ const runtimeConfig = useRuntimeConfig();
 const userStore = useUserStore();
 const layoutStore = useLayoutStore();
 
-const menuGroups = [
+interface NavItem {
+  path: string;
+  label: string;
+  icon: any;
+  /** 传了就在新标签页打开（用于看板这种裸页面） */
+  target?: string;
+}
+
+const menuGroups: { label: string; items: NavItem[] }[] = [
   {
     label: "概览",
     items: [
       { path: "/", label: "仪表盘", icon: HomeFilled },
       { path: "/quickcreate", label: "快速创建", icon: MagicStick },
+      // 看板是裸页面（layout: false），新标签页打开，不会把控制台顶掉
+      { path: "/board", label: "大屏看板", icon: Picture, target: "_blank" },
     ],
   },
   {
@@ -109,6 +124,7 @@ const menuGroups = [
     label: "管理",
     items: [
       { path: "/classes", label: "班级管理", icon: School },
+      { path: "/exams", label: "考试安排", icon: Calendar },
       { path: "/devices", label: "设备追踪", icon: Monitor },
       { path: "/plugins", label: "插件管理", icon: Grid },
       { path: "/backup", label: "配置备份", icon: Download },

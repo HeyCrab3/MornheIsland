@@ -8,6 +8,14 @@
         <h1 class="text-xl font-semibold">{{ cls?.name || cls?.identity || '班级详情' }}</h1>
         <div class="text-xs text-gray-400 font-mono mt-0.5">{{ cls?.identity }}</div>
       </div>
+      <div class="ml-auto flex items-center gap-2">
+        <el-button size="small" @click="copyClassId">
+          <el-icon class="mr-1"><CopyDocument /></el-icon>复制班级 ID
+        </el-button>
+        <el-button size="small" type="primary" plain @click="openBoard">
+          <el-icon class="mr-1"><Picture /></el-icon>查看看板
+        </el-button>
+      </div>
     </div>
 
     <el-card v-loading="loading" class="max-w-2xl">
@@ -148,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, CopyDocument, Download, QuestionFilled } from "@element-plus/icons-vue";
+import { ArrowLeft, CopyDocument, Download, Picture, QuestionFilled } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "班级详情", protected: true });
 
@@ -160,6 +168,19 @@ const {
 
 const route = useRoute();
 const id = route.params.id as string;
+
+/** 看板要的是班级 ID，这里直接给出去，省得用户自己去地址栏抠 */
+function copyClassId() {
+  navigator.clipboard.writeText(id).then(
+    () => ElMessage.success(`已复制班级 ID：${id}`),
+    () => ElMessage.error("复制失败"),
+  );
+}
+
+function openBoard() {
+  if (!import.meta.client) return;
+  window.open(`/board?id=${encodeURIComponent(id)}`, "_blank", "noopener");
+}
 const loading = ref(false);
 const saving = ref(false);
 const cls = ref<any>({
