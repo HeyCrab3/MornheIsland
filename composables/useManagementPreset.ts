@@ -58,7 +58,14 @@ export function useManagementPreset() {
   }
 
   function buildPreset(cls: any, mode: PresetMode = "serverless", grpcAddress?: string): string {
-    const identity = cls?.identity ?? "";
+    /**
+     * ⚠ ClassIdentity 必须用**班级唯一 ID**，不能用班级代号（identity）。
+     *
+     * 班级代号是用户自己填的（"1"、"1-101"…），全库不唯一——实测 110 个班里有
+     * 7 个账号都用了 "1"。服务端曾用它解析班级，命中多个时会拿到别的学校的班级，
+     * 造成跨校串数据。改成 _id 后全局唯一，服务端按 ObjectId 精确命中。
+     */
+    const classIdentity = String(cls?._id ?? "");
 
     if (mode === "grpc") {
       return JSON.stringify(
@@ -66,7 +73,7 @@ export function useManagementPreset() {
           ManagementServerKind: 1,
           ManagementServer: apiOrigin.value,
           ManagementServerGrpc: grpcAddress || defaultGrpcAddress(),
-          ClassIdentity: identity,
+          ClassIdentity: classIdentity,
         },
         null,
         2,
@@ -76,8 +83,8 @@ export function useManagementPreset() {
     return JSON.stringify(
       {
         ManagementServerKind: 0,
-        ManifestUrlTemplate: `${apiOrigin.value}/api/v1/ci/${String(cls?._id)}/manifest.json`,
-        ClassIdentity: identity,
+        ManifestUrlTemplate: `${apiOrigin.value}/api/v1/ci/${classIdentity}/manifest.json`,
+        ClassIdentity: classIdentity,
       },
       null,
       2,

@@ -12,6 +12,30 @@
       </el-button>
     </div>
 
+    <!-- 同机构班级升级提示（用户主动点击，不做任何自动迁移） -->
+    <el-alert
+      v-for="c in schoolCandidates"
+      :key="c.normalizedName"
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-4 school-hint"
+    >
+      <template #title>
+        「{{ c.orgName }}」下有 {{ c.classCount }} 个班，建议升级为学校维度聚合管理
+      </template>
+      <div class="text-xs leading-relaxed">
+        升级后这 {{ c.classCount }} 个班会归入同一所学校，可统一分配时间表/策略、按校批量下发插件与通知。
+        <span v-if="c.sharedResources.length">将自动带入 {{ c.sharedResources.length }} 项它们共享的资源</span>
+        <span v-if="c.devices.length">
+          、以及 {{ c.devices.length }} 台关联设备（其中 {{ c.onlineDeviceCount }} 台在线，可实时遥控）
+        </span>
+      </div>
+      <div class="mt-2">
+        <el-button size="small" type="primary" @click="openUpgrade(c)">查看并升级</el-button>
+      </div>
+    </el-alert>
+
     <!-- 班级卡片网格 -->
     <div v-loading="loading" class="min-h-40">
       <div
@@ -127,6 +151,70 @@
         <el-button type="primary" :loading="creating" @click="create"
           >确定</el-button
         >
+      </template>
+    </el-dialog>
+
+    <!-- 升级为学校维度 -->
+    <el-dialog v-model="showUpgrade" title="升级为学校维度聚合管理" width="560px">
+      <div v-if="upgradeTarget" class="space-y-3 text-sm">
+        <div>
+          <div class="text-xs text-gray-400 mb-1">将纳入以下 {{ upgradeTarget.classCount }} 个班</div>
+          <div class="flex flex-wrap gap-1">
+            <el-tag v-for="c in upgradeTarget.classes" :key="c.id" size="small" effect="plain">
+              {{ c.name || c.identity }}
+            </el-tag>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-xs text-gray-400 mb-1">
+            共享资源（{{ upgradeTarget.sharedResources.length }} 项，升级后提升为学校级，同校其他班可直接选）
+          </div>
+          <div v-if="upgradeTarget.sharedResources.length" class="space-y-1">
+            <div
+              v-for="r in upgradeTarget.sharedResources"
+              :key="r.type + r.id"
+              class="flex items-center justify-between gap-2 text-xs"
+            >
+              <span class="truncate">{{ r.label }} · {{ r.name }}</span>
+              <span class="text-gray-400 shrink-0">{{ r.usedByCount }} 个班在用</span>
+            </div>
+          </div>
+          <div v-else class="text-xs text-gray-400">这几个班没有共享同一份资源。</div>
+        </div>
+
+        <div>
+          <div class="text-xs text-gray-400 mb-1">
+            关联设备（{{ upgradeTarget.devices.length }} 台，在线 {{ upgradeTarget.onlineDeviceCount }} 台可实时遥控）
+          </div>
+          <div v-if="upgradeTarget.devices.length" class="space-y-1">
+            <div
+              v-for="d in upgradeTarget.devices"
+              :key="d.cuid"
+              class="flex items-center justify-between gap-2 text-xs"
+            >
+              <span class="truncate">{{ d.className || d.identity || d.cuid }}</span>
+              <el-tag size="small" :type="d.online ? 'success' : 'info'" effect="plain">
+                {{ d.online ? "在线" : "离线" }}
+              </el-tag>
+            </div>
+          </div>
+          <div v-else class="text-xs text-gray-400">这几个班还没有关联设备。</div>
+        </div>
+
+        <div>
+          <div class="text-xs text-gray-400 mb-1">学校名称</div>
+          <el-input v-model="upgradeName" placeholder="如 XX中学" />
+        </div>
+
+        <div class="text-xs text-gray-400 leading-relaxed">
+          只处理你勾选的这几个班，不会动其他班级，也不改动任何设备数据。
+          升级后各班的课表仍可单独编辑。
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showUpgrade = false">取消</el-button>
+        <el-button type="primary" :loading="upgrading" @click="doUpgrade">确认升级</el-button>
       </template>
     </el-dialog>
 
@@ -298,7 +386,71 @@ async function remove(id: string) {
   }
 }
 
-onMounted(fetchClasses);
+// ── 同机构班级 → 升级为学校维度（用户主动，不做自动迁移）──
+const schoolCandidates = ref<any[]>([]);
+const showUpgrade = ref(false);
+const upgrading = ref(false);
+const upgradeTarget = ref<any>(null);
+const upgradeName = ref("");
+
+async function fetchSchoolCandidates() {
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/schools/candidates", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    schoolCandidates.value = res?.data?.candidates || [];
+  } catch {
+    // 拿不到就不显示提示，不影响班级管理本身
+    schoolCandidates.value = [];
+  }
+}
+
+function openUpgrade(c: any) {
+  upgradeTarget.value = c;
+  upgradeName.value = c.orgName || "";
+  showUpgrade.value = true;
+}
+
+async function doUpgrade() {
+  const t = upgradeTarget.value;
+  if (!t) return;
+  upgrading.value = true;
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/schools/upgrade", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: {
+        classIds: t.classes.map((x: any) => x.id),
+        schoolName: upgradeName.value.trim() || t.orgName,
+      },
+    });
+    const d = res?.data || {};
+    ElMessage.success(
+      `已升级为「${d.schoolName}」：${d.linkedClasses} 个班、${d.adoptedResources} 项共享资源、${d.devices} 台设备`,
+    );
+    showUpgrade.value = false;
+    await Promise.all([fetchClasses(), fetchSchoolCandidates()]);
+  } catch (e: any) {
+    // 409 + needInvite：同名学校已被别人创建，不能用「同名机构」硬并进去
+    if (e?.data?.data?.needInvite || e?.data?.code === 409) {
+      ElMessageBox.alert(
+        e?.data?.msg ||
+          "这所学校已经由其他账号创建。请让该校管理员在「学校 → 成员」里生成邀请链接，你加入后再挂班级。",
+        "需要邀请链接",
+        { type: "warning", confirmButtonText: "知道了" },
+      ).catch(() => {});
+      return;
+    }
+    ElMessage.error(e?.data?.msg || "升级失败");
+  } finally {
+    upgrading.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchClasses();
+  fetchSchoolCandidates();
+});
 </script>
 
 <style scoped>

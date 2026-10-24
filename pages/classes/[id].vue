@@ -15,6 +15,9 @@
         <el-button size="small" type="primary" plain @click="openBoard">
           <el-icon class="mr-1"><Picture /></el-icon>查看看板
         </el-button>
+        <el-button size="small" @click="openQr">
+          <el-icon class="mr-1"><Cellphone /></el-icon>发通知二维码
+        </el-button>
       </div>
     </div>
 
@@ -152,11 +155,12 @@
     </el-card>
 
     <Cw2CentralPanel :class-id="id" />
+    <NotifyQrDialog v-model="qrVisible" :class-id="id" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, CopyDocument, Download, Picture, QuestionFilled } from "@element-plus/icons-vue";
+import { ArrowLeft, CopyDocument, Download, Picture, QuestionFilled, Cellphone } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "班级详情", protected: true });
 
@@ -180,6 +184,13 @@ function copyClassId() {
 function openBoard() {
   if (!import.meta.client) return;
   window.open(`/board?id=${encodeURIComponent(id)}`, "_blank", "noopener");
+}
+
+
+// 扫码发通知：具体逻辑在 NotifyQrDialog 里，这里只负责开关
+const qrVisible = ref(false);
+function openQr() {
+  qrVisible.value = true;
 }
 const loading = ref(false);
 const saving = ref(false);

@@ -52,9 +52,47 @@
         <div v-if="mode === 'all'" class="text-xs text-gray-400 mb-2">
           集控（gRPC）· {{ visibleGrpc.length }} 台，可下发实时指令
         </div>
+
+        <!-- 批量操作条 -->
+        <div class="flex items-center flex-wrap gap-2 mb-3 px-3 py-2 rounded-lg batch-bar">
+          <el-checkbox
+            :model-value="allOnlineSelected"
+            :indeterminate="someSelected"
+            :disabled="!onlineCuids.length"
+            @change="toggleSelectAll"
+          >
+            全选在线（{{ onlineCuids.length }} 台）
+          </el-checkbox>
+          <span class="text-xs text-gray-400">已选 {{ selectedCuids.length }} 台</span>
+          <el-button
+            size="small"
+            type="primary"
+            :disabled="!selectedCuids.length"
+            @click="openNotifyBatch"
+          >
+            批量推送通知
+          </el-button>
+          <el-button size="small" text :disabled="!selectedCuids.length" @click="selectedCuids = []">
+            清空选择
+          </el-button>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
-          <el-card v-for="d in visibleGrpc" :key="d.cuid" shadow="hover" class="device-card">
+          <el-card
+            v-for="d in visibleGrpc"
+            :key="d.cuid"
+            shadow="hover"
+            class="device-card"
+            :class="{ 'is-selected': selectedCuids.includes(d.cuid) }"
+          >
             <div class="flex items-center gap-3">
+              <el-checkbox
+                :model-value="selectedCuids.includes(d.cuid)"
+                :disabled="!d.online"
+                class="shrink-0"
+                @change="toggleSelect(d.cuid)"
+                @click.stop
+              />
               <div class="device-icon" :class="{ online: d.online }">
                 <el-icon :size="20"><Monitor /></el-icon>
               </div>
@@ -172,7 +210,11 @@
     <!-- 推送通知 -->
     <ResponsiveDrawer
       v-model:open="notifyVisible"
-      :title="`推送通知 · ${notifyTarget?.className || notifyTarget?.identity || ''}`"
+      :title="
+        notifyBatch?.length
+          ? `推送通知 · 已选 ${notifyBatch.length} 台`
+          : `推送通知 · ${notifyTarget?.className || notifyTarget?.identity || ''}`
+      "
     >
       <el-form label-position="top" class="py-2">
         <el-form-item label="通知内容" required>
@@ -286,10 +328,12 @@ async function fetchAll() {
   }
 }
 
-// ── 推送通知 ──
+// ── 推送通知（单个 / 批量）──
 const notifyVisible = ref(false);
 const notifySending = ref(false);
 const notifyTarget = ref<any>(null);
+/** 批量模式下要推送的 cuid 列表；null 表示单台模式 */
+const notifyBatch = ref<string[] | null>(null);
 const notifyForm = reactive({
   messageContent: "",
   messageMask: "",
@@ -299,28 +343,72 @@ const notifyForm = reactive({
   repeatCounts: 1,
 });
 
-function openNotify(d: any) {
-  notifyTarget.value = d;
+// ── 批量选择 ──
+const selectedCuids = ref<string[]>([]);
+const onlineCuids = computed<string[]>(() =>
+  (visibleGrpc.value || []).filter((d: any) => d.online).map((d: any) => d.cuid),
+);
+const allOnlineSelected = computed(
+  () => onlineCuids.value.length > 0 && onlineCuids.value.every((c) => selectedCuids.value.includes(c)),
+);
+const someSelected = computed(() => selectedCuids.value.length > 0 && !allOnlineSelected.value);
+
+function toggleSelect(cuid: string) {
+  const i = selectedCuids.value.indexOf(cuid);
+  if (i >= 0) selectedCuids.value.splice(i, 1);
+  else selectedCuids.value.push(cuid);
+}
+
+function toggleSelectAll(checked: any) {
+  selectedCuids.value = checked ? [...onlineCuids.value] : [];
+}
+
+function resetNotifyForm() {
   notifyForm.messageContent = "";
   notifyForm.messageMask = "";
   notifyForm.isEmergency = false;
   notifyForm.isSpeechEnabled = false;
   notifyForm.durationSeconds = 5;
   notifyForm.repeatCounts = 1;
+}
+
+function openNotify(d: any) {
+  notifyBatch.value = null;
+  notifyTarget.value = d;
+  resetNotifyForm();
+  notifyVisible.value = true;
+}
+
+function openNotifyBatch() {
+  if (!selectedCuids.value.length) return ElMessage.warning("请先勾选要推送的设备");
+  notifyTarget.value = null;
+  notifyBatch.value = [...selectedCuids.value];
+  resetNotifyForm();
   notifyVisible.value = true;
 }
 
 async function sendNotify() {
   if (!notifyForm.messageContent.trim()) return ElMessage.warning("请输入通知内容");
+  const batch = notifyBatch.value;
+  const body: any = batch?.length
+    ? { cuids: batch, ...notifyForm }
+    : { cuid: notifyTarget.value?.cuid, ...notifyForm };
+
   notifySending.value = true;
   try {
     const res: any = await $fetch("/api/v1/console/ci/grpc/notification", {
       method: "POST",
       headers: auth(),
-      body: { cuid: notifyTarget.value.cuid, ...notifyForm },
+      body,
     });
-    ElMessage.success(`已推送（${res.data?.sent ?? 0} 台）`);
+    const sent = res.data?.sent ?? 0;
+    if (res.data?.rejected?.length) {
+      ElMessage.warning(`已推送 ${sent} 台；有 ${res.data.rejected.length} 台不属于本账号，已忽略`);
+    } else {
+      ElMessage.success(`已推送（${sent} 台）`);
+    }
     notifyVisible.value = false;
+    if (batch?.length) selectedCuids.value = [];
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || "推送失败");
   } finally {
@@ -420,6 +508,14 @@ onMounted(fetchAll);
 .device-card {
   border-radius: var(--mi-radius-lg);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.device-card.is-selected {
+  border-color: var(--mi-brand);
+  box-shadow: 0 0 0 1px var(--mi-brand);
+}
+.batch-bar {
+  background: var(--mi-brand-light);
+  border: 1px solid var(--mi-brand);
 }
 .device-card:hover {
   transform: translateY(-2px);

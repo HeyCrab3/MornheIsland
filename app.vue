@@ -3,6 +3,10 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <!-- 中台公告弹窗：全局挂一次，看板/登录页会自动抑制 -->
+  <ClientOnly>
+    <PlatformNoticePopup />
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">

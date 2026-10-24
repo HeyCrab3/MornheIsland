@@ -49,7 +49,44 @@ export function useCiResource(collection: string, label: string) {
     }
   }
 
-  return { items, loading, fetchList, createItem, removeItem, authHeaders };
+  /**
+   * 重命名。走专用的 rename 接口：只改显示名，**不动 version、不写历史版本**，
+   * 否则客户端会把配置当成有新版本白白重拉一遍。
+   */
+  async function renameItem(id: string, currentName: string) {
+    let input: string;
+    try {
+      const res = await ElMessageBox.prompt(`给「${currentName}」起个新名字`, `重命名${label}`, {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        inputValue: currentName,
+        inputValidator: (v: string) => {
+          const t = String(v ?? "").trim();
+          if (!t) return "名称不能为空";
+          if (t.length > 100) return "名称不能超过 100 个字符";
+          return true;
+        },
+      });
+      input = String(res.value).trim();
+    } catch {
+      return; // 用户取消
+    }
+    if (input === currentName) return;
+
+    try {
+      await $fetch(`/api/v1/console/ci/${collection}/${id}/rename`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: { name: input },
+      });
+      ElMessage.success(`已重命名为「${input}」`);
+      await fetchList();
+    } catch (e: any) {
+      ElMessage.error(e?.data?.msg || "重命名失败");
+    }
+  }
+
+  return { items, loading, fetchList, createItem, removeItem, renameItem, authHeaders };
 }
 
 /**

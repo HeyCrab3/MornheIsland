@@ -455,9 +455,18 @@ const todayEntries = computed<any[]>(() => {
   const seen = new Set<string>();
   for (const day of board.value.days) {
     if (!(day.weekDays || []).includes(dow)) continue;
-    const weeks = day.weeks;
-    // 没设开学日期时无法判定单双周，按「每周都上」处理（设置里已提示）
-    if (Array.isArray(weeks) && week != null && !weeks.includes(week)) continue;
+    if (week != null) {
+      /*
+       * 单双周优先用 weekDiv（0=每周 / 1=单周 / 2=双周）算奇偶。
+       * 不能用 weeks 数组：那是 [1]/[2] 这种有限周次，学期往后走一旦超出范围，
+       * 整天都会被过滤掉——表现就是"明明是双周，看板却说今天没有课"。
+       */
+      const div = Number(day.weekDiv ?? 0);
+      if (div === 1 && week % 2 === 0) continue;
+      if (div === 2 && week % 2 === 1) continue;
+      // 兼容早期没有 weekDiv 的数据
+      if (day.weekDiv == null && Array.isArray(day.weeks) && !day.weeks.includes(week)) continue;
+    }
     for (const e of day.entries || []) {
       const key = `${e.start}-${e.end}`;
       if (seen.has(key)) continue;

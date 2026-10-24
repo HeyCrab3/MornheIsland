@@ -24,22 +24,33 @@
               <el-icon :size="20"><component :is="icon" /></el-icon>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-semibold text-base truncate">{{ item.name }}</div>
+              <div class="flex items-center gap-1.5 min-w-0">
+                <div class="font-semibold text-base truncate">{{ item.name }}</div>
+                <el-tag v-if="item.isSchoolLevel" size="small" type="success" effect="plain" class="shrink-0">
+                  学校共享
+                </el-tag>
+              </div>
               <div class="text-xs text-gray-400 mt-1">
                 v{{ item.version }} · 更新于 {{ formatDate(item.updatedAt) }}
+                <span v-if="item.isSchoolLevel && !item.editable" class="text-amber-500"> · 只读</span>
               </div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-end gap-1.5">
             <el-button size="small" text type="primary" @click.stop="navigateTo(`/${collection}/${item._id}`)">
-              编辑
+              {{ item.editable === false ? "查看" : "编辑" }}
             </el-button>
-            <el-popconfirm :title="`确定删除「${item.name}」？`" @confirm="remove(item._id)">
-              <template #reference>
-                <el-button size="small" text type="danger" @click.stop>删除</el-button>
-              </template>
-            </el-popconfirm>
+            <template v-if="item.editable !== false">
+              <el-button size="small" text @click.stop="rename(item._id, item.name)">
+                改名
+              </el-button>
+              <el-popconfirm :title="`确定删除「${item.name}」？`" @confirm="remove(item._id)">
+                <template #reference>
+                  <el-button size="small" text type="danger" @click.stop>删除</el-button>
+                </template>
+              </el-popconfirm>
+            </template>
           </div>
         </el-card>
       </div>
@@ -65,8 +76,9 @@
 import { Plus, Notebook, Timer, Collection, Lock, Document } from "@element-plus/icons-vue";
 
 const props = defineProps<{ collection: string; label: string }>();
-const { items, loading, fetchList, createItem, removeItem } = useCiResource(props.collection, props.label);
+const { items, loading, fetchList, createItem, removeItem, renameItem } = useCiResource(props.collection, props.label);
 const remove = removeItem;
+const rename = renameItem;
 
 const ICONS: Record<string, any> = {
   classplan: Notebook,

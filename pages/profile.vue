@@ -68,37 +68,66 @@ function doLogout() {
 }
 
 async function startDeleteAccount() {
+  // ── 三重确认（取消就整体退出，不要走后面的请求）──
   try {
-    // 第一次确认
     await ElMessageBox.confirm(
       "您在本服务下的数据将被完全删除且无法恢复，但不会删除您的 CrabCity Passport 或 STCN 账号。",
       "注销账户",
       { confirmButtonText: "我已知晓", cancelButtonText: "取消", type: "warning" },
     );
-    // 第二次确认
     await ElMessageBox.confirm(
       "您登陆 MornheIsland 的账户根据登录渠道不同注销方式不同，具体请联系您的身份服务提供商。确认继续注销吗？",
       "再次确认",
       { confirmButtonText: "继续注销", cancelButtonText: "取消", type: "warning" },
     );
-    // 第三次确认 — 输入验证
+    // 第三次：把账号名原样输一遍（服务端也会比对，前端先拦一道）
     const { value } = await ElMessageBox.prompt(
-      '请输入"确认注销"以继续：',
+      `请输入你的账号名「${userStore.userName || ""}」以确认注销：`,
       "最终确认",
-      { confirmButtonText: "确认", cancelButtonText: "取消", type: "error", inputPattern: /^确认注销$/g, inputErrorMessage: "请输入「确认注销」" },
+      {
+        confirmButtonText: "确认注销",
+        cancelButtonText: "取消",
+        type: "error",
+        inputPlaceholder: userStore.userName || "",
+      },
     );
-    if (value !== "确认注销") return;
+    if (String(value ?? "").trim() !== String(userStore.userName ?? "")) {
+      ElMessage.warning("账号名不匹配，已取消注销");
+      return;
+    }
 
+    // ── 请求（二次验证由服务端把关：必须是新鲜登录）──
     await $fetch("/api/v1/user/delete", {
       method: "DELETE",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: { confirm: value },
     });
     ElMessage.success("账户已注销");
     userStore.logout();
     localStorage.removeItem("token");
     navigateTo("/login");
-  } catch {
-    // 用户取消
+  } catch (e: any) {
+    // 用户取消（ElMessageBox 以字符串 reject）
+    if (e === "cancel" || e === "close") return;
+
+    if (e?.data?.needReauth || e?.data?.code === 401) {
+      try {
+        await ElMessageBox.confirm(
+          e?.data?.code === 401
+            ? "登录状态已失效，请重新登录后再注销。"
+            : "注销需要重新验证账户。为了确认是本人操作，请先退出并重新登录一次，然后回到本页再次注销。",
+          "需要重新验证",
+          { confirmButtonText: "去重新登录", cancelButtonText: "稍后再说", type: "warning" },
+        );
+        userStore.logout();
+        localStorage.removeItem("token");
+        navigateTo("/login");
+      } catch {
+        /* 用户选择稍后 */
+      }
+      return;
+    }
+    ElMessage.error(e?.data?.msg || "注销失败");
   }
 }
 </script>
