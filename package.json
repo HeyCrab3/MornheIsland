@@ -32,7 +32,7 @@
     "echarts": "^6.0.0",
     "element-plus": ">=2",
     "lucide-vue-next": "^1.0.0",
-    "nuxt": "^3.21.10",
+    "nuxt": "^4.6.2",
     "nuxt-echarts": "1.0.1",
     "nuxt-gtag": "4.1.0",
     "pinia": "^3.0.4",
