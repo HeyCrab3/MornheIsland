@@ -1,7 +1,7 @@
 <template>
   <ResourceEditor collection="timelayout" label="时间表">
-    <template #default="{ doc, save }">
-      <TimeLayoutEditor v-if="doc" :model-value="doc.data" :name="doc.name" @save="save" />
+    <template #default="{ doc, save, viewOnly }">
+      <TimeLayoutEditor v-if="doc" :model-value="doc.data" :name="doc.name" :view-only="viewOnly" @save="save" />
     </template>
   </ResourceEditor>
 </template>

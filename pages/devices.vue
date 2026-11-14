@@ -97,7 +97,16 @@
                 <el-icon :size="20"><Monitor /></el-icon>
               </div>
               <div class="flex-1 min-w-0">
-                <div class="font-semibold truncate">{{ d.className || d.identity || '未命名设备' }}</div>
+                <div class="font-semibold truncate flex items-center gap-1.5">
+                  <span class="truncate">{{ d.className || d.identity || '未命名设备' }}</span>
+                  <el-tooltip
+                    v-if="d.drift"
+                    placement="top"
+                    content="这台设备上报的班级标识与它实际在用的班级不一致（多见于改过绑定），建议在班级详情里重新下发配置"
+                  >
+                    <el-tag size="small" type="warning" effect="plain" class="shrink-0">归属待确认</el-tag>
+                  </el-tooltip>
+                </div>
                 <div class="text-xs text-gray-400 font-mono truncate">{{ d.cuid }}</div>
               </div>
               <span class="status-dot" :class="{ online: d.online }" :title="d.online ? '在线' : '离线'" />

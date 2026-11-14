@@ -1,0 +1,35 @@
+/*
+ * 二步验证的公共外观。
+ *
+ * 登录链路有两条：SSO 往返（/callback）和子账户密码（/login）。
+ * 两条链路的第二步长得必须一样 —— 用户在同一个位置、同一个心智模型下输入动态码，
+ * 而不是「这次页面长得不一样，是不是假站」。所以样式放全局，两边共用一份。
+ */
+
+.mfa-icon {
+  font-size: 30px;
+  line-height: 1;
+  color: var(--mi-brand-deep, #3b5bdb);
+}
+
+.mfa-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 10px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.mfa-or::before,
+.mfa-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.dark .mfa-or::before,
+.dark .mfa-or::after {
+  background: #404040;
+}

@@ -7,14 +7,31 @@
           检查每个班级的「班级 → 课表 → 时间表 → 科目」引用链是否自洽，把界面上看不出来的问题暴露出来。
         </p>
       </div>
-      <el-button :loading="loading" @click="load">重新检查</el-button>
+      <div class="flex items-center gap-2">
+        <el-button :loading="fixingAll" @click="fixAllNullGuid">批量修复过期课表</el-button>
+        <el-button :loading="loading" @click="load">重新检查</el-button>
+      </div>
     </div>
+
+    <el-alert type="warning" :closable="false" show-icon class="mb-4 max-w-4xl">
+      <template #title>课表里的 null Guid 会让客户端直接崩</template>
+      空课时如果存成 <code>"SubjectId": null</code>，ClassIsland 反序列化时会抛异常
+      （它的 <code>SubjectId</code> 是非空 Guid，转换器只容忍 <code>""</code>）。
+      正确的空值应该是 <code>00000000-0000-0000-0000-000000000000</code>。
+      下面按班级体检能发现并修复；没有挂到班级上的孤儿课表用右上角「批量修复过期课表」处理。
+    </el-alert>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
       <template #title>为什么需要体检</template>
       档案库里显示"已关联"的，看的是班级自己的字段；而客户端真正读的是<b>课表资源里记录的那一份</b>。
       两者指向不同资源时，界面一切正常，但 ClassIsland 会报「未配置时间表」或者下发一份空白时间表。
       这类问题只能靠比对引用链发现。
+    </el-alert>
+
+    <el-alert v-if="schoolName" type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
+      <template #title>正在检查学校「{{ schoolName }}」的全部班级</template>
+      这里能看到同校其他账号的班级，但<b>只有自己创建的班</b>才给「修复」按钮 ——
+      别人的班只能提示问题，修复要由那位同学的账号来做。
     </el-alert>
 
     <div v-if="summary" class="flex flex-wrap gap-3 mb-4">
@@ -55,6 +72,9 @@
             <div class="font-medium truncate">
               {{ row.className || "（未命名班级）" }}
               <span v-if="row.identity" class="text-xs text-gray-400 ml-1">#{{ row.identity }}</span>
+              <el-tag v-if="row.mine === false" size="small" type="info" effect="plain" class="ml-1">
+                别人的班
+              </el-tag>
             </div>
             <ul class="mt-2 space-y-1.5">
               <li v-for="(it, i) in row.issues" :key="i" class="flex items-start gap-2 text-sm">
@@ -100,17 +120,65 @@ const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("toke
 
 const loading = ref(false);
 const fixing = ref<string>("");
+const fixingAll = ref(false);
 const rows = ref<any[]>([]);
 const summary = ref<any>(null);
 const failed = ref(false);
+
+/**
+ * 批量修我名下所有课表资源里的 null Guid。
+ * 单独一个入口是因为体检按班级遍历，没挂班级的孤儿课表不会出现在列表里 ——
+ * 而线上这类资源不少。
+ */
+async function fixAllNullGuid() {
+  try {
+    await ElMessageBox.confirm(
+      "会把我名下所有课表资源里的 null Guid 统一修成 00000000-0000-0000-0000-000000000000，" +
+        "并同时检查时间表。这个操作是幂等的，不会改动其它字段。继续？",
+      "批量修复过期课表",
+      { type: "warning", confirmButtonText: "开始修复", cancelButtonText: "取消" },
+    );
+  } catch {
+    return;
+  }
+  fixingAll.value = true;
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/health/fix-null-guid", {
+      method: "POST",
+      headers: authHeaders(),
+    });
+    const d = res?.data || {};
+    if (!d.fixedFields) {
+      ElMessage.success(`检查了 ${d.scannedClassPlans ?? 0} 份课表、${d.scannedTimeLayouts ?? 0} 份时间表，没有发现问题`);
+    } else {
+      ElMessage.success(
+        `已修复：课表 ${d.fixedClassPlans} 份、时间表 ${d.fixedTimeLayouts} 份，共 ${d.fixedFields} 处`,
+      );
+      await load();
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "修复失败");
+  } finally {
+    fixingAll.value = false;
+  }
+}
+
+// 从学校详情页进来时带 ?schoolId=，作用域扩到整所学校
+const route = useRoute();
+const schoolId = computed(() => String(route.query.schoolId ?? "").trim());
+const schoolName = ref("");
 
 async function load() {
   loading.value = true;
   failed.value = false;
   try {
-    const res: any = await $fetch("/api/v1/console/ci/health/resources", { headers: authHeaders() });
+    const res: any = await $fetch("/api/v1/console/ci/health/resources", {
+      headers: authHeaders(),
+      query: schoolId.value ? { schoolId: schoolId.value } : {},
+    });
     rows.value = Array.isArray(res?.data?.classes) ? res.data.classes : [];
     summary.value = res?.data?.summary || null;
+    schoolName.value = res?.data?.schoolName || "";
   } catch (e: any) {
     failed.value = true;
     rows.value = [];

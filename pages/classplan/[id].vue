@@ -1,7 +1,7 @@
 <template>
   <ResourceEditor collection="classplan" label="课表">
-    <template #default="{ doc, save, saving }">
-      <ClassPlanEditor v-if="doc" :model-value="doc.data" @save="save" />
+    <template #default="{ doc, save, saving, viewOnly }">
+      <ClassPlanEditor v-if="doc" :model-value="doc.data" :view-only="viewOnly" @save="save" />
     </template>
   </ResourceEditor>
 </template>

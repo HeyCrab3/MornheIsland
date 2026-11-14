@@ -7,8 +7,23 @@
       在这里查看当前账号下关联的资源情况。
     </p>
 
+    <!-- 平台概览：全站规模，让新用户一眼知道这里不是空壳 -->
+    <el-card shadow="never" class="mb-6">
+      <div class="pb-head">
+        <span class="font-medium">平台概览</span>
+        <span class="text-xs text-gray-400">一些伟大的数据。很显然我只是觉得主页太空了才加的。</span>
+      </div>
+      <div class="pb-grid">
+        <div v-for="item in platformCards" :key="item.label" class="pb-item">
+          <div class="pb-value">{{ item.value }}</div>
+          <div class="pb-label">{{ item.label }}</div>
+          <div v-if="item.hint" class="pb-hint" :title="item.hint">{{ item.hint }}</div>
+        </div>
+      </div>
+    </el-card>
+
     <!-- 考试安排入口：看板里的考试覆盖规则不显眼，这里给个明显入口 -->
-    <el-card shadow="hover" class="exam-entry mb-6">
+    <el-card shadow="hover" class="mb-6">
       <div class="flex items-center gap-4 flex-wrap">
         <div class="exam-entry-icon">
           <el-icon :size="20" color="#fff"><EditPen /></el-icon>
@@ -204,7 +219,71 @@ const statCards = computed(() => [
   },
 ]);
 
+/** 全站规模：与当前账号无关，纯展示平台的体量 */
+const platformStats = reactive({
+  users: 0,
+  classes: 0,
+  schools: 0,
+  resourceTotal: 0,
+  resourceTypes: [] as { key: string; label: string; count: number }[],
+  deviceTotal: 0,
+  deviceOnline: 0,
+});
+
+/** 千位分隔只在真的够大时才加，四位以内的数字加了反而难看 */
+function formatCount(n: number): string {
+  return n >= 10000 ? n.toLocaleString("en-US") : String(n);
+}
+
+const platformCards = computed(() => [
+  {
+    label: "注册用户",
+    value: formatCount(platformStats.users),
+    hint: "已注册的主账号",
+  },
+  {
+    label: "班级",
+    value: formatCount(platformStats.classes),
+    hint: platformStats.schools ? `分布在 ${platformStats.schools} 个机构` : "尚未建立机构",
+  },
+  {
+    label: "资源资产",
+    value: formatCount(platformStats.resourceTotal),
+    hint: platformStats.resourceTypes.length
+      ? platformStats.resourceTypes.map((t) => `${t.label} ${t.count}`).join(" · ")
+      : "",
+  },
+  {
+    label: "机构",
+    value: formatCount(platformStats.schools),
+    hint: "学校维度聚合",
+  },
+  {
+    label: "设备",
+    value: `${formatCount(platformStats.deviceOnline)} / ${formatCount(platformStats.deviceTotal)}`,
+    hint: "在线 / 全部",
+  },
+]);
+
+async function loadPlatformStats() {
+  try {
+    const res: any = await $fetch("/api/v1/console/stats/platform", { headers: auth() });
+    const d: any = res?.data;
+    if (!d) return;
+    platformStats.users = d.users ?? 0;
+    platformStats.classes = d.classes ?? 0;
+    platformStats.schools = d.schools ?? 0;
+    platformStats.resourceTotal = d.resources?.total ?? 0;
+    platformStats.resourceTypes = d.resources?.byType ?? [];
+    platformStats.deviceTotal = d.devices?.total ?? 0;
+    platformStats.deviceOnline = d.devices?.online ?? 0;
+  } catch {
+    // 统计失败不影响首页其余部分
+  }
+}
+
 onMounted(async () => {
+  loadPlatformStats();
   try {
     const [classesRes, overviewRes, cpRes, tlRes, sjRes, polRes] =
       await Promise.all([
@@ -308,5 +387,66 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   box-shadow: var(--mi-shadow-sm);
+}
+/* 平台概览：一条横向数据带，数字为主、标签次之 */
+.platform-band {
+  border-radius: var(--mi-radius-lg);
+  background: var(--mi-brand-light);
+  border: 1px solid var(--el-border-color-lighter);
+}
+.platform-band :deep(.el-card__body) {
+  padding: 16px 20px 18px;
+}
+.pb-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pb-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.pb-item {
+  min-width: 0;
+  padding-left: 12px;
+  border-left: 1px solid var(--el-border-color-lighter);
+}
+.pb-item:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+.pb-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.pb-label {
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+  margin-top: 2px;
+}
+.pb-hint {
+  font-size: 11px;
+  color: var(--el-text-color-placeholder);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .pb-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 12px;
+  }
+  .pb-item:nth-child(odd) {
+    padding-left: 0;
+    border-left: none;
+  }
+  .pb-value {
+    font-size: 20px;
+  }
 }
 </style>

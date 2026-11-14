@@ -66,12 +66,21 @@ const userStore = useUserStore();
 const layoutStore = useLayoutStore();
 
 // 水印内容
+// 时间每分钟刷新一次：截图能落到分钟，且不至于每次渲染都重画 canvas
+const watermarkClock = ref(new Date());
+let watermarkTimer: ReturnType<typeof setInterval> | null = null;
+onMounted(() => {
+  watermarkTimer = setInterval(() => {
+    watermarkClock.value = new Date();
+  }, 60_000);
+});
+onBeforeUnmount(() => {
+  if (watermarkTimer) clearInterval(watermarkTimer);
+});
+
 const watermarkContent = computed(() => {
   if (!userStore.isLoggedIn) return [];
-  return [
-    userStore.userName || "",
-    userStore.userId || "",
-    new Date().toLocaleString("zh-CN", { hour12: false }),
-  ];
+  const who = userStore.isDelegate ? `${userStore.userName || ""}（代操作）` : userStore.userName || "";
+  return [who, String(userStore.userId || ""), watermarkClock.value.toLocaleString("zh-CN", { hour12: false })];
 });
 </script>

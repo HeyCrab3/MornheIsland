@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useStorage } from "@vueuse/core";
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import api from "@/util/api";
 import { ElMessage as message } from "element-plus";
 import { userService } from "../services/user.service";
 import {
@@ -14,7 +15,8 @@ export const useUserStore = defineStore("user", () => {
   const user = useStorage<UserData>("user_data", {
     loggedIn: false,
     userName: "",
-    userId: ""
+    userId: "",
+    delegate: false,
   });
 
   // 检查认证状态
@@ -25,6 +27,38 @@ export const useUserStore = defineStore("user", () => {
       return null;
     }
     return token;
+  };
+
+  // 能力位：前端只用它来隐藏「没有意义的功能入口」，真正的校验始终在后端
+  const caps = ref<string[]>([]);
+  const capKind = ref<"owner" | "grantee" | "subaccount" | "delegate">("owner");
+  const isOwner = ref(true);
+  const isSubAccount = computed(() => capKind.value === "subaccount");
+
+  const fetchCapabilities = async () => {
+    try {
+      const res: any = await api.get("/v1/user/capabilities");
+      const d = res?.data || res;
+      caps.value = Array.isArray(d?.caps) ? d.caps : [];
+      capKind.value = d?.kind || "owner";
+      isOwner.value = d?.isOwner !== false;
+    } catch {
+      // 接口不存在或失败时按「主账号」处理，宁可多显示也不要让人用不了
+      caps.value = [];
+      capKind.value = "owner";
+      isOwner.value = true;
+    }
+  };
+
+  /**
+   * 有没有某个能力。
+   *
+   * 主账号只要没收到别人的委托就是全权，直接放行 —— 否则每个主账号
+   * 都要在这里被枚举一遍能力位，多一处漏写就少一个入口。
+   */
+  const hasCap = (cap: string): boolean => {
+    if (isOwner.value) return true;
+    return caps.value.includes(cap);
   };
 
   // 获取用户数据（主函数）
@@ -40,6 +74,8 @@ export const useUserStore = defineStore("user", () => {
         ...authData,
         loggedIn: true,
       };
+
+      await fetchCapabilities();
 
       return { isSuccess: true };
     } catch (error: any) {
@@ -63,7 +99,11 @@ export const useUserStore = defineStore("user", () => {
       loggedIn: false,
       userName: "",
       userId: "",
+      delegate: false,
     };
+    caps.value = [];
+    capKind.value = "owner";
+    isOwner.value = true;
     localStorage.removeItem("token");
   };
 
@@ -71,6 +111,7 @@ export const useUserStore = defineStore("user", () => {
   const isLoggedIn = computed(() => user.value.loggedIn);
   const userName = computed(() => user.value.userName);
   const userId = computed(() => user.value.userId);
+  const isDelegate = computed(() => !!user.value.delegate);
 
   return {
     // 状态 - 保持向后兼容
@@ -80,9 +121,16 @@ export const useUserStore = defineStore("user", () => {
     isLoggedIn,
     userName,
     userId,
+    isDelegate,
+    caps,
+    capKind,
+    isOwner,
+    isSubAccount,
 
     // 方法
     fetchUserData,
+    fetchCapabilities,
+    hasCap,
     logout,
     checkAuthentication,
   };

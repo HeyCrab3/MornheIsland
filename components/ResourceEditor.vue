@@ -23,8 +23,11 @@
             <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">关联资源管理</el-dropdown-item>
             <el-dropdown-item @click="showLinkedClasses = true">关联班级管理</el-dropdown-item>
             <el-dropdown-item @click="showHistory = true">历史版本</el-dropdown-item>
+            <el-dropdown-item @click="openSnapshots">数据快照</el-dropdown-item>
             <el-dropdown-item divided @click="doCopy">复制</el-dropdown-item>
-            <el-dropdown-item @click="doDelete"><span class="text-red-500">删除</span></el-dropdown-item>
+            <el-dropdown-item @click="doDelete" :disabled="viewOnly">
+              <span :class="viewOnly ? 'text-gray-400' : 'text-red-500'">删除</span>
+            </el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -38,13 +41,29 @@
       </el-tag>
     </div>
 
+    <!-- 学校共享 / 只读提示 -->
+    <el-alert
+      v-if="schoolShared"
+      :type="viewOnly ? 'warning' : 'success'"
+      :closable="false"
+      show-icon
+      class="mb-4"
+    >
+      <template #title>
+        {{ viewOnly ? "学校共享资源 · 只读" : "学校共享资源 · 你可以修改" }}
+      </template>
+      {{ viewOnly
+        ? "这份资源由学校共享给全校使用，只有学校管理员或创建者能修改。需要自己的版本就点右上角「复制」。"
+        : "同校所有班级都能选用这份资源；你在这里的修改会直接影响使用它的班级。" }}
+    </el-alert>
+
     <!-- 自定义编辑器 -->
-    <slot v-if="$slots.default" :doc="doc" :save="doSave" :saving="saving" />
+    <slot v-if="$slots.default" :doc="doc" :save="doSave" :saving="saving" :viewOnly="viewOnly" />
     <template v-else>
       <div class="flex justify-end mb-3">
-        <el-button type="primary" :loading="saving" @click="doSave()">保存</el-button>
+        <el-button type="primary" :loading="saving" :disabled="viewOnly" @click="doSave()">保存</el-button>
       </div>
-      <el-input v-model="jsonText" type="textarea" :rows="18" placeholder="粘贴 JSON 数据" />
+      <el-input v-model="jsonText" type="textarea" :rows="18" placeholder="粘贴 JSON 数据" :disabled="viewOnly" />
     </template>
 
     <!-- 历史版本（桌面 Dialog / 移动底部抽屉） -->
@@ -68,8 +87,32 @@
       </div>
     </ResponsiveDrawer>
 
+    <!-- 数据快照（修改前 / 删除前 / 导入覆盖前 的原始数据） -->
+    <ResponsiveDrawer v-model:open="showSnapshots" title="数据快照">
+      <div class="text-xs text-gray-400 mb-3 leading-relaxed">
+        每次修改、删除、导入覆盖、批量修复之前，系统都会自动存一份当时的完整数据。
+        历史版本按「版本号」记；这里按「动作」记，两者互为冗余。
+      </div>
+      <div v-if="snapshotList.length === 0" class="py-4 text-sm text-gray-400 text-center">暂无快照</div>
+      <div
+        v-for="s in snapshotList"
+        :key="s._id"
+        class="flex items-center justify-between gap-3 py-3 border-b border-gray-200 dark:border-gray-700 last:border-0 text-sm"
+      >
+        <div class="min-w-0">
+          <el-tag size="small" effect="plain" type="info">{{ s.reasonLabel }}</el-tag>
+          <span class="ml-2 font-mono text-gray-500" v-if="s.version">v{{ s.version }}</span>
+          <div class="text-xs text-gray-400 mt-0.5 truncate">{{ fmt(s.at) }}</div>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <el-button size="small" text type="primary" @click="previewSnapshot(s)">查看</el-button>
+          <el-button size="small" text type="primary" :disabled="viewOnly" @click="doRestoreSnapshot(s)">恢复</el-button>
+        </div>
+      </div>
+    </ResponsiveDrawer>
+
     <!-- 历史版本预览（按类型结构化展示） -->
-    <ResponsiveDrawer v-model:open="previewVisible" :title="`版本预览 · v${previewVersion}`">
+    <ResponsiveDrawer v-model:open="previewVisible" :title="previewTitle">
       <!-- 时间表 -->
       <div v-if="collection === 'timelayout'">
         <div v-if="previewLayouts.length" class="space-y-0.5">
@@ -78,7 +121,7 @@
             :key="i"
             class="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm"
           >
-            <span class="w-6 text-xs text-gray-400 shrink-0">{{ i + 1 }}</span>
+            <span class="w-6 text-xs text-gray-400 shrink-0">{{ Number(i) + 1 }}</span>
             <span class="font-medium">{{ tp.name || '未命名' }}</span>
             <span class="text-xs text-gray-400 ml-auto">{{ tp.start }} - {{ tp.end }}</span>
           </div>
@@ -220,6 +263,13 @@ const historyList = ref<any[]>([]);
 const previewVisible = ref(false);
 const previewData = ref<any>(null);
 const previewVersion = ref(0);
+const previewLabel = ref("");
+const showSnapshots = ref(false);
+const snapshotList = ref<any[]>([]);
+
+const previewTitle = computed(() =>
+  previewLabel.value ? previewLabel.value : `版本预览 · v${previewVersion.value}`,
+);
 
 function authHeaders() {
   return { Authorization: `Bearer ${localStorage.getItem("token")}` };
@@ -246,6 +296,7 @@ async function previewHistory(h: any) {
     });
     previewData.value = res.data?.data;
     previewVersion.value = h.version;
+    previewLabel.value = "";
     previewVisible.value = true;
     if (props.collection === "classplan") {
       await loadClassplanPreview(previewData.value);
@@ -276,13 +327,75 @@ async function doRestoreConfirmed(version: number) {
   } catch { /* cancelled */ }
 }
 
+// ── 数据快照（修改前 / 删除前 / 导入覆盖前） ──
+async function openSnapshots() {
+  showSnapshots.value = true;
+  await fetchSnapshots();
+}
+
+async function fetchSnapshots() {
+  const route = useRoute();
+  const id = route.params.id as string;
+  if (!id) return;
+  try {
+    const res: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}/snapshots`, {
+      headers: authHeaders(),
+    });
+    snapshotList.value = res.data?.snapshots || [];
+  } catch {
+    snapshotList.value = [];
+  }
+}
+
+async function previewSnapshot(s: any) {
+  const route = useRoute();
+  const id = route.params.id as string;
+  try {
+    const res: any = await $fetch(
+      `/api/v1/console/ci/${props.collection}/${id}/snapshots/${s._id}`,
+      { headers: authHeaders() },
+    );
+    previewData.value = res.data?.data;
+    previewVersion.value = s.version || 0;
+    previewLabel.value = `快照预览 · ${s.reasonLabel}`;
+    previewVisible.value = true;
+    if (props.collection === "classplan") {
+      await loadClassplanPreview(previewData.value);
+    }
+  } catch { ElMessage.error("加载快照失败"); }
+}
+
+function doRestoreSnapshot(s: any) {
+  askConfirm(
+    "从快照恢复",
+    `确定恢复到「${s.reasonLabel}」（${fmt(s.at)}）时的数据？当前内容会先另存一份快照。`,
+    "恢复",
+    () => doRestoreSnapshotConfirmed(s),
+  );
+}
+
+async function doRestoreSnapshotConfirmed(s: any) {
+  const route = useRoute();
+  const id = route.params.id as string;
+  try {
+    await $fetch(`/api/v1/console/ci/${props.collection}/${id}/snapshots/${s._id}/restore`, {
+      method: "POST",
+      headers: authHeaders(),
+    });
+    ElMessage.success("已从快照恢复");
+    const fresh: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}`, { headers: authHeaders() });
+    doc.value = fresh.data;
+    isDirty.value = false;
+    await Promise.all([fetchSnapshots(), fetchHistory()]);
+  } catch { /* cancelled */ }
+}
+
+let dirtySkip = true;
 watch(doc, (d) => {
   if (!d) return;
   editName.value = d.name || "";
   if (d?.data) jsonText.value = JSON.stringify(d.data, null, 2);
 });
-
-let dirtySkip = true;
 watch(jsonText, () => {
   if (dirtySkip) { dirtySkip = false; return; }
   isDirty.value = true;
@@ -418,6 +531,10 @@ async function loadClassplanPreview(data: any) {
 }
 
 async function doSave(raw?: any) {
+  if (viewOnly.value) {
+    ElMessage.warning("这份资源是学校共享的，你没有修改权限");
+    return;
+  }
   const data = raw ?? (() => {
     try { return JSON.parse(jsonText.value); }
     catch { ElMessage.error("JSON 格式错误"); return null; }
@@ -439,6 +556,13 @@ const showLinkedResources = ref(false);
 const showLinkedClasses = ref(false);
 const linkedRes = ref<any>(null);
 const linkedClasses = ref<any[]>([]);
+
+/**
+ * 学校共享资源对普通成员是只读的。
+ * 后端已经会 403，这里把界面也置灰，免得用户辛辛苦苦编辑完才被拒。
+ */
+const viewOnly = computed(() => (doc.value as any)?.editable === false);
+const schoolShared = computed(() => !!(doc.value as any)?.isSchoolLevel);
 
 async function loadLinkedInfo() {
   if (!doc.value) return;

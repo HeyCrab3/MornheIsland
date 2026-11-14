@@ -15,7 +15,7 @@
 
     <!-- 导航（两级） -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1.5">
-      <div v-for="group in menuGroups" :key="group.key">
+      <div v-for="group in visibleGroups" :key="group.key">
         <!-- 不可折叠的组：标题 + 直接铺项 -->
         <template v-if="!group.collapsible">
           <div class="group-label">{{ group.label }}</div>
@@ -100,6 +100,10 @@
       </div>
       <div class="text-[11px] text-gray-400 text-center leading-relaxed">
         ©2019-2026 Crab Studio · 鲁ICP备2020045185号-2<br />
+        <NuxtLink to="/terms" class="hover:underline">用户协议</NuxtLink>
+        <span class="mx-1">·</span>
+        <NuxtLink to="/privacy" class="hover:underline">隐私政策</NuxtLink>
+        <span class="mx-1">·</span>
         v{{ runtimeConfig.public.VERSION }}
       </div>
     </div>
@@ -127,7 +131,12 @@ import {
   Picture,
   Calendar,
   Setting,
+  Key,
+  RefreshLeft,
+  Share,
   CaretRight,
+  UploadFilled,
+  UserFilled,
 } from "@element-plus/icons-vue";
 
 const dark = useDarkMode();
@@ -142,6 +151,13 @@ interface NavItem {
   icon: any;
   /** 传了就在新标签页打开（用于看板这种裸页面） */
   target?: string;
+  /**
+   * 需要的能力位。主账号（kind=owner）恒为全权，所以这里只对
+   * 子账户/代登录这类受限身份起作用 —— 它只影响「显示」，校验仍在后端。
+   */
+  cap?: string;
+  /** 只有完整账号（主账号/受托来的主账号）才看得到 */
+  restricted?: boolean;
 }
 
 interface NavGroup {
@@ -169,7 +185,7 @@ const menuGroups: NavGroup[] = [
     collapsible: false,
     items: [
       { path: "/", label: "仪表盘", icon: HomeFilled },
-      { path: "/quickcreate", label: "快速创建", icon: MagicStick },
+      { path: "/quickcreate", label: "快速创建", icon: MagicStick, restricted: true },
       // 看板是裸页面（layout: false），新标签页打开，不会把控制台顶掉
       { path: "/board", label: "大屏看板", icon: Picture, target: "_blank" },
     ],
@@ -181,6 +197,7 @@ const menuGroups: NavGroup[] = [
     collapsible: true,
     items: [
       { path: "/classplan", label: "档案库", icon: Notebook },
+      { path: "/import", label: "导入档案", icon: UploadFilled, cap: "resource.edit" },
       { path: "/timelayout", label: "时间表库", icon: Timer },
       { path: "/subjects", label: "课程表库", icon: Collection },
       { path: "/policy", label: "策略库", icon: Lock },
@@ -194,7 +211,9 @@ const menuGroups: NavGroup[] = [
     collapsible: true,
     items: [
       { path: "/classes", label: "班级管理", icon: School },
-      { path: "/schools", label: "学校", icon: OfficeBuilding },
+      { path: "/schools", label: "学校", icon: OfficeBuilding, restricted: true },
+      { path: "/grants", label: "委托管理", icon: Share, restricted: true },
+      { path: "/subaccounts", label: "子账户", icon: UserFilled, restricted: true },
     ],
   },
   {
@@ -203,8 +222,8 @@ const menuGroups: NavGroup[] = [
     icon: Monitor,
     collapsible: true,
     items: [
-      { path: "/devices", label: "设备追踪", icon: Monitor },
-      { path: "/plugins", label: "插件管理", icon: Grid },
+      { path: "/devices", label: "设备追踪", icon: Monitor, cap: "device.control" },
+      { path: "/plugins", label: "插件管理", icon: Grid, cap: "device.control" },
       { path: "/health", label: "档案体检", icon: FirstAidKit },
     ],
   },
@@ -214,11 +233,40 @@ const menuGroups: NavGroup[] = [
     icon: Setting,
     collapsible: true,
     items: [
-      { path: "/backup", label: "配置备份", icon: Download },
+      { path: "/backup", label: "配置备份", icon: Download, restricted: true },
+      { path: "/snapshots", label: "数据恢复", icon: RefreshLeft },
       { path: "/profile", label: "用户中心", icon: User },
+      { path: "/security", label: "账号安全", icon: Key },
     ],
   },
 ];
+
+/**
+ * 按账号身份裁剪菜单。
+ *
+ * 为什么要做：子账户/代登录只被委托了几个班、几项能力，把「学校」「配置备份」
+ * 「委托管理」这些原样摆出来，点进去只会是空页面或者 403 —— 比不显示更糟。
+ *
+ * 注意这只是「显示层」：能做什么永远以后端 scopeOf / canWrite 为准，
+ * 前端少画一个入口不等于多了一层防护。
+ */
+const fullAccount = computed(() => {
+  const kind = userStore.capKind;
+  return kind === "owner" || kind === "grantee";
+});
+
+const visibleGroups = computed<NavGroup[]>(() =>
+  menuGroups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((it) => {
+        if (it.restricted && !fullAccount.value) return false;
+        if (it.cap && !userStore.hasCap(it.cap)) return false;
+        return true;
+      }),
+    }))
+    .filter((g) => g.items.length > 0),
+);
 
 const OPEN_KEY = "mi-sidebar-open-group-v1";
 

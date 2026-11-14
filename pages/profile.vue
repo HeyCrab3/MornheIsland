@@ -18,11 +18,13 @@
 
       <!-- 操作 -->
       <div class="space-y-3">
+        <el-button class="w-full" @click="navigateTo('/security')">
+          <el-icon class="mr-1"><Key /></el-icon>账号安全（二步验证 / 登录记录）
+        </el-button>
+
         <el-button class="w-full" @click="doLogout">
           <el-icon class="mr-1"><SwitchButton /></el-icon>退出登录
         </el-button>
-
-        <br/>
 
         <el-button class="w-full" type="danger" plain @click="startDeleteAccount">
           <el-icon class="mr-1"><WarningFilled /></el-icon>注销服务
@@ -51,20 +53,53 @@
         </a>
       </div>
     </el-card>
+
+    <!-- 注销账号前的再验证：支持动态码与通行密钥 -->
+    <ReauthDialog ref="reauthRef" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { SwitchButton, WarningFilled, Link } from "@element-plus/icons-vue";
+import { SwitchButton, WarningFilled, Link, Key } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "用户中心", protected: true });
 
 const userStore = useUserStore();
+const reauthRef = ref<any>(null);
 
 function doLogout() {
   userStore.logout();
   localStorage.removeItem("token");
   navigateTo("/login");
+}
+
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
+
+/**
+ * 开了二步验证的账号，注销时不必退出重登：输一次动态码就能过再验证闸门。
+ * 没开 2FA 的账号返回 false，走「重新登录」那条路。
+ */
+async function reauthViaMfa(): Promise<boolean> {
+  const ok = await reauthRef.value?.ask(
+    "注销账号会删除你名下所有班级、课表与设备绑定，需要先验证是你本人。",
+    "需要重新验证",
+  );
+  return ok === true;
+}
+
+async function submitDelete(confirmValue: string, retried = false): Promise<void> {
+  try {
+    await $fetch("/api/v1/user/delete", {
+      method: "DELETE",
+      headers: authHeaders(),
+      body: { confirm: confirmValue },
+    });
+  } catch (e: any) {
+    if (!retried && e?.data?.needReauth && (await reauthViaMfa())) {
+      return submitDelete(confirmValue, true);
+    }
+    throw e;
+  }
 }
 
 async function startDeleteAccount() {
@@ -96,12 +131,8 @@ async function startDeleteAccount() {
       return;
     }
 
-    // ── 请求（二次验证由服务端把关：必须是新鲜登录）──
-    await $fetch("/api/v1/user/delete", {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      body: { confirm: value },
-    });
+    // ── 请求（再验证由服务端把关：新鲜登录，或刚通过一次二步验证）──
+    await submitDelete(value);
     ElMessage.success("账户已注销");
     userStore.logout();
     localStorage.removeItem("token");

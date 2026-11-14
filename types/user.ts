@@ -3,6 +3,9 @@ export interface UserData {
   userName?: string;
   userId?: string | number;
   loggedIn: boolean;
+  /** 代登录身份（委托里的影子账号），水印与界面都要标出来 */
+  delegate?: boolean;
+  admin?: boolean;
 }
 
 // API响应接口

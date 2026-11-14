@@ -145,6 +145,17 @@
         <el-form-item label="所属组织">
           <el-input v-model="form.orgName" placeholder="如 XX中学" />
         </el-form-item>
+        <el-form-item label="归属学校（可选）">
+          <el-select v-model="form.schoolId" placeholder="不选 = 个人模式" clearable class="w-full">
+            <el-option v-for="s in mySchools" :key="s.id" :label="s.name" :value="s.id" />
+          </el-select>
+          <div class="text-xs text-gray-400 mt-1">
+            选了之后这个班就能用学校的共享时间表/课程表/策略，设备也会聚到学校里。
+            <span v-if="!mySchools.length">
+              你还没有加入任何学校 —— 可以先到「学校」页创建一个。
+            </span>
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showCreate = false">取消</el-button>
@@ -298,7 +309,9 @@ const creating = ref(false);
 const showCreate = ref(false);
 const classes = ref<any[]>([]);
 
-const form = reactive({ identity: "", name: "", orgName: "" });
+const form = reactive({ identity: "", name: "", orgName: "", schoolId: "" });
+/** 我加入的学校，供新建班级时可选关联 */
+const mySchools = ref<any[]>([]);
 
 /**
  * 下发前必须关联的资源（和班级详情页的 required 字段保持一致）。
@@ -358,13 +371,15 @@ async function create() {
     await $fetch("/api/v1/console/ci/class", {
       method: "POST",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      body: { ...form },
+      // schoolId 为空串时不传，后端按"不关联学校"处理
+      body: { ...form, schoolId: form.schoolId || undefined },
     });
     ElMessage.success("创建成功");
     showCreate.value = false;
     form.identity = "";
     form.name = "";
     form.orgName = "";
+    form.schoolId = "";
     await fetchClasses();
   } catch {
     ElMessage.error("创建失败");
@@ -447,9 +462,22 @@ async function doUpgrade() {
   }
 }
 
+/** 拉取我加入的学校，供「归属学校」下拉使用 */
+async function fetchMySchools() {
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/schools", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    mySchools.value = Array.isArray(res?.data) ? res.data : [];
+  } catch {
+    mySchools.value = [];
+  }
+}
+
 onMounted(() => {
   fetchClasses();
   fetchSchoolCandidates();
+  fetchMySchools();
 });
 </script>
 

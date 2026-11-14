@@ -2,6 +2,11 @@
  * 全局 auth 中间件。
  * 页面在 definePageMeta 中设置 protected: true 后，
  * 未登录 / 会话过期的用户会被重定向到 /login。
+ *
+ * ⚠ 跳登录时必须**带上原目标**：
+ * 邀请链接 `/schools/join/<token>`、扫码页、以及任何深链都是一次性的，
+ * 不带目标的话用户登录完只会落到首页 —— 实测反馈的
+ * "邀请链接打不开、直接跳回主页" 就是这个原因。
  */
 
 // session 内已校验过 token 有效性的标记（避免每次导航都打后端）
@@ -14,9 +19,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // 仅在客户端检查 token
   if (typeof window === "undefined") return;
 
+  const toLogin = () => navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
+
   const token = localStorage.getItem("token");
   if (!token) {
-    return navigateTo("/login");
+    return toLogin();
   }
 
   // token 存在但可能已过期：向后端校验一次有效性
@@ -46,6 +53,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const ok = await verifying;
   if (!ok) {
-    return navigateTo("/login");
+    return toLogin();
   }
 });

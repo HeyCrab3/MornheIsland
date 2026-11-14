@@ -17,6 +17,19 @@
       </div>
       <div class="ml-auto flex items-center gap-2">
         <el-button v-if="data?.canManage" size="small" @click="openRename">改名</el-button>
+        <el-dropdown v-if="data?.myRole === 'owner'" trigger="click" placement="bottom-end">
+          <el-button size="small" text>
+            更多<el-icon class="ml-1"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="openMerge">合并到其他学校…</el-dropdown-item>
+              <el-dropdown-item divided @click="doDeleteSchool">
+                <span class="text-red-500">删除这所学校</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         <el-button :loading="loading" size="small" @click="load">刷新</el-button>
       </div>
     </div>
@@ -26,11 +39,18 @@
         <div class="stat-num">{{ data.summary.classCount }}</div>
         <div class="stat-label">班级</div>
       </div>
-      <div class="stat-card">
+      <div
+        class="stat-card"
+        :class="{ 'cursor-pointer hover:border-amber-400': data.summary.unconfiguredCount }"
+        :title="data.summary.unconfiguredCount ? '点击去档案体检页，只看这所学校的班' : ''"
+        @click="data.summary.unconfiguredCount && navigateTo(`/health?schoolId=${id}`)"
+      >
         <div class="stat-num" :class="data.summary.unconfiguredCount ? 'text-amber-500' : ''">
           {{ data.summary.unconfiguredCount }}
         </div>
-        <div class="stat-label">资源没配全的班</div>
+        <div class="stat-label">
+          资源没配全的班<span v-if="data.summary.unconfiguredCount" class="text-amber-500"> ›</span>
+        </div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ data.summary.memberCount }}</div>
@@ -134,6 +154,17 @@
               :disabled="!selectedOnline.length"
               @click="notifyVisible = true"
             >批量推送通知{{ selectedOnline.length ? `（${selectedOnline.length}）` : "" }}</el-button>
+            <el-button
+              size="small"
+              :loading="refreshing"
+              :disabled="!selectedOnline.length"
+              @click="refreshDevices"
+            >刷新数据</el-button>
+            <el-button
+              size="small"
+              :disabled="!data?.summary?.onlineDeviceCount"
+              @click="openPluginDeliver"
+            >下发插件</el-button>
             <el-button size="small" @click="selectAllOnline">全选在线</el-button>
           </div>
         </div>
@@ -311,12 +342,91 @@
       </template>
     </el-dialog>
 
+    <!-- 合并到其他学校 -->
+    <el-dialog v-model="mergeVisible" title="合并到其他学校" width="520px">
+      <el-alert type="warning" :closable="false" show-icon class="mb-3">
+        <template #title>合并是把「{{ school?.name }}」整个并进去，然后删掉这个学校</template>
+        班级、学校级资源、邀请链接、成员都会搬到目标学校，资源内容不动。
+        这个操作不可撤销，建议先看清楚下面的数字。
+      </el-alert>
+
+      <div class="mb-3">
+        <div class="text-sm font-medium mb-1.5">合并到</div>
+        <el-select v-model="mergeInto" placeholder="选一个你创建的学校" class="w-full" @change="loadMergePreview">
+          <el-option v-for="s in otherSchools" :key="s.id" :label="`${s.name}（${s.classCount} 个班）`" :value="s.id" />
+        </el-select>
+        <div v-if="!otherSchools.length" class="text-xs text-gray-400 mt-1.5">
+          你没有其他自己创建的学校可以合并过去。
+        </div>
+      </div>
+
+      <div v-if="mergePreview" class="preview-box">
+        <div class="text-sm">
+          把 <b>{{ mergePreview.from.name }}</b>
+          （{{ mergePreview.from.classCount }} 班 / {{ mergePreview.from.resourceTotal }} 份学校级资源）
+          并入 <b>{{ mergePreview.into.name }}</b>
+          （{{ mergePreview.into.classCount }} 班）
+        </div>
+        <div v-if="mergePreview.duplicateNames.length" class="text-xs text-amber-600 mt-2">
+          注意：有 {{ mergePreview.duplicateNames.length }} 份资源在两边同名
+          （{{ mergePreview.duplicateNames.slice(0, 3).join("、") }}{{ mergePreview.duplicateNames.length > 3 ? " 等" : "" }}），
+          合并后会并存，不会互相覆盖。
+        </div>
+      </div>
+
+      <template #footer>
+        <el-button @click="mergeVisible = false">取消</el-button>
+        <el-button type="danger" :loading="merging" :disabled="!mergeInto" @click="doMerge">
+          确认合并
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 下发插件（学校级） -->
+    <el-dialog v-model="pluginVisible" title="下发插件" width="480px">
+      <el-alert type="info" :closable="false" show-icon class="mb-3">
+        <template #title>只发给这所学校的设备</template>
+        客户端需要先装好「引导插件」才收得到分发指令；离线设备会在下次上线后自行拉取配置。
+      </el-alert>
+
+      <el-form label-position="top">
+        <el-form-item label="选择插件">
+          <el-select v-model="pluginId" placeholder="选一个已上传的插件" class="w-full" :loading="pluginLoading">
+            <el-option
+              v-for="p in plugins"
+              :key="p._id"
+              :label="`${p.name}${p.version ? ' v' + p.version : ''}`"
+              :value="p._id"
+            />
+          </el-select>
+          <div v-if="!pluginLoading && !plugins.length" class="text-xs text-gray-400 mt-1">
+            还没有插件，先去「插件管理」上传或从市场添加。
+          </div>
+        </el-form-item>
+        <el-form-item label="发给谁">
+          <el-radio-group v-model="pluginScope">
+            <el-radio value="school">全校在线设备（{{ data?.summary?.onlineDeviceCount || 0 }} 台）</el-radio>
+            <el-radio value="selected" :disabled="!selectedOnline.length">
+              已选中的 {{ selectedOnline.length }} 台
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="pluginVisible = false">取消</el-button>
+        <el-button type="primary" :loading="pluginSending" :disabled="!pluginId" @click="doPluginDeliver">
+          下发
+        </el-button>
+      </template>
+    </el-dialog>
+
     <NotifyQrDialog v-model="qrVisible" :class-id="qrClassId" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft } from "@element-plus/icons-vue";
+import { ArrowLeft, ArrowDown } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "学校详情", protected: true });
 
@@ -634,6 +744,201 @@ async function setRole(row: any, role: string) {
   }
 }
 
+// ── 合并 / 删除学校（危险操作，只有 owner 看得到入口）──
+//
+// 设计取舍：删除只允许「空学校」。还有班级或学校级资源时一律拒绝，
+// 让用户自己先处理干净 —— "删学校顺带删掉 7 个班"这种级联不该藏在一个按钮里。
+const mergeVisible = ref(false);
+const mergeInto = ref("");
+const otherSchools = ref<any[]>([]);
+const mergePreview = ref<any>(null);
+const merging = ref(false);
+const deleting = ref(false);
+
+async function openMerge() {
+  mergeVisible.value = true;
+  mergePreview.value = null;
+  mergeInto.value = "";
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/schools", { headers: authHeaders() });
+    otherSchools.value = (Array.isArray(res?.data) ? res.data : []).filter(
+      (s: any) => s.id !== id && s.role === "owner",
+    );
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "读取学校列表失败");
+  }
+}
+
+async function loadMergePreview() {
+  mergePreview.value = null;
+  if (!mergeInto.value) return;
+  try {
+    const res: any = await $fetch(`/api/v1/console/ci/schools/${id}/merge-preview`, {
+      headers: authHeaders(),
+      query: { intoId: mergeInto.value },
+    });
+    mergePreview.value = res?.data || null;
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "读取合并预览失败");
+  }
+}
+
+/**
+ * 服务端对删除/合并这类不可撤销操作要求「再验证身份」。
+ * 这里统一接住：引导去账号安全页输一次动态码（没开 2FA 就是重新登录），回来再点一次。
+ */
+async function maybeReauth(e: any): Promise<boolean> {
+  if (!e?.data?.needReauth) return false;
+  try {
+    await ElMessageBox.confirm(
+      "这是不可撤销的操作，需要先验证身份。去「账号安全」输一次动态码（没开二步验证的话重新登录一次），再回来点一次即可。",
+      "需要重新验证",
+      { confirmButtonText: "去验证", cancelButtonText: "稍后再说", type: "warning" },
+    );
+    navigateTo("/security");
+  } catch {
+    /* 用户选择稍后 */
+  }
+  return true;
+}
+
+async function doMerge() {
+  const target = otherSchools.value.find((s) => s.id === mergeInto.value);
+  try {
+    await ElMessageBox.confirm(
+      `把「${school.value?.name}」整个并进「${target?.name}」，然后删除前者。这个操作不可撤销。`,
+      "确认合并",
+      { type: "warning", confirmButtonText: "合并", cancelButtonText: "取消" },
+    );
+  } catch {
+    return;
+  }
+  merging.value = true;
+  try {
+    const res: any = await $fetch(`/api/v1/console/ci/schools/${id}/merge`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: { intoId: mergeInto.value },
+    });
+    const d = res?.data || {};
+    ElMessage.success(
+      `已并入「${d.intoSchoolName}」：班级 ${d.movedClasses}、资源 ${Object.values(d.movedResources || {}).reduce((a: any, b: any) => a + b, 0)}、成员 ${d.addedMembers}`,
+    );
+    mergeVisible.value = false;
+    navigateTo(`/schools/${d.intoSchoolId}`);
+  } catch (e: any) {
+    if (await maybeReauth(e)) return;
+    ElMessage.error(e?.data?.msg || "合并失败");
+  } finally {
+    merging.value = false;
+  }
+}
+
+async function doDeleteSchool() {
+  const s = data.value;
+  if (!s) return;
+  if (s.summary.classCount > 0 || s.summary.schoolResourceCount > 0) {
+    ElMessageBox.alert(
+      `这所学校里还有 ${s.summary.classCount} 个班级、${s.summary.schoolResourceCount} 份学校级资源。` +
+        `先到「班级」里把班级移出、到「资源」里把共享收回，再来删。`,
+      "不能删除",
+      { type: "warning", confirmButtonText: "知道了" },
+    ).catch(() => {});
+    return;
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确定删除空学校「${school.value?.name}」？删掉后邀请链接和成员关系一起失效。`,
+      "删除学校",
+      { type: "error", confirmButtonText: "删除", cancelButtonText: "取消" },
+    );
+  } catch {
+    return;
+  }
+  deleting.value = true;
+  try {
+    await $fetch(`/api/v1/console/ci/schools/${id}/delete`, {
+      method: "POST",
+      headers: authHeaders(),
+    });
+    ElMessage.success("已删除");
+    navigateTo("/schools");
+  } catch (e: any) {
+    if (await maybeReauth(e)) return;
+    ElMessage.error(e?.data?.msg || "删除失败");
+  } finally {
+    deleting.value = false;
+  }
+}
+
+// ── 设备批量通知 / 刷新数据 ──
+const refreshing = ref(false);
+
+async function refreshDevices() {
+  const cuids = selectedOnline.value.map((d) => d.cuid);
+  if (!cuids.length) return;
+  refreshing.value = true;
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/grpc/data-updated", {
+      method: "POST",
+      headers: authHeaders(),
+      body: { cuids },
+    });
+    ElMessage.success(`已通知 ${res?.data?.sent ?? 0} 台设备重新拉取配置`);
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "下发失败");
+  } finally {
+    refreshing.value = false;
+  }
+}
+
+// ── 下发插件（学校级）──
+const pluginVisible = ref(false);
+const pluginLoading = ref(false);
+const pluginSending = ref(false);
+const plugins = ref<any[]>([]);
+const pluginId = ref("");
+const pluginScope = ref<"school" | "selected">("school");
+
+async function openPluginDeliver() {
+  pluginVisible.value = true;
+  pluginId.value = "";
+  pluginScope.value = selectedOnline.value.length ? "selected" : "school";
+  pluginLoading.value = true;
+  try {
+    const res: any = await $fetch("/api/v1/console/ci/plugin/list", { headers: authHeaders() });
+    plugins.value = Array.isArray(res?.data) ? res.data : [];
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "读取插件列表失败");
+  } finally {
+    pluginLoading.value = false;
+  }
+}
+
+async function doPluginDeliver() {
+  if (!pluginId.value) return;
+  pluginSending.value = true;
+  try {
+    // 学校作用域由后端校验（必须是我所在学校），设备再收敛一次
+    const body: any = { pluginId: pluginId.value, schoolId: id };
+    if (pluginScope.value === "selected") body.cuids = selectedOnline.value.map((d) => d.cuid);
+    const res: any = await $fetch("/api/v1/console/ci/plugin/deliver", {
+      method: "POST",
+      headers: authHeaders(),
+      body,
+    });
+    const d = res?.data || {};
+    ElMessage.success(
+      `已下发到 ${d.sent ?? 0} 台设备` + (d.rejected?.length ? `（${d.rejected.length} 台不在本范围内被忽略）` : ""),
+    );
+    pluginVisible.value = false;
+  } catch (e: any) {
+    ElMessage.error(e?.data?.msg || "下发失败");
+  } finally {
+    pluginSending.value = false;
+  }
+}
+
 onMounted(async () => {
   await load();
   await loadInvites();
@@ -671,5 +976,11 @@ onMounted(async () => {
   padding: 6px 8px;
   border-radius: 6px;
   background: var(--el-fill-color-light);
+}
+.preview-box {
+  padding: 10px 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 8px;
+  background: var(--el-fill-color-blank);
 }
 </style>

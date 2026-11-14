@@ -17,7 +17,10 @@
         @pointerdown="onPointerDown('clock', $event)"
       >
         <div class="clock-time">
-          {{ clockText }}<span v-if="settings.showSeconds" class="clock-sec">{{ secondsText }}</span>
+          {{ clockText
+          }}<span v-if="settings.showSeconds" class="clock-sec">{{
+            secondsText
+          }}</span>
         </div>
         <div class="clock-date">{{ dateText }}</div>
       </div>
@@ -34,16 +37,29 @@
           <template v-if="currentEntry">
             <div class="subject-label">
               <span v-if="currentEntry.isExam" class="exam-chip">考试</span>
-              {{ currentEntry.isExam ? "考试中" : currentEntry.type === "class" ? "正在上" : "当前" }}
+              {{
+                currentEntry.isExam
+                  ? "考试中"
+                  : currentEntry.type === "class"
+                    ? "正在上"
+                    : "当前"
+              }}
             </div>
             <div class="subject-name">{{ currentMain }}</div>
             <div class="subject-sub">
-              <span v-if="currentEntry.isExam">{{ currentEntry.start }}–{{ currentEntry.end }}</span>
+              <span v-if="currentEntry.isExam"
+                >{{ currentEntry.start }}–{{ currentEntry.end }}</span
+              >
               <span v-else-if="currentEntry.name">{{ currentEntry.name }}</span>
-              <span v-if="currentEntry.teacher">· {{ currentEntry.teacher }}</span>
+              <span v-if="currentEntry.teacher"
+                >· {{ currentEntry.teacher }}</span
+              >
             </div>
             <div class="progress-track">
-              <div class="progress-fill" :style="{ width: progress * 100 + '%' }" />
+              <div
+                class="progress-fill"
+                :style="{ width: progress * 100 + '%' }"
+              />
             </div>
             <div class="subject-sub">还剩 {{ remainMinutes }} 分钟</div>
           </template>
@@ -52,10 +68,14 @@
               <span v-if="nextEntry?.isExam" class="exam-chip">考试</span>
               {{ nextEntry ? "下一节" : "今天" }}
             </div>
-            <div class="subject-name">{{ nextEntry ? nextMain : "今天没有课了" }}</div>
+            <div class="subject-name">
+              {{ nextEntry ? nextMain : "今天没有课了" }}
+            </div>
             <div v-if="nextEntry" class="subject-sub">
               {{ nextEntry.start }}–{{ nextEntry.end }}
-              <span v-if="nextEntry.name && !nextEntry.isExam"> · {{ nextEntry.name }}</span>
+              <span v-if="nextEntry.name && !nextEntry.isExam">
+                · {{ nextEntry.name }}</span
+              >
             </div>
           </template>
         </template>
@@ -75,18 +95,26 @@
             {{ settings.weatherLocationName }}
           </div>
           <div class="weather-row">
-            <span class="weather-emoji">{{ weatherEmoji(weather.now.icon) }}</span>
+            <span class="weather-emoji">{{
+              weatherEmoji(weather.now.icon)
+            }}</span>
             <span class="weather-temp">{{ weather.now.temp }}°</span>
           </div>
           <div class="weather-text">{{ weather.now.text }}</div>
           <div v-if="weather.today" class="weather-sub">
-            {{ weather.today.textDay }} {{ weather.today.tempMin }}° ~ {{ weather.today.tempMax }}°
+            {{ weather.today.textDay }} {{ weather.today.tempMin }}° ~
+            {{ weather.today.tempMax }}°
           </div>
           <div v-if="weather.now.windDir" class="weather-sub">
             {{ weather.now.windDir }} {{ weather.now.windScale }} 级
           </div>
           <div class="weather-credit">
-            <a href="https://www.qweather.com/" target="_blank" rel="noopener noreferrer">和风天气</a>
+            <a
+              href="https://www.qweather.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >和风天气</a
+            >
           </div>
         </template>
         <div v-else class="subject-label">天气加载中…</div>
@@ -110,14 +138,22 @@
       <div v-if="warningItems.length" class="warning-bar">
         <div class="warning-glass">
           <div class="warning-viewport">
-            <div class="warning-track" :style="{ animationDuration: warningScrollSeconds + 's' }">
+            <div
+              class="warning-track"
+              :style="{ animationDuration: warningScrollSeconds + 's' }"
+            >
               <span v-for="(w, i) in warningLoop" :key="i" class="warning-item">
-                <span class="warning-tag" :class="warningLevelClass(w.severityColor)">
+                <span
+                  class="warning-tag"
+                  :class="warningLevelClass(w.severityColor)"
+                >
                   {{ w.level || w.typeName || "预警" }}
                 </span>
                 <span class="warning-title">{{ w.title }}</span>
                 <span v-if="w.text" class="warning-detail">{{ w.text }}</span>
-                <span v-if="w.sender" class="warning-src">— {{ w.sender }}</span>
+                <span v-if="w.sender" class="warning-src"
+                  >— {{ w.sender }}</span
+                >
               </span>
             </div>
           </div>
@@ -125,25 +161,48 @@
       </div>
 
       <!-- 水印 -->
-      <a class="board-watermark" :href="consoleUrl" target="_blank" rel="noopener noreferrer">
-        由莫宁岛驱动
-      </a>
+      <el-popover placement="top-end" width="256px">
+        <img class="w-36 mx-auto mb-4" src="data:image/png;base64,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"/>
+        <p class="text-center">想让自己的班级也用上大屏看板？<br/>扫描二维码立即试用莫宁岛！</p>
+        <template #reference>
+          <a
+            class="board-watermark"
+            :href="consoleUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            由莫宁岛驱动
+          </a>
+        </template>
+      </el-popover>
 
       <!-- 底部操作提示 -->
       <div v-if="settings.showHints" class="board-hints">
-        按 <kbd>E</kbd> 调整元素位置 · 拖动元素即可移动 · 左下角「设置」可换背景 / 写公告 / 选班级
+        按 <kbd>E</kbd> 调整元素位置 · 拖动元素即可移动 · 左下角「设置」可换背景
+        / 写公告 / 选班级
       </div>
 
       <!-- 设置入口 -->
-      <button class="board-gear" title="打开看板设置（快捷键 E 切换布局编辑）" @click="drawer = true">
+      <button
+        class="board-gear"
+        title="打开看板设置（快捷键 E 切换布局编辑）"
+        @click="drawer = true"
+      >
         <span class="gear-icon">⚙</span>
         <span>设置</span>
       </button>
-      <div v-if="editMode" class="board-edithint">布局编辑中：拖动元素调整位置，再按 E 退出</div>
+      <div v-if="editMode" class="board-edithint">
+        布局编辑中：拖动元素调整位置，再按 E 退出
+      </div>
     </div>
 
     <!-- 设置抽屉 -->
-    <el-drawer v-model="drawer" title="看板设置" size="380px" :append-to-body="true">
+    <el-drawer
+      v-model="drawer"
+      title="看板设置"
+      size="380px"
+      :append-to-body="true"
+    >
       <el-form label-position="top" size="small">
         <el-form-item label="班级">
           <el-select
@@ -162,20 +221,28 @@
               :value="String(c._id)"
             />
           </el-select>
-          <el-input v-model="settings.identity" placeholder="班级 ID（或班级标识，如 1-101）" clearable />
+          <el-input
+            v-model="settings.identity"
+            placeholder="班级 ID（或班级标识，如 1-101）"
+            clearable
+          />
           <div class="hint">
             <template v-if="classLoadState === 'anon'">
               未登录，拉不到班级列表。可以先
               <a href="/login" target="_blank">登录控制台</a>
-              再回到看板（就能直接选班级），或者手动填班级 ID——班级管理里点「管理」，地址栏最后一段就是。
+              再回到看板（就能直接选班级），或者手动填班级
+              ID——班级管理里点「管理」，地址栏最后一段就是。
             </template>
-            <template v-else-if="classLoadState === 'loading'">正在读取你的班级列表…</template>
+            <template v-else-if="classLoadState === 'loading'"
+              >正在读取你的班级列表…</template
+            >
             <template v-else-if="classLoadState === 'ok' && !classList.length">
               你还没有创建班级。可手动填班级 ID，或先去
               <a href="/classes" target="_blank">班级管理</a> 建一个。
             </template>
             <template v-else>
-              填班级 <b>ID</b> 最准；也兼容班级标识。URL 参数可用 <code>?id=</code> 覆盖。
+              填班级 <b>ID</b> 最准；也兼容班级标识。URL 参数可用
+              <code>?id=</code> 覆盖。
             </template>
           </div>
         </el-form-item>
@@ -188,28 +255,40 @@
               clearable
               @keyup.enter="searchCity"
             />
-            <el-button size="small" :loading="citySearching" @click="searchCity">搜索</el-button>
+            <el-button size="small" :loading="citySearching" @click="searchCity"
+              >搜索</el-button
+            >
           </div>
           <div v-if="cityResults.length" class="w-full mt-2">
-            <el-radio-group v-model="settings.weatherLocation" class="city-list">
+            <el-radio-group
+              v-model="settings.weatherLocation"
+              class="city-list"
+            >
               <el-radio v-for="c in cityResults" :key="c.id" :value="c.id">
                 {{ c.name }}
                 <span class="text-gray-400">
-                  · {{ c.adm1 }}{{ c.adm2 && c.adm2 !== c.name ? " " + c.adm2 : "" }} · {{ c.id }}
+                  · {{ c.adm1
+                  }}{{ c.adm2 && c.adm2 !== c.name ? " " + c.adm2 : "" }} ·
+                  {{ c.id }}
                 </span>
               </el-radio>
             </el-radio-group>
           </div>
           <div class="hint">
-            当前：<b>{{ settings.weatherLocationName || "跟随服务端默认城市" }}</b>
-            <span v-if="settings.weatherLocation">（{{ settings.weatherLocation }}）</span>
+            当前：<b>{{
+              settings.weatherLocationName || "跟随服务端默认城市"
+            }}</b>
+            <span v-if="settings.weatherLocation"
+              >（{{ settings.weatherLocation }}）</span
+            >
             <el-button
               v-if="settings.weatherLocation"
               size="small"
               text
               type="primary"
               @click="clearCity"
-            >恢复默认</el-button>
+              >恢复默认</el-button
+            >
           </div>
         </el-form-item>
 
@@ -224,8 +303,12 @@
           />
           <div class="hint">
             留空时单双周不做区分，按每周都上处理。
-            <template v-if="currentWeek">按此日期算，今天属于第 {{ currentWeek }} 周。</template>
-            <template v-else-if="settings.termStart">日期在未来，暂不参与计算。</template>
+            <template v-if="currentWeek"
+              >按此日期算，今天属于第 {{ currentWeek }} 周。</template
+            >
+            <template v-else-if="settings.termStart"
+              >日期在未来，暂不参与计算。</template
+            >
           </div>
         </el-form-item>
 
@@ -236,7 +319,9 @@
               <b>{{ serverExams.length }}</b>
               场考试，今天 <b>{{ todayExams.length }}</b> 场。
             </div>
-            <el-button size="small" class="mt-2" @click="openExamsPage">去控制台编辑</el-button>
+            <el-button size="small" class="mt-2" @click="openExamsPage"
+              >去控制台编辑</el-button
+            >
           </div>
           <div class="hint">
             考试安排现在按<b>账号</b>存在服务端，该账号下所有班级共用一份，
@@ -280,11 +365,17 @@
         </el-form-item>
 
         <el-form-item :label="`预警滚动速度 ${settings.warningSpeed} 字/秒`">
-          <el-slider v-model="settings.warningSpeed" :min="2" :max="12" :step="1" />
+          <el-slider
+            v-model="settings.warningSpeed"
+            :min="2"
+            :max="12"
+            :step="1"
+          />
           <div class="hint">
             数值越小越慢、越好读。鼠标移到预警条上会暂停。
             <template v-if="warningTotalChars">
-              当前预警共 {{ warningTotalChars }} 字，滚完一轮约 {{ warningScrollSeconds }} 秒。
+              当前预警共 {{ warningTotalChars }} 字，滚完一轮约
+              {{ warningScrollSeconds }} 秒。
             </template>
             <template v-else>（当前没有生效中的预警）</template>
           </div>
@@ -297,7 +388,11 @@
           </el-radio-group>
           <el-input
             v-model="settings.bgValue"
-            :placeholder="settings.bgType === 'image' ? '图片 URL，或点下面上传' : 'CSS 渐变，留空用默认'"
+            :placeholder="
+              settings.bgType === 'image'
+                ? '图片 URL，或点下面上传'
+                : 'CSS 渐变，留空用默认'
+            "
             clearable
           />
           <div class="flex items-center gap-2 mt-2">
@@ -308,8 +403,19 @@
               class="hidden"
               @change="onPickBackground"
             />
-            <el-button size="small" :loading="bgProcessing" @click="pickBackground">上传图片</el-button>
-            <el-button v-if="settings.bgValue" size="small" text @click="clearBackground">清除</el-button>
+            <el-button
+              size="small"
+              :loading="bgProcessing"
+              @click="pickBackground"
+              >上传图片</el-button
+            >
+            <el-button
+              v-if="settings.bgValue"
+              size="small"
+              text
+              @click="clearBackground"
+              >清除</el-button
+            >
           </div>
           <div class="hint">
             上传的图片在<b>本地</b>压缩后存进浏览器（localStorage），不会上传到服务器；
@@ -318,15 +424,30 @@
         </el-form-item>
 
         <el-form-item label="公告（支持 Markdown）">
-          <el-input v-model="settings.notice" type="textarea" :autosize="{ minRows: 5, maxRows: 12 }" />
-          <div class="hint">支持标题、粗体、斜体、列表、引用、代码、链接；出于安全不执行原始 HTML。</div>
+          <el-input
+            v-model="settings.notice"
+            type="textarea"
+            :autosize="{ minRows: 5, maxRows: 12 }"
+          />
+          <div class="hint">
+            支持标题、粗体、斜体、列表、引用、代码、链接；出于安全不执行原始
+            HTML。
+          </div>
         </el-form-item>
 
         <el-form-item label="嵌入壁纸引擎（iframe）">
-          <el-input :model-value="iframeCode" type="textarea" :rows="3" readonly />
-          <el-button class="mt-2" size="small" @click="copyIframe">复制嵌入代码</el-button>
+          <el-input
+            :model-value="iframeCode"
+            type="textarea"
+            :rows="3"
+            readonly
+          />
+          <el-button class="mt-2" size="small" @click="copyIframe"
+            >复制嵌入代码</el-button
+          >
           <div class="hint">
-            壁纸引擎里选「网页」类型，把上面代码存成本地 html 打开即可；也可直接把看板地址填进去。
+            壁纸引擎里选「网页」类型，把上面代码存成本地 html
+            打开即可；也可直接把看板地址填进去。
           </div>
         </el-form-item>
 
@@ -335,9 +456,13 @@
           <el-button size="small" type="primary" @click="toggleEdit">
             {{ editMode ? "退出布局编辑" : "调整元素位置" }}
           </el-button>
-          <el-button size="small" text @click="backToConsole">返回控制台</el-button>
+          <el-button size="small" text @click="backToConsole"
+            >返回控制台</el-button
+          >
         </div>
-        <div class="hint mt-2">设置自动保存在本机浏览器（localStorage），换台机器需重新设置。</div>
+        <div class="hint mt-2">
+          设置自动保存在本机浏览器（localStorage），换台机器需重新设置。
+        </div>
       </el-form>
     </el-drawer>
   </ClientOnly>
@@ -375,8 +500,12 @@ function defaultSettings() {
     bgValue: "",
     weatherLocation: "",
     weatherLocationName: "",
-    notice: "## 公告\n\n在**看板设置**里写点什么吧～\n\n- 支持 Markdown\n- 内容只存在本机",
-    layout: JSON.parse(JSON.stringify(DEFAULT_LAYOUT)) as Record<string, { x: number; y: number }>,
+    notice:
+      "## 公告\n\n在**看板设置**里写点什么吧～\n\n- 支持 Markdown\n- 内容只存在本机",
+    layout: JSON.parse(JSON.stringify(DEFAULT_LAYOUT)) as Record<
+      string,
+      { x: number; y: number }
+    >,
   };
 }
 
@@ -417,10 +546,14 @@ function saveSettings(): boolean {
 
 // ── 时间 ──
 const pad = (n: number) => String(n).padStart(2, "0");
-const clockText = computed(() => `${pad(now.value.getHours())}:${pad(now.value.getMinutes())}`);
+const clockText = computed(
+  () => `${pad(now.value.getHours())}:${pad(now.value.getMinutes())}`,
+);
 const secondsText = computed(() => `:${pad(now.value.getSeconds())}`);
 const dateText = computed(() => {
-  const w = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][now.value.getDay()];
+  const w = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+    now.value.getDay()
+  ];
   return `${now.value.getFullYear()}年${now.value.getMonth() + 1}月${now.value.getDate()}日 ${w}`;
 });
 const hhmm = computed(() => clockText.value);
@@ -465,7 +598,12 @@ const todayEntries = computed<any[]>(() => {
       if (div === 1 && week % 2 === 0) continue;
       if (div === 2 && week % 2 === 1) continue;
       // 兼容早期没有 weekDiv 的数据
-      if (day.weekDiv == null && Array.isArray(day.weeks) && !day.weeks.includes(week)) continue;
+      if (
+        day.weekDiv == null &&
+        Array.isArray(day.weeks) &&
+        !day.weeks.includes(week)
+      )
+        continue;
     }
     for (const e of day.entries || []) {
       const key = `${e.start}-${e.end}`;
@@ -494,7 +632,9 @@ async function loadExams() {
     return;
   }
   try {
-    const res: any = await $fetch(`/api/v1/ci/${encodeURIComponent(id)}/exams.json`);
+    const res: any = await $fetch(
+      `/api/v1/ci/${encodeURIComponent(id)}/exams.json`,
+    );
     serverExams.value = Array.isArray(res?.entries) ? res.entries : [];
   } catch {
     // 取不到就当没有考试安排，不影响课表显示
@@ -509,7 +649,15 @@ function openExamsPage() {
 const todayExams = computed<any[]>(() => {
   const today = ymd(now.value);
   return (serverExams.value || [])
-    .filter((e: any) => e && e.date === today && e.subject && e.start && e.end && e.end > e.start)
+    .filter(
+      (e: any) =>
+        e &&
+        e.date === today &&
+        e.subject &&
+        e.start &&
+        e.end &&
+        e.end > e.start,
+    )
     .map((e: any) => ({
       name: "考试",
       type: "exam",
@@ -532,11 +680,16 @@ const effectiveEntries = computed<any[]>(() => {
   if (!exams.length) return std;
   const overlaps = (a: any, b: any) => a.start < b.end && b.start < a.end;
   const kept = std.filter((s: any) => !exams.some((e: any) => overlaps(s, e)));
-  return [...kept, ...exams].sort((a, b) => String(a.start).localeCompare(String(b.start)));
+  return [...kept, ...exams].sort((a, b) =>
+    String(a.start).localeCompare(String(b.start)),
+  );
 });
 
 const currentEntry = computed<any | null>(
-  () => effectiveEntries.value.find((e) => e.start <= hhmm.value && hhmm.value < e.end) || null,
+  () =>
+    effectiveEntries.value.find(
+      (e) => e.start <= hhmm.value && hhmm.value < e.end,
+    ) || null,
 );
 const nextEntry = computed<any | null>(
   () => effectiveEntries.value.find((e) => e.start > hhmm.value) || null,
@@ -551,12 +704,18 @@ const progress = computed(() => {
   if (!e) return 0;
   const s = toMin(e.start);
   const en = toMin(e.end);
-  return Math.max(0, Math.min(1, (toMin(hhmm.value) - s) / Math.max(1, en - s)));
+  return Math.max(
+    0,
+    Math.min(1, (toMin(hhmm.value) - s) / Math.max(1, en - s)),
+  );
 });
 const remainMinutes = computed(() => {
   const e = currentEntry.value;
   if (!e) return 0;
-  return Math.max(0, toMin(e.end) - toMin(hhmm.value) - (now.value.getSeconds() > 0 ? 1 : 0) + 1);
+  return Math.max(
+    0,
+    toMin(e.end) - toMin(hhmm.value) - (now.value.getSeconds() > 0 ? 1 : 0) + 1,
+  );
 });
 
 const currentMain = computed(() => {
@@ -564,7 +723,10 @@ const currentMain = computed(() => {
   if (!e) return "";
   if (e.isExam) return e.subject || "考试";
   if (e.type === "class") return e.subject || e.name || "上课";
-  return e.name || (e.type === "break" ? "课间" : e.type === "activity" ? "活动" : "休息");
+  return (
+    e.name ||
+    (e.type === "break" ? "课间" : e.type === "activity" ? "活动" : "休息")
+  );
 });
 const nextMain = computed(() => {
   const e = nextEntry.value;
@@ -579,7 +741,11 @@ const noticeHtml = computed(() => renderMarkdownLite(settings.notice || ""));
 // ── 布局拖动 ──
 function posStyle(key: string) {
   const p = settings.layout[key] || { x: 50, y: 50 };
-  return { left: `${p.x}%`, top: `${p.y}%`, transform: "translate(-50%, -50%)" };
+  return {
+    left: `${p.x}%`,
+    top: `${p.y}%`,
+    transform: "translate(-50%, -50%)",
+  };
 }
 let dragKey: string | null = null;
 function onPointerDown(key: string, e: PointerEvent) {
@@ -592,7 +758,10 @@ function onPointerMove(e: PointerEvent) {
   if (!dragKey) return;
   const x = Math.max(2, Math.min(98, (e.clientX / window.innerWidth) * 100));
   const y = Math.max(2, Math.min(98, (e.clientY / window.innerHeight) * 100));
-  settings.layout[dragKey] = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+  settings.layout[dragKey] = {
+    x: Math.round(x * 10) / 10,
+    y: Math.round(y * 10) / 10,
+  };
 }
 function onPointerUp() {
   if (!dragKey) return;
@@ -626,8 +795,12 @@ const rootStyle = computed(() => {
 });
 
 const iframeCode = computed(() => {
-  const origin = import.meta.client ? window.location.origin : "https://你的控制台域名";
-  const q = settings.identity ? `?id=${encodeURIComponent(settings.identity)}` : "";
+  const origin = import.meta.client
+    ? window.location.origin
+    : "https://你的控制台域名";
+  const q = settings.identity
+    ? `?id=${encodeURIComponent(settings.identity)}`
+    : "";
   return `<iframe src="${origin}/board${q}" style="width:100vw;height:100vh;border:0" allow="fullscreen"></iframe>`;
 });
 async function copyIframe() {
@@ -660,7 +833,9 @@ async function loadBoard() {
     return;
   }
   try {
-    const res: any = await $fetch(`/api/v1/ci/${encodeURIComponent(id)}/board.json`);
+    const res: any = await $fetch(
+      `/api/v1/ci/${encodeURIComponent(id)}/board.json`,
+    );
     board.value = res;
   } catch {
     board.value = null;
@@ -692,7 +867,9 @@ async function searchCity() {
   }
   citySearching.value = true;
   try {
-    const res: any = await $fetch(`/api/v1/public/weather/lookup?q=${encodeURIComponent(q)}`);
+    const res: any = await $fetch(
+      `/api/v1/public/weather/lookup?q=${encodeURIComponent(q)}`,
+    );
     cityResults.value = Array.isArray(res?.results) ? res.results : [];
     if (!cityResults.value.length) ElMessage.info("没找到匹配的城市");
   } catch (e: any) {
@@ -751,12 +928,16 @@ const warningItems = computed<any[]>(() => {
   return Array.isArray(list) ? list.filter((w: any) => w?.title) : [];
 });
 /** 复制一份用于无缝滚动 */
-const warningLoop = computed<any[]>(() => [...warningItems.value, ...warningItems.value]);
+const warningLoop = computed<any[]>(() => [
+  ...warningItems.value,
+  ...warningItems.value,
+]);
 
 /** 预警文案总字数（标题 + 正文），用于算滚动时长 */
 const warningTotalChars = computed(() =>
   warningItems.value.reduce(
-    (n: number, w: any) => n + String(w.title || "").length + String(w.text || "").length,
+    (n: number, w: any) =>
+      n + String(w.title || "").length + String(w.text || "").length,
     0,
   ),
 );
@@ -789,7 +970,11 @@ function pickBackground() {
 }
 
 /** 等比缩到 maxWidth 以内再转 JPEG，避免把 localStorage 撑爆 */
-function downscaleImage(file: File, maxWidth: number, quality: number): Promise<string> {
+function downscaleImage(
+  file: File,
+  maxWidth: number,
+  quality: number,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
@@ -839,7 +1024,9 @@ async function onPickBackground(e: Event) {
         settings.bgType = prevType;
         settings.bgValue = prevValue;
         saveSettings();
-        ElMessage.error("这张图太大，浏览器存储放不下。换张小一点的，或用图片直链。");
+        ElMessage.error(
+          "这张图太大，浏览器存储放不下。换张小一点的，或用图片直链。",
+        );
         return;
       }
       ElMessage.warning("原图太大，已用更小的尺寸保存");
@@ -882,7 +1069,10 @@ onMounted(() => {
   if (import.meta.client) consoleUrl.value = window.location.origin;
 
   // 从控制台「配置考试安排」点进来时直接展开设置抽屉
-  if (import.meta.client && new URLSearchParams(window.location.search).get("settings") === "1") {
+  if (
+    import.meta.client &&
+    new URLSearchParams(window.location.search).get("settings") === "1"
+  ) {
     drawer.value = true;
   }
 
@@ -952,7 +1142,12 @@ watch(settings, saveSettings, { deep: true });
     0 1px 2px rgba(0, 0, 0, 0.6),
     0 2px 10px rgba(0, 0, 0, 0.4);
   font-family:
-    "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", system-ui, -apple-system, sans-serif;
+    "HarmonyOS Sans SC",
+    "Microsoft YaHei",
+    "PingFang SC",
+    system-ui,
+    -apple-system,
+    sans-serif;
   user-select: none;
   cursor: default;
 }
@@ -996,7 +1191,11 @@ watch(settings, saveSettings, { deep: true });
 .board-veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.28) 100%);
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
   pointer-events: none;
 }
 /*
@@ -1305,8 +1504,20 @@ watch(settings, saveSettings, { deep: true });
 /* 遮罩只加在视口上，不能加在玻璃层，否则胶囊的边框和投影也会被一起淡掉 */
 .warning-viewport {
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent 0, #000 2.2em, #000 calc(100% - 2.2em), transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 2.2em, #000 calc(100% - 2.2em), transparent 100%);
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2.2em,
+    #000 calc(100% - 2.2em),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 2.2em,
+    #000 calc(100% - 2.2em),
+    transparent 100%
+  );
 }
 .warning-track {
   display: inline-flex;
