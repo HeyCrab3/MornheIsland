@@ -27,21 +27,13 @@
           </p>
           <div class="flex items-center gap-2 flex-wrap">
             <el-input
-              v-model="bootstrapForm.url"
+              :model-value="bootstrapForm.url"
               size="small"
               class="bootstrap-input"
-              :disabled="!bootstrapEditing"
+              readonly
             />
             <el-button size="small" @click="copyBootstrap">复制</el-button>
             <el-button size="small" type="primary" @click="openBootstrap">下载</el-button>
-            <template v-if="!bootstrapEditing">
-              <el-button size="small" text @click="startBootstrapEdit">修改</el-button>
-            </template>
-            <template v-else>
-              <el-button size="small" type="primary" :loading="bootstrapSaving" @click="saveBootstrap">保存</el-button>
-              <el-button size="small" text @click="resetBootstrap">恢复默认</el-button>
-              <el-button size="small" text @click="cancelBootstrap">取消</el-button>
-            </template>
             <el-tag v-if="bootstrapForm.isDefault" size="small" type="info" effect="plain">默认地址</el-tag>
           </div>
         </div>
@@ -552,9 +544,6 @@ function formatSize(bytes: number): string {
 
 // ── 引导插件 ──
 const bootstrapForm = reactive({ url: "", isDefault: true });
-const bootstrapEditing = ref(false);
-const bootstrapSaving = ref(false);
-let bootstrapBackup = "";
 
 async function fetchBootstrap() {
   try {
@@ -563,54 +552,6 @@ async function fetchBootstrap() {
     bootstrapForm.isDefault = !!res.data?.isDefault;
   } catch {
     /* 静默：不影响其它标签页 */
-  }
-}
-
-function startBootstrapEdit() {
-  bootstrapBackup = bootstrapForm.url;
-  bootstrapEditing.value = true;
-}
-
-function cancelBootstrap() {
-  bootstrapForm.url = bootstrapBackup;
-  bootstrapEditing.value = false;
-}
-
-async function saveBootstrap() {
-  bootstrapSaving.value = true;
-  try {
-    const res: any = await $fetch("/api/v1/console/ci/plugin/bootstrap", {
-      method: "PUT",
-      headers: auth(),
-      body: { url: bootstrapForm.url },
-    });
-    bootstrapForm.url = res.data?.url || "";
-    bootstrapForm.isDefault = !!res.data?.isDefault;
-    bootstrapEditing.value = false;
-    ElMessage.success("已保存引导插件地址");
-  } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "保存失败");
-  } finally {
-    bootstrapSaving.value = false;
-  }
-}
-
-async function resetBootstrap() {
-  bootstrapSaving.value = true;
-  try {
-    const res: any = await $fetch("/api/v1/console/ci/plugin/bootstrap", {
-      method: "PUT",
-      headers: auth(),
-      body: { url: "" },
-    });
-    bootstrapForm.url = res.data?.url || "";
-    bootstrapForm.isDefault = true;
-    bootstrapEditing.value = false;
-    ElMessage.success("已恢复默认地址");
-  } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "恢复失败");
-  } finally {
-    bootstrapSaving.value = false;
   }
 }
 
