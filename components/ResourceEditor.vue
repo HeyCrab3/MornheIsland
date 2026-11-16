@@ -252,7 +252,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const props = defineProps<{ collection: string; label: string }>();
-const { doc, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
+const { doc, persistedData, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
 const { isDirty } = useUnsavedGuard();
 
 const jsonText = ref("");
@@ -404,7 +404,7 @@ watch(jsonText, () => {
 async function onNameChange() {
   if (!doc.value || editName.value === doc.value.name) return;
   try {
-    await save(doc.value.data, editName.value);
+    await save(persistedData.value, editName.value);
     isDirty.value = false;
     await fetchHistory();
   } catch { /* */ }
@@ -540,10 +540,11 @@ async function doSave(raw?: any) {
     catch { ElMessage.error("JSON 格式错误"); return null; }
   })();
   if (!data && !raw) return;
+  const submittedText = jsonText.value;
   saving.value = true;
   try {
     await save(data);
-    isDirty.value = false;
+    if (jsonText.value === submittedText) isDirty.value = false;
     ElNotification.success({ title: "已保存", message: `当前版本：v${doc.value.version}，更新后请重新启动一遍 ClassIsland 以加载最新的集控配置` });
     await fetchHistory();
   } catch { ElMessage.error("保存失败"); }
@@ -568,8 +569,8 @@ async function loadLinkedInfo() {
   if (!doc.value) return;
   linkedClasses.value = doc.value.usedBy || [];
   // 课表：加载关联的时间表和课程表
-  if (isClassplan.value && doc.value.data) {
-    const d = doc.value.data;
+  if (isClassplan.value && persistedData.value) {
+    const d = persistedData.value;
     const info: any = {};
     if (d.timelayoutId) {
       try {
@@ -587,7 +588,7 @@ async function loadLinkedInfo() {
   }
 }
 
-watch(doc, loadLinkedInfo);
+watch([doc, persistedData], loadLinkedInfo);
 
 async function doCopy() {
   if (!doc.value) return;
@@ -595,7 +596,7 @@ async function doCopy() {
     const res: any = await $fetch(`/api/v1/console/ci/${props.collection}`, {
       method: "POST",
       headers: authHeaders(),
-      body: { name: `${doc.value.name} - 副本`, data: doc.value.data },
+      body: { name: `${doc.value.name} - 副本`, data: persistedData.value },
     });
     ElMessage.success("已复制");
     navigateTo(`/${props.collection}/${res.data._id}`);
