@@ -18,8 +18,6 @@ export function useUnsavedGuard() {
       return true;
     } catch {
       return false;
-    } finally {
-      isDirty.value = false;
     }
   });
 
