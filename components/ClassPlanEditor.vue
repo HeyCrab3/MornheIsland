@@ -430,24 +430,26 @@ function doSave() {
       let lastOn = -1;
       for (let i = 0; i < timePoints.value.length; i++) if (flags[i]) lastOn = i;
 
+      const prev = props.modelValue?.classPlans?.[uuid] || props.modelValue?.[uuid] || {};
       const classes = [];
       for (let i = 0; i < timePoints.value.length; i++) {
         const on = i <= lastOn && !!flags[i];
         // ⚠ 空课时必须写 Guid.Empty 字符串，不能写 null。
         // 客户端的 SubjectId 是非空 Guid，且转换器在遇到 null 时直接抛异常，
         // 会让整个档案反序列化失败（课表直接炸）。这是线上踩过的真实事故。
+        const previousClass = prev.Classes?.[i] || {};
         classes.push({
+          ...previousClass,
           SubjectId: g[i] || EMPTY_GUID,
-          IsChangedClass: false,
+          IsChangedClass: previousClass.IsChangedClass ?? false,
           // 明确写入启用位，而不是靠"有没有科目"推断
           IsEnabled: on,
-          AttachedObjects: {},
-          IsActive: false,
+          AttachedObjects: previousClass.AttachedObjects ?? {},
+          IsActive: previousClass.IsActive ?? false,
         });
       }
 
       // 保留原有条目的其它字段（叠课信息等），别重建
-      const prev = props.modelValue?.classPlans?.[uuid] || {};
       classPlans[uuid] = {
         ...prev,
         TimeLayoutId: tlUuid,
