@@ -258,9 +258,6 @@ function resetAll() {
 async function fetchResources() {
   loading.value = true;
   try {
-    activeDays.value = [];
-    resetAll();
-
     const [tlRes, sjRes] = await Promise.all([
       $fetch("/api/v1/console/ci/timelayout/list", { headers: authHeaders() }),
       $fetch("/api/v1/console/ci/subjects/list", { headers: authHeaders() }),
@@ -268,41 +265,57 @@ async function fetchResources() {
     timelayouts.value = (tlRes as any).data || [];
     subjectsList.value = (sjRes as any).data || [];
 
-    if (props.modelValue) {
-      selectedTimelayoutId.value = props.modelValue.timelayoutId || "";
-      selectedSubjectsId.value = props.modelValue.subjectsId || "";
-
-      const entries = Object.entries(props.modelValue.classPlans || props.modelValue || {});
-      for (const [uuid, entry] of entries as [string, any][]) {
-        if (!entry?.TimeRule || !entry?.Classes) continue;
-        const dayKey = DAYS.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
-        if (!dayKey) continue;
-        if (!activeDays.value.includes(dayKey)) activeDays.value.push(dayKey);
-
-        const wd = entry.TimeRule.WeekCountDiv as number;
-        const div: 0 | 1 | 2 = wd === 1 || wd === 2 ? wd : 0;
-        existingUuids[div][dayKey] = uuid;
-        if (!grids[div][dayKey]) grids[div][dayKey] = [];
-        if (!enabledFlag[div][dayKey]) enabledFlag[div][dayKey] = [];
-        entry.Classes.forEach((cls: any, i: number) => {
-          grids[div][dayKey][i] = cls?.SubjectId || null;
-          // 真实数据里 IsEnabled 与「有没有科目」一直是等价的，但语义上要分开读：
-          // 显式 false 就是没启用；没写这个字段的老数据按"有科目即启用"兜底。
-          enabledFlag[div][dayKey][i] =
-            cls?.IsEnabled === undefined ? !!cls?.SubjectId : cls.IsEnabled === true;
-        });
-      }
-
-      if (props.modelValue.timelayoutId) {
-        const tl = timelayouts.value.find((t: any) => t._id === props.modelValue.timelayoutId);
-        if (tl?.data) loadTimePoints(tl.data);
-      }
-      if (props.modelValue.subjectsId) onSubjectsChange();
-    }
+    loadModel();
   } finally {
     loading.value = false;
   }
 }
+
+// 恢复历史/快照时父组件会替换 modelValue，同步重建本地工作副本。
+function loadModel() {
+  resetAll();
+  activeDays.value = [];
+  selectedTimelayoutId.value = "";
+  selectedSubjectsId.value = "";
+  timePoints.value = [];
+  subjectPool.value = [];
+  pickedSubject.value = "";
+  activeWeekDiv.value = 0;
+  if (props.modelValue) {
+    selectedTimelayoutId.value = props.modelValue.timelayoutId || "";
+    selectedSubjectsId.value = props.modelValue.subjectsId || "";
+
+    const entries = Object.entries(props.modelValue.classPlans || props.modelValue || {});
+    for (const [uuid, entry] of entries as [string, any][]) {
+      if (!entry?.TimeRule || !entry?.Classes) continue;
+      const dayKey = DAYS.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
+      if (!dayKey) continue;
+      if (!activeDays.value.includes(dayKey)) activeDays.value.push(dayKey);
+
+      const wd = entry.TimeRule.WeekCountDiv as number;
+      const div: 0 | 1 | 2 = wd === 1 || wd === 2 ? wd : 0;
+      existingUuids[div][dayKey] = uuid;
+      if (!grids[div][dayKey]) grids[div][dayKey] = [];
+      if (!enabledFlag[div][dayKey]) enabledFlag[div][dayKey] = [];
+      entry.Classes.forEach((cls: any, i: number) => {
+        grids[div][dayKey][i] = cls?.SubjectId || null;
+        // 真实数据里 IsEnabled 与「有没有科目」一直是等价的，但语义上要分开读：
+        // 显式 false 就是没启用；没写这个字段的老数据按"有科目即启用"兜底。
+        enabledFlag[div][dayKey][i] =
+          cls?.IsEnabled === undefined ? !!cls?.SubjectId : cls.IsEnabled === true;
+      });
+    }
+
+    if (props.modelValue.timelayoutId) {
+      const tl = timelayouts.value.find((t: any) => t._id === props.modelValue.timelayoutId);
+      if (tl?.data) loadTimePoints(tl.data);
+    }
+    if (props.modelValue.subjectsId) onSubjectsChange();
+  }
+  forceRender.value++;
+}
+
+watch(() => props.modelValue, loadModel);
 
 function loadTimePoints(data: any) {
   const entries = Object.entries(data);
