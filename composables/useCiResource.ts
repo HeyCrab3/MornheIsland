@@ -117,7 +117,9 @@ export function useCiResourceEditor(collection: string, label: string) {
   }
 
   async function save(data: any, name?: string) {
-    const body: any = { data };
+    // 固定本次提交的数据，避免请求期间继续编辑改变保存成功后的副本。
+    const savedData = JSON.parse(JSON.stringify(data));
+    const body: any = { data: savedData };
     if (name !== undefined) body.name = name;
     const res: any = await $fetch(`/api/v1/console/ci/${collection}/${id}`, {
       method: "PUT",
@@ -126,6 +128,7 @@ export function useCiResourceEditor(collection: string, label: string) {
     });
     ElMessage.success(`${label}已保存，v${res.data?.version}`);
     if (doc.value) {
+      doc.value.data = savedData;
       doc.value.version = res.data?.version;
       if (name !== undefined) doc.value.name = name;
     }
