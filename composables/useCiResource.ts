@@ -96,6 +96,11 @@ export function useCiResourceEditor(collection: string, label: string) {
   const route = useRoute();
   const id = route.params.id as string;
   const doc = ref<any>(null);
+  // 已保存内容供复制使用；doc.data 是子编辑器的加载输入，保存响应不能重置它。
+  const persistedData = ref<any>(null);
+  watch(doc, (value) => {
+    persistedData.value = value?.data == null ? value?.data : JSON.parse(JSON.stringify(value.data));
+  }, { flush: "sync" });
   const loading = ref(false);
   const dataReady = ref(false);
 
@@ -117,7 +122,10 @@ export function useCiResourceEditor(collection: string, label: string) {
   }
 
   async function save(data: any, name?: string) {
-    const body: any = { data };
+    // 固定本次提交的数据，避免请求期间继续编辑改变保存成功后的副本。
+    const savedData = JSON.parse(JSON.stringify(data));
+    const savingDoc = doc.value;
+    const body: any = { data: savedData };
     if (name !== undefined) body.name = name;
     const res: any = await $fetch(`/api/v1/console/ci/${collection}/${id}`, {
       method: "PUT",
@@ -125,7 +133,8 @@ export function useCiResourceEditor(collection: string, label: string) {
       body,
     });
     ElMessage.success(`${label}已保存，v${res.data?.version}`);
-    if (doc.value) {
+    if (doc.value && doc.value === savingDoc) {
+      persistedData.value = savedData;
       doc.value.version = res.data?.version;
       if (name !== undefined) doc.value.name = name;
     }
@@ -133,7 +142,7 @@ export function useCiResourceEditor(collection: string, label: string) {
 
   onMounted(fetchDoc);
 
-  return { doc, loading, dataReady, save, authHeaders };
+  return { doc, persistedData, loading, dataReady, save, authHeaders };
 }
 
 /** 所有资源类型及其标签 */
