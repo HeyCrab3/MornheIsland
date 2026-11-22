@@ -57,7 +57,7 @@ export function useCiResource(collection: string, label: string) {
   async function renameItem(id: string, currentName: string) {
     let input: string;
     try {
-      const res = await ElMessageBox.prompt(`给「${currentName}」起个新名字`, `重命名${label}`, {
+      const res = await ElMessageBox.prompt(t('composables.useciresource.renamePrompt', { name: currentName }), t('composables.useciresource.renameTitle', { label }), {
         confirmButtonText: t('components.resourceeditor.confirm'),
         cancelButtonText: t('reauth.cancel'),
         inputValue: currentName,
@@ -80,7 +80,7 @@ export function useCiResource(collection: string, label: string) {
         headers: authHeaders(),
         body: { name: input },
       });
-      ElMessage.success(`已重命名为「${input}」`);
+      ElMessage.success(t('composables.useciresource.renamed', { name: input }));
       await fetchList();
     } catch (e: any) {
       ElMessage.error(e?.data?.msg || t('composables.useciresource.renameFailed'));
@@ -94,6 +94,7 @@ export function useCiResource(collection: string, label: string) {
  * 资源编辑器通用逻辑。
  */
 export function useCiResourceEditor(collection: string, label: string) {
+  const { t } = useI18n();
   const route = useRoute();
   const id = route.params.id as string;
   const doc = ref<any>(null);
@@ -133,7 +134,7 @@ export function useCiResourceEditor(collection: string, label: string) {
       headers: authHeaders(),
       body,
     });
-    ElMessage.success(`${label}已保存，v${res.data?.version}`);
+    ElMessage.success(t('composables.useciresource.savedVersion', { label, version: res.data?.version }));
     if (doc.value && doc.value === savingDoc) {
       persistedData.value = savedData;
       doc.value.version = res.data?.version;
@@ -146,11 +147,3 @@ export function useCiResourceEditor(collection: string, label: string) {
   return { doc, persistedData, loading, dataReady, save, authHeaders };
 }
 
-/** 所有资源类型及其标签 */
-export const CI_RESOURCES = {
-  classplan: { collection: "classplan", label: "课表" },
-  timelayout: { collection: "timelayout", label: "时间表" },
-  subjects:  { collection: "subjects",  label: "科目" },
-  settings:  { collection: "settings",  label: "设置" },
-  policy:    { collection: "policy",    label: "策略" },
-} as const;

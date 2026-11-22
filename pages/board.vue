@@ -359,11 +359,11 @@
           </div>
         </el-form-item>
 
-        <el-form-item :label="`整体缩放 ${settings.scale}%`">
+        <el-form-item :label="$t('pages.board.extra.scaleLabel', { value: settings.scale })">
           <el-slider v-model="settings.scale" :min="60" :max="200" :step="5" />
         </el-form-item>
 
-        <el-form-item :label="`预警滚动速度 ${settings.warningSpeed} 字/秒`">
+        <el-form-item :label="$t('pages.board.extra.warningSpeedLabel', { value: settings.warningSpeed })">
           <el-slider
             v-model="settings.warningSpeed"
             :min="2"
@@ -553,7 +553,12 @@ const dateText = computed(() => {
   const w = [t('components.classplaneditor.sunday'), t('components.classplaneditor.monday'), t('components.classplaneditor.tuesday'), t('components.classplaneditor.wednesday'), t('components.classplaneditor.thursday'), t('components.classplaneditor.friday'), t('components.classplaneditor.saturday')][
     now.value.getDay()
   ];
-  return `${now.value.getFullYear()}年${now.value.getMonth() + 1}月${now.value.getDate()}日 ${w}`;
+  return t('pages.board.extra.dateLabel', {
+    year: now.value.getFullYear(),
+    month: now.value.getMonth() + 1,
+    day: now.value.getDate(),
+    weekday: w,
+  });
 });
 const hhmm = computed(() => clockText.value);
 
@@ -1032,7 +1037,7 @@ async function onPickBackground(e: Event) {
       return;
     }
     const kb = Math.round((dataUrl.length * 3) / 4 / 1024);
-    ElMessage.success(`背景已更新（约 ${kb} KB）`);
+    ElMessage.success(t('pages.board.extra.backgroundUpdated', { kb }));
   } catch (err: any) {
     settings.bgType = prevType;
     settings.bgValue = prevValue;

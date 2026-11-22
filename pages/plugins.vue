@@ -63,7 +63,7 @@
             <div class="mt-3 flex items-center gap-3 text-xs text-gray-400">
               <span>↓ {{ p.downloadCount }}</span>
               <span>★ {{ p.starsCount }}</span>
-              <span v-if="p.dependencies?.length">{{ $t('pages.plugins.extra.dependencies') }} {{ p.dependencies.length }}</span>
+              <span v-if="p.dependencies?.length">{{ $t('pages.plugins.extra.dependenciesCount', { count: p.dependencies.length }) }}</span>
             </div>
 
             <div class="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
@@ -117,7 +117,7 @@
             </div>
 
             <div v-if="p.url" class="mt-2 text-xs text-gray-400 truncate" :title="p.url">
-              {{ $t('pages.plugins.extra.source') }} {{ p.url }}
+              {{ $t('pages.plugins.extra.sourceUrl', { url: p.url }) }}
             </div>
 
             <div class="mt-2 text-xs text-gray-400 font-mono truncate" :title="p.sha256">
@@ -161,7 +161,7 @@
             </div>
 
             <div class="mt-3">
-              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.expectedPlugins') }}（{{ g.plugins.length }}）</div>
+              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.expectedPluginsWithCount', { count: g.plugins.length }) }}</div>
               <div class="flex flex-wrap gap-1">
                 <el-tag
                   v-for="p in g.plugins"
@@ -177,7 +177,7 @@
             </div>
 
             <div class="mt-2">
-              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.boundClasses') }}（{{ g.classes.length }}）</div>
+              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.boundClassesWithCount', { count: g.classes.length }) }}</div>
               <div class="flex flex-wrap gap-1">
                 <el-tag
                   v-for="c in g.classes"
@@ -263,21 +263,21 @@
           </div>
 
           <div class="text-xs text-gray-500 mt-1">
-            {{ $t('pages.plugins.extra.installedCount') }} {{ d.installedCount }} {{ $t('pages.plugins.extra.units') }}
-            <span v-if="d.collected"> · {{ $t('pages.plugins.extra.collectedAt') }} {{ formatTime(d.pluginsUpdatedAt) }}</span>
-            <span v-else> · {{ $t('pages.plugins.extra.notCollectedYet') }}</span>
-            <span v-if="d.profiles.length"> · {{ $t('pages.plugins.extra.profilesColon') }}{{ d.profiles.map((p: any) => p.name).join('、') }}</span>
+            {{ $t('pages.plugins.extra.installedCountMessage', { count: d.installedCount }) }}
+            <span v-if="d.collected">{{ $t('pages.plugins.extra.collectedAtTime', { time: formatTime(d.pluginsUpdatedAt) }) }}</span>
+            <span v-else>{{ $t('pages.plugins.extra.notCollectedYetFull') }}</span>
+            <span v-if="d.profiles.length">{{ $t('pages.plugins.extra.profilesList', { names: d.profiles.map((p: any) => p.name).join('、') }) }}</span>
           </div>
 
           <div v-if="d.missing.length" class="text-xs mt-1">
-            <span class="text-red-500">{{ $t('pages.plugins.extra.missingColon') }}</span>{{ d.missing.map(pluginLabel).join('、') }}
+            <span class="text-red-500">{{ $t('pages.plugins.extra.missingList', { names: d.missing.map(pluginLabel).join('、') }) }}</span>
           </div>
           <div
             v-if="d.extra.length"
             class="text-xs text-gray-400 mt-1 truncate"
             :title="d.extra.map(pluginLabel).join('、')"
           >
-            {{ $t('pages.plugins.extra.unmanaged') }}{{ d.extra.map(pluginLabel).join('、') }}
+            {{ $t('pages.plugins.extra.unmanagedList', { names: d.extra.map(pluginLabel).join('、') }) }}
           </div>
         </div>
         <el-empty
@@ -364,7 +364,7 @@
         </div>
 
         <div>
-          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.expectedPlugins') }}（{{ editorForm.pluginIds.length }}）</div>
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.expectedPluginsWithCount', { count: editorForm.pluginIds.length }) }}</div>
           <el-checkbox-group
             v-if="localPlugins.length"
             v-model="editorForm.pluginIds"
@@ -387,7 +387,7 @@
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <div class="text-sm">{{ $t('pages.plugins.extra.boundClasses') }}（{{ editorForm.classIds.length }}）</div>
+            <div class="text-sm">{{ $t('pages.plugins.extra.boundClassesWithCount', { count: editorForm.classIds.length }) }}</div>
             <el-button
               v-if="editorForm.classIds.length"
               size="small"
@@ -475,7 +475,7 @@
           :closable="false"
           show-icon
           class="mb-3"
-          :title="`${$t('pages.plugins.extra.unknownPluginsPrefix')}${report.summary.unknownPlugins.length}${$t('pages.plugins.extra.unknownPluginsSuffix')}`"
+          :title="$t('pages.plugins.extra.unknownPluginsMessage', { count: report.summary.unknownPlugins.length })"
           :description="report.summary.unknownPlugins.join('、')"
         />
 
@@ -491,17 +491,17 @@
             </div>
             <div class="text-xs text-gray-500 mt-1">{{ d.message }}</div>
             <div v-if="d.missing?.length" class="text-xs text-gray-400 mt-1">
-              {{ $t('pages.plugins.extra.resentThisTime') }}{{ d.missing.join('、') }}
+              {{ $t('pages.plugins.extra.resentThisTimeList', { names: d.missing.join('、') }) }}
             </div>
             <div v-if="d.installedCount !== null && d.installedCount !== undefined" class="text-xs text-gray-400 mt-1">
-              {{ $t('pages.plugins.extra.deviceInstalled') }} {{ d.installedCount }} {{ $t('pages.plugins.extra.pluginsUnit') }}
+              {{ $t('pages.plugins.extra.deviceInstalledMessage', { count: d.installedCount }) }}
             </div>
           </div>
         </div>
         <el-empty v-else :image-size="80" :description="$t('pages.plugins.noTargetDevices')" />
 
         <div v-if="report?.baseUrl" class="text-xs text-gray-400 mt-4 break-all">
-          {{ $t('pages.plugins.extra.downloadPrefix') }}{{ report.baseUrl }}/api/v1/ci/plugin/…
+          {{ $t('pages.plugins.extra.downloadPrefixUrl', { url: report.baseUrl }) }}
         </div>
       </div>
       <template #footer>
@@ -606,7 +606,7 @@ async function importFromMarket(p: any) {
       headers: auth(),
       body: { pluginId: p.id },
     });
-    ElMessage.success(`${t('pages.plugins.extra.importedPrefix')}「${p.name}」${t('pages.plugins.extra.importedSuffix')}`);
+    ElMessage.success(t('pages.plugins.extra.importedMessage', { name: p.name }));
     await fetchLocal();
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.plugins.extra.importFailed'));
@@ -672,7 +672,7 @@ async function removePlugin(p: any) {
     const names = (res?._data?.data?.usedBy || []).map((x: any) => x.name).join("、");
     try {
       await ElMessageBox.confirm(
-        `「${p.name}」${t('pages.plugins.extra.inUsePrefix')}${names}${t('pages.plugins.extra.inUseSuffix')}`,
+        t('pages.plugins.extra.inUseMessage', { name: p.name, groups: names }),
         t('pages.plugins.pluginInUse'),
         { type: "warning", confirmButtonText: t('pages.plugins.forceDelete'), cancelButtonText: t('reauth.cancel') },
       );
@@ -733,7 +733,7 @@ async function updatePlugin(p: any) {
       method: "POST",
       headers: auth(),
     });
-    ElMessage.success(`${t('pages.plugins.extra.updatedToPrefix')}v${res.data?.version || "?"}`);
+    ElMessage.success(t('pages.plugins.extra.updatedTo', { version: res.data?.version || "?" }));
     await Promise.all([fetchLocal(), fetchProfiles()]);
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.plugins.updateFailed'));
@@ -759,7 +759,7 @@ async function checkUpdates() {
         .filter((i: any) => i.outdated)
         .map((i: any) => `${i.name}：${i.currentVersion || "?"} → ${i.latestVersion}`)
         .join("\n");
-      ElMessageBox.alert(lines, `${t('pages.plugins.extra.updatablePrefix')}${d.updatable}${t('pages.plugins.extra.updatableSuffix')}`, {
+      ElMessageBox.alert(lines, t('pages.plugins.extra.updatableMessage', { count: d.updatable }), {
         type: "info",
         customStyle: { whiteSpace: "pre-line" },
       });
@@ -787,7 +787,7 @@ async function dedupePlugins() {
     }
     await ElMessageBox.alert(
       d.removed.map((r: any) => `${r.name}（${r.pluginId}）`).join("\n"),
-      `${t('pages.plugins.extra.deletedDuplicatesPrefix')}${d.removed.length}${t('pages.plugins.extra.deletedDuplicatesSuffix')}`,
+      t('pages.plugins.extra.deletedDuplicates', { count: d.removed.length }),
       { type: "success", customStyle: { whiteSpace: "pre-line" } },
     );
     await Promise.all([fetchLocal(), fetchProfiles()]);
@@ -820,7 +820,7 @@ async function refreshAllDevices() {
   try {
     const res: any = await $fetch("/api/v1/console/ci/plugin/query-all", { method: "POST", headers: auth() });
     const d = res.data || {};
-    ElMessage.success(`${t('pages.plugins.extra.refreshedPrefix')}${d.refreshed ?? 0}/${d.online ?? 0}${t('pages.plugins.extra.refreshedSuffix')}`);
+    ElMessage.success(t('pages.plugins.extra.refreshed', { refreshed: d.refreshed ?? 0, online: d.online ?? 0 }));
     await fetchCompliance();
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.plugins.refreshFailed'));
@@ -925,7 +925,7 @@ async function doDeliver() {
         headers: auth(),
         body: { pluginId: deliverTarget.value._id, all: true, baseUrl: publicBase() },
       });
-      ElMessage.success(`${t('pages.plugins.extra.dispatchedPrefix')}${res.data?.sent ?? 0}${t('pages.plugins.extra.dispatchedSuffix')}`);
+      ElMessage.success(t('pages.plugins.extra.dispatched', { count: res.data?.sent ?? 0 }));
     } else {
       if (!selectedCuis.value.length) return ElMessage.warning(t('pages.plugins.selectAtLeastOneDevice'));
       let sent = 0;
@@ -937,7 +937,7 @@ async function doDeliver() {
         });
         sent += res.data?.sent ?? 0;
       }
-      ElMessage.success(`${t('pages.plugins.extra.dispatchedPrefix')}${sent}${t('pages.plugins.extra.dispatchedSuffix')}`);
+      ElMessage.success(t('pages.plugins.extra.dispatched', { count: sent }));
     }
     deliverVisible.value = false;
   } catch (e: any) {
@@ -1051,8 +1051,8 @@ async function applyProfile(g: any) {
     report.value = res.data;
     reportVisible.value = true;
     const s = res.data?.summary || {};
-    if (s.pushed) ElMessage.success(`${t('pages.plugins.extra.resentPrefix')}${s.pushed}${t('pages.plugins.extra.resentSuffix')}`);
-    else if (s.noBootstrap) ElMessage.warning(`${s.noBootstrap}${t('pages.plugins.extra.noBootstrapWarningSuffix')}`);
+    if (s.pushed) ElMessage.success(t('pages.plugins.extra.resent', { count: s.pushed }));
+    else if (s.noBootstrap) ElMessage.warning(t('pages.plugins.extra.noBootstrapWarning', { count: s.noBootstrap }));
     else if (s.offline || s.noResponse) ElMessage.warning(t('pages.plugins.targetDevicesUnreachable'));
     else ElMessage.success(t('pages.plugins.allTargetsUpToDate'));
   } catch (e: any) {

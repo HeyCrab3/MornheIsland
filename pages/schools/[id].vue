@@ -196,7 +196,7 @@
       <!-- ── 成员 ── -->
       <el-tab-pane :label="$t('pages.schools.index.member')" name="members">
         <div class="text-sm text-gray-500 mb-3">
-          学校有多人时，<b>创建者和管理员</b>能改学校级资源，普通成员只读 —— 免得统一的时间表被随手改掉。
+          {{ $t('pages.schools.id.extra.membersHintBefore') }}<b>{{ $t('pages.schools.id.extra.membersHintBold') }}</b>{{ $t('pages.schools.id.extra.membersHintAfter') }}
         </div>
 
         <div v-if="data?.canManage" class="invite-box">
@@ -204,7 +204,7 @@
             <div>
               <div class="font-medium text-sm">{{ $t('pages.schools.id.extra.inviteLink') }}</div>
               <div class="text-xs text-gray-500 mt-0.5">
-                对方登录后点链接即可加入。<b>不要公开发出去</b> —— 拿到链接的人都能进校。
+                {{ $t('pages.schools.id.extra.inviteHintBefore') }}<b>{{ $t('pages.schools.id.extra.inviteHintBold') }}</b>{{ $t('pages.schools.id.extra.inviteHintAfter') }}
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -224,8 +224,8 @@
                 <div class="text-xs font-mono truncate">{{ inv.url }}</div>
                 <div class="text-[11px] text-gray-400 mt-0.5">
                   {{ roleLabel(inv.role) }} ·
-                  用 {{ inv.uses }}/{{ inv.maxUses }} 次 ·
-                  {{ inv.expired ? $t('pages.schools.id.expired') : `到期 ${inv.expiresAt?.slice(0, 16).replace("T", " ")}` }}
+                  {{ $t('pages.schools.id.extra.usesCount', { uses: inv.uses, maxUses: inv.maxUses }) }}
+                  {{ inv.expired ? $t('pages.schools.id.expired') : $t('pages.schools.id.extra.expiresAt', { date: inv.expiresAt?.slice(0, 16).replace("T", " ") }) }}
                   <span v-if="inv.revoked" class="text-red-400"> · {{ $t('pages.schools.id.revoked') }}</span>
                 </div>
               </div>
@@ -330,10 +330,10 @@
         <span class="text-[13px] text-gray-500 shrink-0">{{ $t('pages.schools.id.extra.displayDuration') }}</span>
         <el-slider v-model="notifyDuration" :min="0" :max="120" :step="10" class="flex-1" />
         <span class="text-[13px] text-gray-600 w-16 text-right">
-          {{ notifyDuration ? `${notifyDuration} 秒` : $t('pages.schools.id.doNotClose') }}
+          {{ notifyDuration ? $t('pages.schools.id.extra.seconds', { n: notifyDuration }) : $t('pages.schools.id.doNotClose') }}
         </span>
       </div>
-      <div class="text-xs text-gray-400 mt-2">将发给已选中的 {{ selectedOnline.length }} 台在线设备。</div>
+      <div class="text-xs text-gray-400 mt-2">{{ $t('pages.schools.id.extra.sendToSelected', { n: selectedOnline.length }) }}</div>
       <template #footer>
         <el-button @click="notifyVisible = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="notifying" :disabled="!notifyMessage.trim()" @click="doNotify">
@@ -345,7 +345,7 @@
     <!-- 合并到其他学校 -->
     <el-dialog v-model="mergeVisible" :title="$t('pages.schools.id.mergeIntoAnotherSchool')" width="520px">
       <el-alert type="warning" :closable="false" show-icon class="mb-3">
-        <template #title>合并是把「{{ school?.name }}」整个并进去，然后删掉这个学校</template>
+        <template #title>{{ $t('pages.schools.id.extra.mergeTitle', { name: school?.name }) }}</template>
         {{ $t('pages.schools.id.extra.mergeEffect') }}
         {{ $t('pages.schools.id.extra.mergeIrreversible') }}
       </el-alert>
@@ -353,7 +353,7 @@
       <div class="mb-3">
         <div class="text-sm font-medium mb-1.5">{{ $t('pages.schools.id.extra.mergeTo') }}</div>
         <el-select v-model="mergeInto" :placeholder="$t('pages.schools.id.selectCreatedSchool')" class="w-full" @change="loadMergePreview">
-          <el-option v-for="s in otherSchools" :key="s.id" :label="`${s.name}（${s.classCount} 个班）`" :value="s.id" />
+          <el-option v-for="s in otherSchools" :key="s.id" :label="$t('pages.schools.id.extra.schoolOption', { name: s.name, n: s.classCount })" :value="s.id" />
         </el-select>
         <div v-if="!otherSchools.length" class="text-xs text-gray-400 mt-1.5">
           {{ $t('pages.schools.id.extra.noMergeTarget') }}
@@ -362,13 +362,13 @@
 
       <div v-if="mergePreview" class="preview-box">
         <div class="text-sm">
-          把 <b>{{ mergePreview.from.name }}</b>
-          （{{ mergePreview.from.classCount }} 班 / {{ mergePreview.from.resourceTotal }} 份学校级资源）
-          并入 <b>{{ mergePreview.into.name }}</b>
-          （{{ mergePreview.into.classCount }} 班）
+          {{ $t('pages.schools.id.extra.mergePreviewFrom') }}<b>{{ mergePreview.from.name }}</b>
+          {{ $t('pages.schools.id.extra.mergePreviewFromStats', { classes: mergePreview.from.classCount, resources: mergePreview.from.resourceTotal }) }}
+          {{ $t('pages.schools.id.extra.mergePreviewInto') }}<b>{{ mergePreview.into.name }}</b>
+          {{ $t('pages.schools.id.extra.mergePreviewIntoStats', { classes: mergePreview.into.classCount }) }}
         </div>
         <div v-if="mergePreview.duplicateNames.length" class="text-xs text-amber-600 mt-2">
-          注意：有 {{ mergePreview.duplicateNames.length }} 份资源在两边同名
+          {{ $t('pages.schools.id.extra.duplicateNamesHint', { n: mergePreview.duplicateNames.length }) }}
           （{{ mergePreview.duplicateNames.slice(0, 3).join("、") }}{{ mergePreview.duplicateNames.length > 3 ? $t('pages.schools.id.etc') : "" }}），
           {{ $t('pages.schools.id.extra.mergeCoexist') }}
         </div>
@@ -405,9 +405,9 @@
         </el-form-item>
         <el-form-item :label="$t('pages.schools.id.sendToWhom')">
           <el-radio-group v-model="pluginScope">
-            <el-radio value="school">全校在线设备（{{ data?.summary?.onlineDeviceCount || 0 }} 台）</el-radio>
+            <el-radio value="school">{{ $t('pages.schools.id.extra.scopeAllDevices', { n: data?.summary?.onlineDeviceCount || 0 }) }}</el-radio>
             <el-radio value="selected" :disabled="!selectedOnline.length">
-              已选中的 {{ selectedOnline.length }} 台
+              {{ $t('pages.schools.id.extra.scopeSelectedDevices', { n: selectedOnline.length }) }}
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -530,7 +530,7 @@ async function doLink() {
       headers: authHeaders(),
       body: { classIds: linkSelected.value },
     });
-    ElMessage.success(`已挂入 ${res?.data?.linked ?? 0} 个班级`);
+    ElMessage.success(t("pages.schools.id.extra.linkedClasses", { n: res?.data?.linked ?? 0 }));
     linkVisible.value = false;
     await load();
   } catch (e: any) {
@@ -543,7 +543,7 @@ async function doLink() {
 async function unlink(row: any) {
   try {
     await ElMessageBox.confirm(
-      `把「${row.name || row.identity}」移出学校？班级会退回个人模式，资源和设备数据都不动。`,
+      t("pages.schools.id.extra.unlinkConfirm", { name: row.name || row.identity }),
       t("pages.schools.id.removeClass"),
       { type: "warning", confirmButtonText: t("pages.schools.id.remove"), cancelButtonText: t("reauth.cancel") },
     );
@@ -575,7 +575,7 @@ const SHARE_ALIAS: Record<string, string> = {
 async function shareResource(row: any) {
   try {
     await ElMessageBox.confirm(
-      `把${row.label}「${row.name}」共享给这个学校？之后同校的管理员都能修改，全校班级都能选用。`,
+      t("pages.schools.id.extra.shareConfirm", { label: row.label, name: row.name }),
       t("pages.schools.id.shareToSchool"),
       { type: "info", confirmButtonText: t("pages.schools.id.share"), cancelButtonText: t("reauth.cancel") },
     );
@@ -652,7 +652,7 @@ async function doNotify() {
         durationSeconds: notifyDuration.value,
       },
     });
-    ElMessage.success(`已发送到 ${res?.data?.sent ?? 0} 台设备`);
+    ElMessage.success(t("pages.schools.id.extra.sentToDevices", { n: res?.data?.sent ?? 0 }));
     notifyVisible.value = false;
     notifyMessage.value = "";
   } catch (e: any) {
@@ -739,7 +739,7 @@ async function setRole(row: any, role: string) {
       headers: authHeaders(),
       body: { role },
     });
-    ElMessage.success(`已设为${roleLabel(role)}`);
+    ElMessage.success(t("pages.schools.id.extra.setRoleSuccess", { role: roleLabel(role) }));
     await load();
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t("pages.schools.id.editFailed"));
@@ -808,7 +808,7 @@ async function doMerge() {
   const target = otherSchools.value.find((s) => s.id === mergeInto.value);
   try {
     await ElMessageBox.confirm(
-      `把「${school.value?.name}」整个并进「${target?.name}」，然后删除前者。这个操作不可撤销。`,
+      t("pages.schools.id.extra.mergeConfirm", { from: school.value?.name, into: target?.name }),
       t("pages.schools.id.confirmMerge"),
       { type: "warning", confirmButtonText: t("pages.schools.id.merge"), cancelButtonText: t("reauth.cancel") },
     );
@@ -824,7 +824,12 @@ async function doMerge() {
     });
     const d = res?.data || {};
     ElMessage.success(
-      `已并入「${d.intoSchoolName}」：班级 ${d.movedClasses}、资源 ${Object.values(d.movedResources || {}).reduce((a: any, b: any) => a + b, 0)}、成员 ${d.addedMembers}`,
+      t("pages.schools.id.extra.mergeSuccess", {
+        into: d.intoSchoolName,
+        classes: d.movedClasses,
+        resources: Object.values(d.movedResources || {}).reduce((a: any, b: any) => a + b, 0),
+        members: d.addedMembers,
+      }),
     );
     mergeVisible.value = false;
     navigateTo(`/schools/${d.intoSchoolId}`);
@@ -841,7 +846,7 @@ async function doDeleteSchool() {
   if (!s) return;
   if (s.summary.classCount > 0 || s.summary.schoolResourceCount > 0) {
     ElMessageBox.alert(
-      `这所学校里还有 ${s.summary.classCount} 个班级、${s.summary.schoolResourceCount} 份学校级资源。` +
+      t("pages.schools.id.extra.cannotDeleteDetail", { classes: s.summary.classCount, resources: s.summary.schoolResourceCount }) +
         t("pages.schools.id.prepareBeforeDelete"),
       t("pages.schools.id.cannotDelete"),
       { type: "warning", confirmButtonText: t("composables.useciresource.gotIt") },
@@ -850,7 +855,7 @@ async function doDeleteSchool() {
   }
   try {
     await ElMessageBox.confirm(
-      `确定删除空学校「${school.value?.name}」？删掉后邀请链接和成员关系一起失效。`,
+      t("pages.schools.id.extra.deleteConfirm", { name: school.value?.name }),
       t("pages.schools.id.deleteSchool"),
       { type: "error", confirmButtonText: t("components.resourceeditor.delete"), cancelButtonText: t("reauth.cancel") },
     );
@@ -886,7 +891,7 @@ async function refreshDevices() {
       headers: authHeaders(),
       body: { cuids },
     });
-    ElMessage.success(`已通知 ${res?.data?.sent ?? 0} 台设备重新拉取配置`);
+    ElMessage.success(t("pages.schools.id.extra.notifiedRefresh", { n: res?.data?.sent ?? 0 }));
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t("components.cw2centralpanel.dispatchFailed"));
   } finally {
@@ -931,7 +936,8 @@ async function doPluginDeliver() {
     });
     const d = res?.data || {};
     ElMessage.success(
-      `已下发到 ${d.sent ?? 0} 台设备` + (d.rejected?.length ? `（${d.rejected.length} 台不在本范围内被忽略）` : ""),
+      t("pages.schools.id.extra.pluginDelivered", { sent: d.sent ?? 0 }) +
+        (d.rejected?.length ? t("pages.schools.id.extra.pluginRejected", { n: d.rejected.length }) : ""),
     );
     pluginVisible.value = false;
   } catch (e: any) {

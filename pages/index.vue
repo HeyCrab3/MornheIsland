@@ -76,7 +76,7 @@
           <el-carousel v-if="platform.notices.length !== 0" height="200px">
             <el-carousel-item v-for="(item, index) in platform.notices" :key="index">
               <p class="text-lg font-medium">{{ item.title }}</p>
-              <p class="text-sm text-gray-400">发布于 {{ processTime(item.publishAt) }}</p>
+              <p class="text-sm text-gray-400">{{ $t('pages.index.publishedAt', { time: processTime(item.publishAt) }) }}</p>
               <p class="text-gray-600 dark:text-gray-400 mt-2">{{ item.content }}</p>
             </el-carousel-item>
           </el-carousel>
@@ -111,7 +111,7 @@
           <template #header>
             <div class="flex items-center justify-between">
               <span class="font-medium">{{ $t('dashboard.recentActivity') }}</span>
-              <span class="text-xs text-gray-400">集控 gRPC {{ deviceSummary.grpcOnline }}/{{ deviceSummary.grpc }} 在线 · 静态 {{ deviceSummary.static }}</span>
+              <span class="text-xs text-gray-400">{{ $t('pages.index.grpcOnlineSummary', { online: deviceSummary.grpcOnline, total: deviceSummary.grpc, static: deviceSummary.static }) }}</span>
             </div>
           </template>
           <div v-if="recentActivity.length" class="space-y-2">
@@ -199,7 +199,7 @@ const statCards = computed(() => [
   {
     label: t('dashboard.cards.deviceCount'),
     value: stats.deviceCount,
-    hint: `集控 ${deviceSummary.grpcOnline} 在线 · 静态 ${deviceSummary.static}`,
+    hint: t('pages.index.grpcStatHint', { online: deviceSummary.grpcOnline, static: deviceSummary.static }),
     gradient: "linear-gradient(135deg, #9B8FC2 0%, #4D3B8E 100%)",
     icon: Monitor,
   },
@@ -244,7 +244,7 @@ const platformCards = computed(() => [
   {
     label: t('dashboard.cards.classes'),
     value: formatCount(platformStats.classes),
-    hint: platformStats.schools ? `分布在 ${platformStats.schools} 个机构` : t('pages.index.noOrganizationYet'),
+    hint: platformStats.schools ? t('pages.index.distributedIn', { count: platformStats.schools }) : t('pages.index.noOrganizationYet'),
   },
   {
     label: t('dashboard.cards.resources'),
@@ -330,7 +330,7 @@ onMounted(async () => {
         key: `grpc:${d.cuid}`,
         mode: "grpc" as const,
         label: d.className || d.identity || d.cuid,
-        title: `班级：${d.className || "—"}｜标识：${d.identity || "—"}｜MAC：${d.mac || "—"}`,
+        title: t('pages.index.classTitle', { name: d.className || "—", identity: d.identity || "—", mac: d.mac || "—" }),
         online: !!d.online,
         ts: d.lastSeen ? new Date(d.lastSeen).getTime() : 0,
         time: fmtTime(d.lastSeen),
@@ -339,7 +339,7 @@ onMounted(async () => {
         key: `static:${d.ip}`,
         mode: "static" as const,
         label: d.className ? `${d.className} · ${d.ip}` : d.ip,
-        title: `IP：${d.ip}｜最后请求：${d.lastPath || "—"}｜累计 ${d.requestCount ?? 0} 次`,
+        title: t('pages.index.ipTitle', { ip: d.ip, path: d.lastPath || "—", count: d.requestCount ?? 0 }),
         online: false,
         ts: d.lastSeen ? new Date(d.lastSeen).getTime() : 0,
         time: fmtTime(d.lastSeen),

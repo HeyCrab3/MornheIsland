@@ -153,7 +153,7 @@
 
         <el-form-item :label="$t('pages.grants.validityPeriod')">
           <el-select v-model="form.days" class="w-48">
-            <el-option v-for="d in [7, 30, 90, 180, 365]" :key="d" :label="`${d} 天`" :value="d" />
+            <el-option v-for="d in [7, 30, 90, 180, 365]" :key="d" :label="$t('pages.subaccounts.extra.daysLabel', { d })" :value="d" />
           </el-select>
           <span class="text-xs text-gray-400 ml-3">{{ $t('pages.subaccounts.extra.expiresHint') }}</span>
         </el-form-item>

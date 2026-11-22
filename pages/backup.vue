@@ -34,7 +34,7 @@
             <el-option
               v-for="c in classes"
               :key="c._id"
-              :label="`${c.name || c.identity}（${c.identity || '无标识'}）`"
+              :label="`${c.name || c.identity}（${c.identity || $t('pages.backup.extra.unnamedIdentity')}）`"
               :value="c._id"
             />
           </el-select>
@@ -151,7 +151,7 @@
           type="warning"
           :closable="false"
           show-icon
-          :title="`有 ${result.skipped.length} 条改用了新 id`"
+          :title="$t('pages.backup.extra.skippedNewIds', { count: result.skipped.length })"
         >
           <div v-for="(s, i) in result.skipped" :key="i" class="text-xs">
             {{ s.name }}：{{ s.reason }}
@@ -278,7 +278,7 @@ const scopeText = computed(() => {
   const s = parsed.value?.scope;
   if (!s) return t('pages.backup.unlabeled');
   if (s.type === "full") return t('pages.backup.full');
-  if (s.type === "class") return `班级：${s.className || s.identity || s.classId}`;
+  if (s.type === "class") return t('pages.backup.extra.classScope', { name: s.className || s.identity || s.classId });
   return s.type;
 });
 
@@ -304,11 +304,11 @@ function onFileChange(e: Event) {
     try {
       const obj = JSON.parse(String(reader.result || ""));
       if (obj?.format !== "mornheisland-backup") {
-        parseError.value = `这不是莫宁岛备份文件（format=${obj?.format ?? "缺失"}）`;
+        parseError.value = t('pages.backup.extra.invalidBackupFormat', { format: obj?.format ?? t('pages.backup.extra.missingFormat') });
         return;
       }
       if (Number(obj.version) > 1) {
-        parseError.value = `备份版本 ${obj.version} 高于当前支持的 1，请先升级平台`;
+        parseError.value = t('pages.backup.extra.versionTooNew', { version: obj.version });
         return;
       }
       parsed.value = obj;
@@ -355,7 +355,7 @@ async function doImport() {
     });
     result.value = res.data;
     resultVisible.value = true;
-    ElMessage.success(`导入完成：新建 ${res.data?.totals?.created ?? 0}，覆盖 ${res.data?.totals?.updated ?? 0}`);
+    ElMessage.success(t('pages.backup.extra.importCompleted', { created: res.data?.totals?.created ?? 0, updated: res.data?.totals?.updated ?? 0 }));
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.backup.importFailed'));
   } finally {

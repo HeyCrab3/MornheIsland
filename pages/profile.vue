@@ -119,7 +119,7 @@ async function startDeleteAccount() {
     );
     // 第三次：把账号名原样输一遍（服务端也会比对，前端先拦一道）
     const { value } = await ElMessageBox.prompt(
-      `请输入你的账号名「${userStore.userName || ""}」以确认注销：`,
+      t('pages.profile.extra.confirmDeleteHint', { name: userStore.userName || "" }),
       t('pages.profile.finalConfirm'),
       {
         confirmButtonText: t('pages.profile.confirmDelete'),

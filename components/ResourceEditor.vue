@@ -8,7 +8,7 @@
         </el-button>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="text-xl font-semibold truncate">{{ doc?.name || `${label}编辑` }}</h1>
+            <h1 class="text-xl font-semibold truncate">{{ doc?.name || $t('components.resourceeditor.extra.editLabel', { label }) }}</h1>
             <el-tag v-if="doc" size="small" effect="plain" round>v{{ doc.version }}</el-tag>
           </div>
           <div class="text-xs text-gray-400 mt-0.5" v-if="doc">
@@ -269,7 +269,7 @@ const showSnapshots = ref(false);
 const snapshotList = ref<any[]>([]);
 
 const previewTitle = computed(() =>
-  previewLabel.value ? previewLabel.value : `版本预览 · v${previewVersion.value}`,
+  previewLabel.value ? previewLabel.value : t('components.resourceeditor.extra.versionPreview', { version: previewVersion.value }),
 );
 
 function authHeaders() {
@@ -306,7 +306,7 @@ async function previewHistory(h: any) {
 }
 
 async function doRestore(version: number) {
-  askConfirm(t('components.resourceeditor.confirmRestore'), `确定恢复到 v${version}？当前内容将存入历史。`, t('components.resourceeditor.restore'), () => doRestoreConfirmed(version));
+  askConfirm(t('components.resourceeditor.confirmRestore'), t('components.resourceeditor.extra.restoreConfirm', { version }), t('components.resourceeditor.restore'), () => doRestoreConfirmed(version));
 }
 
 async function doRestoreConfirmed(version: number) {
@@ -317,7 +317,7 @@ async function doRestoreConfirmed(version: number) {
       method: "POST",
       headers: authHeaders(),
     });
-    ElMessage.success(`已恢复到 v${version}（新版本 v${res.data.version}）`);
+    ElMessage.success(t('components.resourceeditor.extra.restored', { version, newVersion: res.data.version }));
     // 重新加载
     if (doc.value) {
       const fresh: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}`, { headers: authHeaders() });
@@ -358,7 +358,7 @@ async function previewSnapshot(s: any) {
     );
     previewData.value = res.data?.data;
     previewVersion.value = s.version || 0;
-    previewLabel.value = `快照预览 · ${s.reasonLabel}`;
+    previewLabel.value = t('components.resourceeditor.extra.snapshotPreview', { reason: s.reasonLabel });
     previewVisible.value = true;
     if (props.collection === "classplan") {
       await loadClassplanPreview(previewData.value);
@@ -369,7 +369,7 @@ async function previewSnapshot(s: any) {
 function doRestoreSnapshot(s: any) {
   askConfirm(
     t('components.resourceeditor.restoreFromSnapshot'),
-    `确定恢复到「${s.reasonLabel}」（${fmt(s.at)}）时的数据？当前内容会先另存一份快照。`,
+    t('components.resourceeditor.extra.snapshotRestoreConfirm', { reason: s.reasonLabel, time: fmt(s.at) }),
     t('components.resourceeditor.restore'),
     () => doRestoreSnapshotConfirmed(s),
   );
@@ -546,7 +546,7 @@ async function doSave(raw?: any) {
   try {
     await save(data);
     if (jsonText.value === submittedText) isDirty.value = false;
-    ElNotification.success({ title: t('components.resourceeditor.saved'), message: `当前版本：v${doc.value.version}，更新后请重新启动一遍 ClassIsland 以加载最新的集控配置` });
+    ElNotification.success({ title: t('components.resourceeditor.saved'), message: t('components.resourceeditor.extra.restartHint', { version: doc.value.version }) });
     await fetchHistory();
   } catch { ElMessage.error(t('components.resourceeditor.saveFailed')); }
   finally { saving.value = false; }
@@ -597,7 +597,7 @@ async function doCopy() {
     const res: any = await $fetch(`/api/v1/console/ci/${props.collection}`, {
       method: "POST",
       headers: authHeaders(),
-      body: { name: `${doc.value.name} - 副本`, data: persistedData.value },
+      body: { name: t('components.resourceeditor.extra.copyName', { name: doc.value.name }), data: persistedData.value },
     });
     ElMessage.success(t('components.resourceeditor.copied'));
     navigateTo(`/${props.collection}/${res.data._id}`);
@@ -608,7 +608,7 @@ async function doCopy() {
 
 async function doDelete() {
   if (!doc.value) return;
-  askConfirm(t('components.resourceeditor.deleteConfirm'), `确定删除「${doc.value.name}」？此操作不可撤销。`, t('components.resourceeditor.delete'), () => doDeleteConfirmed(), true);
+  askConfirm(t('components.resourceeditor.deleteConfirm'), t('components.resourceeditor.extra.deleteConfirmDetail', { name: doc.value.name }), t('components.resourceeditor.delete'), () => doDeleteConfirmed(), true);
 }
 
 async function doDeleteConfirmed() {

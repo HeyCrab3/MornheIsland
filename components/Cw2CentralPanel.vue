@@ -52,7 +52,7 @@
           type="error"
           :closable="false"
           class="mb-2"
-          :title="`转换失败（${preview.errors.length} 项）`"
+          :title="$t('components.cw2centralpanel.extra.convertFailedTitle', { count: preview.errors.length })"
         >
           <ul class="m-0 pl-4 text-xs">
             <li v-for="(e, i) in preview.errors" :key="i">{{ e }}</li>
@@ -63,7 +63,7 @@
           type="warning"
           :closable="false"
           class="mb-2"
-          :title="`有 ${preview.warnings.length} 条警告`"
+          :title="$t('components.cw2centralpanel.extra.warningCountTitle', { count: preview.warnings.length })"
         >
           <ul class="m-0 pl-4 text-xs">
             <li v-for="(w, i) in preview.warnings" :key="i">{{ w }}</li>
@@ -227,12 +227,13 @@ const onlineCount = computed(() => devices.value.filter((d) => d.online && !d.re
 const previewTitle = computed(() => {
   if (!preview.value) return "";
   const { errors = [], warnings = [], schedule } = preview.value;
-  if (errors.length) return `预览失败：${errors.length} 项错误`;
+  if (errors.length) return t('components.cw2centralpanel.extra.previewFailedDetail', { count: errors.length });
   const days = schedule?.days?.length ?? 0;
   const asg = schedule?.assignments?.length ?? 0;
-  return `预览：${days} 天 / ${schedule?.subjects?.length ?? 0} 个科目 / ${asg} 条课时${
-    warnings.length ? `（${warnings.length} 条警告）` : ""
-  }`;
+  return (
+    t('components.cw2centralpanel.extra.previewSummary', { days, subjects: schedule?.subjects?.length ?? 0, asg }) +
+    (warnings.length ? t('components.cw2centralpanel.extra.previewWarningSuffix', { count: warnings.length }) : '')
+  );
 });
 
 function fmtTime(v: any): string {
@@ -281,7 +282,7 @@ async function doPublishSchedule() {
       headers: authHeaders(),
       body: { classId: props.classId },
     });
-    ElMessage.success(`已发布课表 v${res.data?.revision}`);
+    ElMessage.success(t('components.cw2centralpanel.extra.schedulePublished', { revision: res.data?.revision }));
     if (res.data?.warnings?.length) {
       preview.value = { warnings: res.data.warnings, errors: [], schedule: null };
     }
@@ -320,7 +321,7 @@ async function copyPairingCode() {
 
 async function revokeDevice(row: any) {
   try {
-    await ElMessageBox.confirm(`确定撤销设备「${row.name || row.installationId}」？`, t('components.cw2centralpanel.revokeDevice'), {
+    await ElMessageBox.confirm(t('components.cw2centralpanel.extra.revokeDeviceConfirm', { name: row.name || row.installationId }), t('components.cw2centralpanel.revokeDevice'), {
       type: "warning",
     });
   } catch {
@@ -381,7 +382,7 @@ async function doPublishPolicy() {
       headers: authHeaders(),
       body: { classId: props.classId, policy },
     });
-    ElMessage.success(`已发布策略 v${res.data?.revision}`);
+    ElMessage.success(t('components.cw2centralpanel.extra.policyPublished', { revision: res.data?.revision }));
     await refreshAll();
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.publishFailed'));

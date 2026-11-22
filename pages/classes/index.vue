@@ -22,13 +22,13 @@
       class="mb-4 school-hint"
     >
       <template #title>
-        「{{ c.orgName }}」下有 {{ c.classCount }} 个班，建议升级为学校维度聚合管理
+        {{ $t('pages.classes.index.extra.hintTitle', { org: c.orgName, n: c.classCount }) }}
       </template>
       <div class="text-xs leading-relaxed">
-        升级后这 {{ c.classCount }} 个班会归入同一所学校，可统一分配时间表/策略、按校批量下发插件与通知。
-        <span v-if="c.sharedResources.length">将自动带入 {{ c.sharedResources.length }} 项它们共享的资源</span>
+        {{ $t('pages.classes.index.extra.hintBody', { n: c.classCount }) }}
+        <span v-if="c.sharedResources.length">{{ $t('pages.classes.index.extra.hintResources', { n: c.sharedResources.length }) }}</span>
         <span v-if="c.devices.length">
-          、以及 {{ c.devices.length }} 台关联设备（其中 {{ c.onlineDeviceCount }} 台在线，可实时遥控）
+          {{ $t('pages.classes.index.extra.hintDevices', { devices: c.devices.length, online: c.onlineDeviceCount }) }}
         </span>
       </div>
       <div class="mt-2">
@@ -169,7 +169,7 @@
     <el-dialog v-model="showUpgrade" :title="$t('pages.classes.index.upgradeToSchoolManagement')" width="560px">
       <div v-if="upgradeTarget" class="space-y-3 text-sm">
         <div>
-          <div class="text-xs text-gray-400 mb-1">将纳入以下 {{ upgradeTarget.classCount }} 个班</div>
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.classes.index.extra.upgradeIncludes', { n: upgradeTarget.classCount }) }}</div>
           <div class="flex flex-wrap gap-1">
             <el-tag v-for="c in upgradeTarget.classes" :key="c.id" size="small" effect="plain">
               {{ c.name || c.identity }}
@@ -179,7 +179,7 @@
 
         <div>
           <div class="text-xs text-gray-400 mb-1">
-            共享资源（{{ upgradeTarget.sharedResources.length }} 项，升级后提升为学校级，同校其他班可直接选）
+            {{ $t('pages.classes.index.extra.upgradeSharedTitle', { n: upgradeTarget.sharedResources.length }) }}
           </div>
           <div v-if="upgradeTarget.sharedResources.length" class="space-y-1">
             <div
@@ -188,7 +188,7 @@
               class="flex items-center justify-between gap-2 text-xs"
             >
               <span class="truncate">{{ r.label }} · {{ r.name }}</span>
-              <span class="text-gray-400 shrink-0">{{ r.usedByCount }} 个班在用</span>
+              <span class="text-gray-400 shrink-0">{{ $t('pages.classes.index.extra.usedByClasses', { n: r.usedByCount }) }}</span>
             </div>
           </div>
           <div v-else class="text-xs text-gray-400">{{ $t('pages.classes.index.extra.noSharedResources') }}</div>
@@ -196,7 +196,7 @@
 
         <div>
           <div class="text-xs text-gray-400 mb-1">
-            关联设备（{{ upgradeTarget.devices.length }} 台，在线 {{ upgradeTarget.onlineDeviceCount }} 台可实时遥控）
+            {{ $t('pages.classes.index.extra.upgradeDevicesTitle', { devices: upgradeTarget.devices.length, online: upgradeTarget.onlineDeviceCount }) }}
           </div>
           <div v-if="upgradeTarget.devices.length" class="space-y-1">
             <div
@@ -229,7 +229,7 @@
     </el-dialog>
 
     <!-- 下发配置弹窗 -->
-    <ResponsiveDrawer v-model:open="showPreset" :title="`下发配置 - ${currentActiveRow.name}`">
+    <ResponsiveDrawer v-model:open="showPreset" :title="$t('pages.classes.index.extra.presetDrawerTitle', { name: currentActiveRow.name })">
       <div class="py-2">
         <!-- 加入模式 -->
         <div class="mb-4">
@@ -264,11 +264,11 @@
         <el-steps direction="vertical" class="mt-4" style="height: 220px">
           <el-step
             :title="$t('pages.classes.index.downloadConfigFile')"
-            :description="`点击下方「下载配置文件」按钮，下载 ${currentActiveRow.name} 的集控配置文件`"
+            :description="$t('pages.classes.index.extra.stepDownloadDesc', { name: currentActiveRow.name })"
           />
           <el-step
             :title="$t('pages.classes.index.installToClassIsland')"
-            :description="`打开 ${currentActiveRow.name} 的 ClassIsland 应用设置，点击右上角三个点，选择「加入管理」，选中刚刚下载的配置文件，点击「确定」`"
+            :description="$t('pages.classes.index.extra.stepInstallDesc', { name: currentActiveRow.name })"
           />
           <el-step
             :title="$t('pages.classes.index.configComplete')"
@@ -442,7 +442,7 @@ async function doUpgrade() {
     });
     const d = res?.data || {};
     ElMessage.success(
-      `已升级为「${d.schoolName}」：${d.linkedClasses} 个班、${d.adoptedResources} 项共享资源、${d.devices} 台设备`,
+      t("pages.classes.index.extra.upgradeSuccess", { name: d.schoolName, classes: d.linkedClasses, resources: d.adoptedResources, devices: d.devices }),
     );
     showUpgrade.value = false;
     await Promise.all([fetchClasses(), fetchSchoolCandidates()]);

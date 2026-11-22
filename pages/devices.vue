@@ -162,7 +162,7 @@
 
       <template v-if="visibleStatic.length">
         <div v-if="mode === 'all'" class="text-xs text-gray-400 mb-2">
-          静态配置 · {{ visibleStatic.length }} {{ $t('pages.devices.extra.unit') }}（{{ $t('pages.devices.extra.staticHint') }}）
+          {{ $t('pages.devices.extra.staticConfig') }} · {{ visibleStatic.length }} {{ $t('pages.devices.extra.unit') }}（{{ $t('pages.devices.extra.staticHint') }}）
         </div>
         <el-alert
           v-if="mode === 'static'"
@@ -221,8 +221,8 @@
       v-model:open="notifyVisible"
       :title="
         notifyBatch?.length
-          ? `推送通知 · 已选 ${notifyBatch.length} 台`
-          : `推送通知 · ${notifyTarget?.className || notifyTarget?.identity || ''}`
+          ? $t('pages.devices.extra.notifyBatchTitle', { count: notifyBatch.length })
+          : $t('pages.devices.extra.notifyTargetTitle', { target: notifyTarget?.className || notifyTarget?.identity || '' })
       "
     >
       <el-form label-position="top" class="py-2">
@@ -414,9 +414,9 @@ async function sendNotify() {
     });
     const sent = res.data?.sent ?? 0;
     if (res.data?.rejected?.length) {
-      ElMessage.warning(`已推送 ${sent} 台；有 ${res.data.rejected.length} 台不属于本账号，已忽略`);
+      ElMessage.warning(t('pages.devices.extra.notifyPartiallyRejected', { sent, rejected: res.data.rejected.length }));
     } else {
-      ElMessage.success(`已推送（${sent} 台）`);
+      ElMessage.success(t('pages.devices.extra.notifySent', { sent }));
     }
     notifyVisible.value = false;
     if (batch?.length) selectedCuids.value = [];
@@ -434,7 +434,7 @@ async function sendDataUpdated(d: any) {
       headers: auth(),
       body: { cuid: d.cuid },
     });
-    ElMessage.success(`已通知刷新（${res.data?.sent ?? 0} 台）`);
+    ElMessage.success(t('pages.devices.extra.refreshNotified', { sent: res.data?.sent ?? 0 }));
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.devices.operationFailed'));
   }
@@ -459,7 +459,7 @@ async function refreshPlugins(d: any) {
     if (res.data?.plugins) {
       d.plugins = res.data.plugins;
       d.pluginsUpdatedAt = new Date().toISOString();
-      ElMessage.success(`已获取 ${res.data.plugins.length} 个插件`);
+      ElMessage.success(t('pages.devices.extra.pluginsFetched', { count: res.data.plugins.length }));
     } else {
       ElMessage.warning(res.msg || t('pages.devices.deviceNotResponding'));
     }
@@ -482,7 +482,7 @@ const confirmState = ref({
 function confirmRestart(d: any) {
   confirmState.value = {
     title: t('pages.devices.restartDevice'),
-    description: `确定让「${d.className || d.identity}」重启 ClassIsland？`,
+    description: t('pages.devices.extra.restartConfirm', { name: d.className || d.identity }),
     confirmText: t('pages.devices.restart'),
     onConfirm: () => doRestart(d),
   };
@@ -500,7 +500,7 @@ async function doRestart(d: any) {
       headers: auth(),
       body: { cuid: d.cuid },
     });
-    ElMessage.success(`已下发重启（${res.data?.sent ?? 0} 台）`);
+    ElMessage.success(t('pages.devices.extra.restartDispatched', { sent: res.data?.sent ?? 0 }));
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || t('pages.devices.operationFailed'));
   }

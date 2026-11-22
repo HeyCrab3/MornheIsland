@@ -144,7 +144,7 @@ function doSave() {
     // 验证所有字段
     for (const f of policyFields) {
       if (typeof data[f.key] !== "boolean") {
-        ElMessage.warning(`字段 ${f.key} 缺失或类型错误`);
+        ElMessage.warning(t('pages.policy.id.extra.fieldInvalid', { key: f.key }));
         return;
       }
     }

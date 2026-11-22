@@ -8,7 +8,7 @@
         {{ $t('components.grpcproxynotice.extra.grpcProxyIntro2') }}
         <code>Unable to get subchannel from HttpRequestMessage</code>{{ $t('components.grpcproxynotice.extra.grpcProxyIntro3') }}
         <code>http://</code>{{ $t('components.grpcproxynotice.extra.grpcProxyIntro4') }}
-        <code>unable to establish HTTP/2 connection</code>。
+        <code>unable to establish HTTP/2 connection</code>{{ $t('components.grpcproxynotice.extra.grpcProxyIntro7') }}
         <b>{{ $t('components.grpcproxynotice.extra.grpcProxyIntro5') }}</b>{{ $t('components.grpcproxynotice.extra.grpcProxyIntro6') }}
       </p>
       <p>
@@ -46,7 +46,7 @@ const host = computed(() => {
 async function copyHost() {
   try {
     await navigator.clipboard.writeText(host.value);
-    ElMessage.success(`已复制代理例外地址：${host.value}`);
+    ElMessage.success(t('components.grpcproxynotice.extra.copiedExceptionAddress', { host: host.value }));
   } catch {
     ElMessage.error(t('components.cw2centralpanel.copyFailed'));
   }

@@ -79,8 +79,7 @@
           <li>{{ $t('pages.classes.id.extra.stepPlace') }}</li>
           <li>{{ $t('pages.classes.id.extra.stepJoin') }}</li>
           <li v-if="bootstrapUrl">
-            如需平台分发插件，先在该机器上安装<a :href="bootstrapUrl" target="_blank" class="underline">引导插件</a>（ClassIsland
-            不支持由服务端安装插件，每台机器需手动装一次）
+            {{ $t('pages.classes.id.extra.bootstrapIntroBefore') }}<a :href="bootstrapUrl" target="_blank" class="underline">{{ $t('pages.classes.id.extra.bootstrapIntroLink') }}</a>{{ $t('pages.classes.id.extra.bootstrapIntroAfter') }}
           </li>
         </ol>
       </el-alert>
@@ -112,10 +111,10 @@
             <template #prepend>{{ $t('pages.classes.index.extra.grpcAddress') }}</template>
           </el-input>
           <div class="text-xs text-gray-500 mt-2 leading-relaxed">
-            客户端会<b>直连</b>这个地址建长连接，它不走 443、也不经过 /api 代理。
-            只放行 443 的环境下客户端连不上，集控模式下连「加入」都会失败。
-            若已用 nginx 把 gRPC 反代到 443 并上了 TLS，请填 <code>https://域名</code>；
-            想在所有班级统一改，可在后端 config 里设 <code>public_grpc_address</code>。
+            {{ $t('pages.classes.id.extra.grpcHint1Before') }}<b>{{ $t('pages.classes.id.extra.grpcHint1Bold') }}</b>{{ $t('pages.classes.id.extra.grpcHint1After') }}
+            {{ $t('pages.classes.id.extra.grpcHint2') }}
+            {{ $t('pages.classes.id.extra.grpcHint3Before') }} <code>https://域名</code>；
+            {{ $t('pages.classes.id.extra.grpcHint4Before') }} <code>public_grpc_address</code>。
           </div>
           <el-alert
             v-if="grpcEndpoint.loaded && !grpcEndpoint.isConfigured"
@@ -148,7 +147,7 @@
 
       <el-alert type="warning" :closable="false" show-icon>
         <template #title>
-          请先关联{{ missingRequired.map((s) => s.label).join("、") || $t('pages.classes.id.requiredResources') }}后再下发配置
+          {{ $t('pages.classes.id.extra.linkBeforeDeploy') }}{{ missingRequired.map((s) => s.label).join("、") || $t('pages.classes.id.requiredResources') }}{{ $t('pages.classes.id.extra.linkBeforeDeployAfter') }}
         </template>
         {{ $t('pages.classes.id.extra.requiredFieldsNote') }}
       </el-alert>
@@ -178,7 +177,7 @@ const id = route.params.id as string;
 /** 看板要的是班级 ID，这里直接给出去，省得用户自己去地址栏抠 */
 function copyClassId() {
   navigator.clipboard.writeText(id).then(
-    () => ElMessage.success(`已复制班级 ID：${id}`),
+    () => ElMessage.success(t("pages.classes.id.extra.classIdCopied", { id })),
     () => ElMessage.error(t("components.cw2centralpanel.copyFailed")),
   );
 }
@@ -273,7 +272,7 @@ async function fetchAll() {
 
 async function doSave() {
   if (missingRequired.value.length) {
-    ElMessage.warning(`请先关联：${missingRequired.value.map((s) => s.label).join("、")}（策略可选）`);
+    ElMessage.warning(t("pages.classes.id.extra.saveMissingBefore") + missingRequired.value.map((s) => s.label).join("、") + t("pages.classes.id.extra.saveMissingAfter"));
     return;
   }
   saving.value = true;

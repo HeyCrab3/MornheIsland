@@ -72,8 +72,8 @@
       </el-button>
 
       <p class="text-xs text-neutral-400 text-center">
-        子账号由你的班级/学校主账号创建，登录名形如
-        <b>子账户名@主账号名</b>，密码请向对方索取。
+        {{ $t('pages.login.subAccountHintBefore') }}
+        <b>{{ $t('pages.login.subAccountHintBold') }}</b>{{ $t('pages.login.subAccountHintAfter') }}
       </p>
     </template>
 
@@ -150,10 +150,10 @@
     <NuxtLink to="/terms" class="text-blue-500 hover:underline"
       >《{{ $t('sidebar.userAgreement') }}》</NuxtLink
     >
-    与
+    {{ $t('pages.login.agreementBetween') }}
     <NuxtLink to="/privacy" class="text-blue-500 hover:underline"
       >《{{ $t('sidebar.privacyPolicy') }}》</NuxtLink
-    >。不同登录方式数据不互通。
+    >{{ $t('pages.login.agreementAfter') }}
   </p>
   <p class="text-xs text-gray-400 mt-2 text-center">
     {{ $t('login.delegateHint') }}

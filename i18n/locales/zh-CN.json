@@ -189,7 +189,9 @@
         "subjectsLabel": "课程表：",
         "timeLayoutLabel": "时间表：",
         "weekLabel": "周次：",
-        "weekRuleHint": "每周 = 不轮换；单周 + 双周 = 两周轮换"
+        "weekRuleHint": "每周 = 不轮换；单周 + 双周 = 两周轮换",
+        "periodLabel": "第{index}节",
+        "weekCopied": "已将「{from}」复制到「{to}」"
       }
     },
     "cw2centralpanel": {
@@ -254,7 +256,15 @@
         "publishSchedule": "发布课表",
         "refresh": "刷新",
         "revoke": "撤销",
-        "scheduleVersion": "课表版本："
+        "scheduleVersion": "课表版本：",
+        "convertFailedTitle": "转换失败（{count} 项）",
+        "warningCountTitle": "有 {count} 条警告",
+        "previewFailedDetail": "预览失败：{count} 项错误",
+        "previewSummary": "预览：{days} 天 / {subjects} 个科目 / {asg} 条课时",
+        "previewWarningSuffix": "（{count} 条警告）",
+        "schedulePublished": "已发布课表 v{revision}",
+        "policyPublished": "已发布策略 v{revision}",
+        "revokeDeviceConfirm": "确定撤销设备「{name}」？"
       }
     },
     "home": {
@@ -341,7 +351,8 @@
           "userAgent": "用户代理:",
           "platform": "平台:",
           "userId": "用户 ID:",
-          "time": "时间:"
+          "time": "时间:",
+          "fetchFingerprintFailed": "获取设备指纹信息失败：{error}"
         }
       }
     },
@@ -368,13 +379,21 @@
         "noQrBody": "生成后打印张贴在班牌上即可。",
         "close": "关闭",
         "totalPrefix": "/ 共",
-        "totalUnit": "台"
+        "totalUnit": "台",
+        "onlineDevices": "{count} 台设备在线",
+        "totalDevices": "/ 共 {count} 台"
       }
     },
     "platformnoticepopup": {
       "urgentNotice": "紧急公告",
       "importantNotice": "重要公告",
-      "unknownTime": "未知时间"
+      "unknownTime": "未知时间",
+      "publishedAt": "发布于 {time}",
+      "morePending": "· 还有 {count} 条待查看",
+      "gotIt": "我知道了",
+      "urgent": "紧急公告",
+      "important": "重要公告",
+      "normal": "公告"
     },
     "resourceeditor": {
       "schoolSharedReadOnly": "学校共享资源 · 只读",
@@ -424,7 +443,16 @@
         "snapshotHintB": "历史版本按「版本号」记；这里按「动作」记，两者互为冗余。",
         "updatedAt": "更新于",
         "usedByA": "被",
-        "usedByB": "个班级使用："
+        "usedByB": "个班级使用：",
+        "editLabel": "{label}编辑",
+        "versionPreview": "版本预览 · v{version}",
+        "restoreConfirm": "确定恢复到 v{version}？当前内容将存入历史。",
+        "restored": "已恢复到 v{version}（新版本 v{newVersion}）",
+        "snapshotPreview": "快照预览 · {reason}",
+        "snapshotRestoreConfirm": "确定恢复到「{reason}」（{time}）时的数据？当前内容会先另存一份快照。",
+        "restartHint": "当前版本：v{version}，更新后请重新启动一遍 ClassIsland 以加载最新的集控配置",
+        "copyName": "{name} - 副本",
+        "deleteConfirmDetail": "确定删除「{name}」？此操作不可撤销。"
       }
     },
     "resourcelist": {
@@ -439,7 +467,13 @@
         "readOnly": "只读",
         "rename": "改名",
         "schoolShared": "学校共享",
-        "updatedAt": "更新于"
+        "updatedAt": "更新于",
+        "deleteConfirm": "确定删除「{name}」？",
+        "emptyHint": "暂无{label}，点击右上角「新建{label}」开始",
+        "createTitle": "新建{label}",
+        "nameLabel": "{label}名称",
+        "namePlaceholder": "如「高中标准{label}」",
+        "created": "{label}已创建"
       }
     },
     "subjectseditor": {
@@ -538,7 +572,14 @@
         "set": "已设置",
         "warnA": "时间上有",
         "warnB": "处问题，保存前请确认",
-        "zeroLength": "零长度"
+        "zeroLength": "零长度",
+        "originalActionBytes": "原有 {count} 字节",
+        "itemCountKept": "{count} 项（原样保留）",
+        "segmentLabel": "第 {index} 段",
+        "segmentNameSuffix": "（{name}）",
+        "endBeforeStart": "{label}：结束时间不晚于开始时间",
+        "actionJsonError": "「{name}」的动作 JSON 格式错误，先改好再保存",
+        "overlapPrev": "{label}：开始时间早于前一段（{prevLabel}）的结束时间 {prevEnd}"
       }
     },
     "grpcproxynotice": {
@@ -559,7 +600,9 @@
         "grpcProxyWarning1": "注意：仅在代理软件里给该域名配一条「直连 / DIRECT」规则",
         "grpcProxyWarningBold": "无效",
         "grpcProxyWarning2": "，流量仍会先进代理进程，照样触发这个 bug。",
-        "copyExceptionAddress": "复制例外地址"
+        "copyExceptionAddress": "复制例外地址",
+        "copiedExceptionAddress": "已复制代理例外地址：{host}",
+        "grpcProxyIntro7": "。"
       }
     },
     "celldropzone": {
@@ -582,13 +625,27 @@
       "plan": "课表",
       "subject": "科目",
       "settings": "设置",
-      "policy": "策略"
+      "policy": "策略",
+      "renamePrompt": "给「{name}」起个新名字",
+      "renameTitle": "重命名{label}",
+      "renamed": "已重命名为「{name}」",
+      "savedVersion": "{label}已保存，v{version}",
+      "labelPlan": "课表",
+      "labelTimeLayout": "时间表",
+      "labelSubjects": "科目",
+      "labelSettings": "设置",
+      "labelPolicy": "策略"
     },
     "useunsavedguard": {
       "unsavedChangesWarning": "有未保存的内容，退出将丢失编辑器内所有未保存更改",
       "notice": "提示",
       "discardChanges": "放弃更改",
       "continueEditing": "继续编辑"
+    },
+    "usemanagementpreset": {
+      "copiedConfig": "已复制 {name} 的配置文件（{mode}模式）",
+      "modeGrpc": "集控服务器",
+      "modeStatic": "静态配置"
     }
   },
   "error": {
@@ -662,7 +719,14 @@
         "statUpdated": "覆盖",
         "resultFootnote": "导入只新增/覆盖，不会删除现有内容。刷新各页面即可看到结果。",
         "close": "关闭",
-        "refreshData": "刷新数据"
+        "refreshData": "刷新数据",
+        "unnamedIdentity": "无标识",
+        "skippedNewIds": "有 {count} 条改用了新 id",
+        "classScope": "班级：{name}",
+        "invalidBackupFormat": "这不是莫宁岛备份文件（format={format}）",
+        "missingFormat": "缺失",
+        "versionTooNew": "备份版本 {version} 高于当前支持的 1，请先升级平台",
+        "importCompleted": "导入完成：新建 {created}，覆盖 {updated}"
       }
     },
     "board": {
@@ -778,7 +842,11 @@
         "weekCalcB": "周。",
         "weekEmptyHint": "留空时单双周不做区分，按每周都上处理。",
         "weekFutureHint": "日期在未来，暂不参与计算。",
-        "windScaleUnit": "级"
+        "windScaleUnit": "级",
+        "scaleLabel": "整体缩放 {value}%",
+        "warningSpeedLabel": "预警滚动速度 {value} 字/秒",
+        "backgroundUpdated": "背景已更新（约 {kb} KB）",
+        "dateLabel": "{year}年{month}月{day}日 {weekday}"
       }
     },
     "callback": {
@@ -793,7 +861,8 @@
       "extra": {
         "loggingIn": "正在登录",
         "backToLogin": "返回重新登录"
-      }
+      },
+      "invalidChannel": "无效的登录渠道：{channel}"
     },
     "classes": {
       "index": {
@@ -843,7 +912,19 @@
           "bootstrapHint": "ClassIsland 不支持由服务端安装插件，每台机器要先手动装一次引导插件，装好后它才收得到分发的插件。",
           "copy": "复制",
           "download": "下载",
-          "threeStepsHint": "简单三步，即可让终端应用使用集控配置！"
+          "threeStepsHint": "简单三步，即可让终端应用使用集控配置！",
+          "hintTitle": "「{org}」下有 {n} 个班，建议升级为学校维度聚合管理",
+          "hintBody": "升级后这 {n} 个班会归入同一所学校，可统一分配时间表/策略、按校批量下发插件与通知。",
+          "hintResources": "将自动带入 {n} 项它们共享的资源",
+          "hintDevices": "、以及 {devices} 台关联设备（其中 {online} 台在线，可实时遥控）",
+          "upgradeIncludes": "将纳入以下 {n} 个班",
+          "upgradeSharedTitle": "共享资源（{n} 项，升级后提升为学校级，同校其他班可直接选）",
+          "usedByClasses": "{n} 个班在用",
+          "upgradeDevicesTitle": "关联设备（{devices} 台，在线 {online} 台可实时遥控）",
+          "presetDrawerTitle": "下发配置 - {name}",
+          "stepDownloadDesc": "点击下方「下载配置文件」按钮，下载 {name} 的集控配置文件",
+          "stepInstallDesc": "打开 {name} 的 ClassIsland 应用设置，点击右上角三个点，选择「加入管理」，选中刚刚下载的配置文件，点击「确定」",
+          "upgradeSuccess": "已升级为「{name}」：{classes} 个班、{resources} 项共享资源、{devices} 台设备"
         }
       },
       "id": {
@@ -874,7 +955,21 @@
           "staticModeHint": "客户端轮询静态清单拉取配置；改动后需等客户端下次检查才生效（有延迟）。",
           "grpcLiveHint": "客户端与集控服务器保持 gRPC 长连接，支持实时下发通知 / 刷新数据 / 分发插件。",
           "copyConfig": "复制配置",
-          "requiredFieldsNote": "档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。"
+          "requiredFieldsNote": "档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。",
+          "bootstrapIntroBefore": "如需平台分发插件，先在该机器上安装",
+          "bootstrapIntroLink": "引导插件",
+          "bootstrapIntroAfter": "（ClassIsland 不支持由服务端安装插件，每台机器需手动装一次）",
+          "grpcHint1Before": "客户端会",
+          "grpcHint1Bold": "直连",
+          "grpcHint1After": "这个地址建长连接，它不走 443、也不经过 /api 代理。",
+          "grpcHint2": "只放行 443 的环境下客户端连不上，集控模式下连「加入」都会失败。",
+          "grpcHint3Before": "若已用 nginx 把 gRPC 反代到 443 并上了 TLS，请填",
+          "grpcHint4Before": "想在所有班级统一改，可在后端 config 里设",
+          "linkBeforeDeploy": "请先关联",
+          "linkBeforeDeployAfter": "后再下发配置",
+          "classIdCopied": "已复制班级 ID：{id}",
+          "saveMissingBefore": "请先关联：",
+          "saveMissingAfter": "（策略可选）"
         }
       }
     },
@@ -918,7 +1013,10 @@
         "realNameHint": "填真实名字（例如「张三」）。委托期间你做的每一处修改都会记在这个名字下，这也是委托人信任你的前提。",
         "enter": "进入",
         "noDelegateCode": "没有代登录码？",
-        "loginWithAccount": "用账号登录"
+        "loginWithAccount": "用账号登录",
+        "loginSuccess": "已进入{ownerHint}委托{capsHint}",
+        "ownerHint": " {owner} 的",
+        "capsHint": "：{caps}"
       }
     },
     "devices": {
@@ -974,7 +1072,16 @@
         "emptyAll": "暂无设备记录",
         "emergency": "紧急（置顶覆盖）",
         "speech": "语音朗读",
-        "send": "发送"
+        "send": "发送",
+        "staticConfig": "静态配置",
+        "notifyBatchTitle": "推送通知 · 已选 {count} 台",
+        "notifyTargetTitle": "推送通知 · {target}",
+        "notifyPartiallyRejected": "已推送 {sent} 台；有 {rejected} 台不属于本账号，已忽略",
+        "notifySent": "已推送（{sent} 台）",
+        "refreshNotified": "已通知刷新（{sent} 台）",
+        "pluginsFetched": "已获取 {count} 个插件",
+        "restartConfirm": "确定让「{name}」重启 ClassIsland？",
+        "restartDispatched": "已下发重启（{sent} 台）"
       }
     },
     "exams": {
@@ -1005,7 +1112,8 @@
         "scheduledPrefix": "已安排",
         "scheduledSuffix": "场",
         "unsavedChanges": "有未保存的修改",
-        "syncHint": "提示：看板每 10 分钟同步一次，保存后最多等这么久生效；想立刻看到就刷新看板页面。"
+        "syncHint": "提示：看板每 10 分钟同步一次，保存后最多等这么久生效；想立刻看到就刷新看板页面。",
+        "pastRemoved": "已移除 {count} 条过期安排，记得保存"
       }
     },
     "g": {
@@ -1041,7 +1149,8 @@
           "validUntil": "有效至",
           "acceptedCount": "已接受",
           "personUnit": "人",
-          "noteLabel": "备注："
+          "noteLabel": "备注：",
+          "dateFormat": "{year}年{month}月{day}日 {time}"
         }
       }
     },
@@ -1117,7 +1226,17 @@
         "copyCode": "复制码",
         "active": "生效中",
         "acceptedLabel": "已接受",
-        "delegateCodeEnabled": "代登录码"
+        "delegateCodeEnabled": "代登录码",
+        "intro1": "把某个班的运维权临时交给别人：指定<b>能做哪些事</b>、<b>到什么时候为止</b>、<b>最多几个人</b>。",
+        "intro2": "对方用他自己的账号接受，所以每一步都追得到人；随时可以撤销，撤销即刻生效。",
+        "expirySlots": "到期 {date} · 名额 {used}/{max}",
+        "notePrefix": " · 备注：",
+        "ownerGrantSuffix": " 委托）",
+        "expiry": "到期 {date}",
+        "linkHint": "把这条链接发给对方，对方<b>用自己的账号登录</b>后点「接受委托」即可。",
+        "delegateHint1": "给<b>没有账号</b>的人用（学弟、家长、临时帮忙的人）。他打开",
+        "delegateHint2": "输入这串码和自己的名字就能进来 —— 不做注册，但每一步都记在他填的名字下。",
+        "dateFormat": "{month}月{day}日 {time}"
       }
     },
     "health": {
@@ -1168,7 +1287,10 @@
         "autoFix4": "时间表本身是空壳、科目被删、课时数对不上这类属于",
         "autoFixBold2": "数据内容",
         "autoFix5": "问题，需要回到档案库重做，",
-        "autoFix6": "自动改只会把错的内容下发得更整齐。"
+        "autoFix6": "自动改只会把错的内容下发得更整齐。",
+        "noIssuesFound": "检查了 {plans} 份课表、{layouts} 份时间表，没有发现问题",
+        "fixSummary": "已修复：课表 {plans} 份、时间表 {layouts} 份，共 {fields} 处",
+        "fixedItems": "已修复：{items}"
       }
     },
     "import": {
@@ -1235,16 +1357,28 @@
         "classPlansHint": "课表（可以直接去班级里关联）",
         "subjectsWithParentheses": "课程表（科目）",
         "goLinkClasses": "去班级关联",
-        "importAnother": "再导一个"
+        "importAnother": "再导一个",
+        "importCompleted": "导入完成，共创建 {total} 份资源"
       }
     },
     "index": {
       "noOrganizationYet": "尚未建立机构",
-      "schoolAggregation": "学校维度聚合"
+      "schoolAggregation": "学校维度聚合",
+      "publishedAt": "发布于 {time}",
+      "grpcOnlineSummary": "集控 gRPC {online}/{total} 在线 · 静态 {static}",
+      "grpcStatHint": "集控 {online} 在线 · 静态 {static}",
+      "distributedIn": "分布在 {count} 个机构",
+      "classTitle": "班级：{name}｜标识：{identity}｜MAC：{mac}",
+      "ipTitle": "IP：{ip}｜最后请求：{path}｜累计 {count} 次"
     },
     "login": {
       "ownerLogin": "主账号登录",
-      "subLogin": "子账号登录"
+      "subLogin": "子账号登录",
+      "subAccountHintBefore": "子账号由你的班级/学校主账号创建，登录名形如",
+      "subAccountHintBold": "子账户名@主账号名",
+      "subAccountHintAfter": "，密码请向对方索取。",
+      "agreementBetween": "与",
+      "agreementAfter": "。不同登录方式数据不互通。"
     },
     "n": {
       "token": {
@@ -1263,7 +1397,10 @@
           "durationLabel": "显示时长",
           "sendNotification": "发送通知",
           "qrWarning": "⚠️ 二维码请勿外传。转发出去后任何人都能向本班大屏发通知，可能干扰正常教学秩序。"
-        }
+        },
+        "onlineDevices": "{count} 台设备在线",
+        "seconds": "{count} 秒",
+        "sentTo": "已发送到 {count} 台设备"
       }
     },
     "plugins": {
@@ -1400,7 +1537,30 @@
         "dispatchFailed": "下发失败",
         "resentPrefix": "已补发 ",
         "resentSuffix": " 台设备",
-        "noBootstrapWarningSuffix": " 台设备还没装引导插件"
+        "noBootstrapWarningSuffix": " 台设备还没装引导插件",
+        "importedMessage": "已导入「{name}」",
+        "inUseMessage": "「{name}」正被这些配置组引用：{groups}。删除后它们会缺少该插件。",
+        "updatedTo": "已更新到 v{version}",
+        "updatableMessage": "有 {count} 个插件可以更新（在卡片上点「更新到最新版」）",
+        "deletedDuplicates": "已删除 {count} 条重复",
+        "refreshed": "已刷新 {refreshed}/{online} 台在线设备",
+        "dispatched": "已下发（{count} 台）",
+        "resent": "已补发 {count} 台设备",
+        "noBootstrapWarning": "{count} 台设备还没装引导插件",
+        "unknownPluginsMessage": "有 {count} 个插件没识别出 id，已跳过",
+        "dependenciesCount": "依赖 {count}",
+        "sourceUrl": "来源 {url}",
+        "expectedPluginsWithCount": "期望插件（{count}）",
+        "boundClassesWithCount": "绑定班级（{count}）",
+        "installedCountMessage": "已装 {count} 个",
+        "collectedAtTime": " · 采集于 {time}",
+        "notCollectedYetFull": " · 尚未采集",
+        "profilesList": " · 配置组：{names}",
+        "missingList": "缺少：{names}",
+        "unmanagedList": "未纳管（手工装的）：{names}",
+        "resentThisTimeList": "本次补发：{names}",
+        "deviceInstalledMessage": "设备已装 {count} 个插件",
+        "downloadPrefixUrl": "插件下载地址前缀：{url}/api/v1/ci/plugin/…"
       }
     },
     "policy": {
@@ -1426,7 +1586,8 @@
         "policySavedRestartRequired": "策略已保存，请重启CI以使更改生效",
         "extra": {
           "jsonSyncHint": "修改 JSON 后开关自动同步，保存时以 JSON 内容为准",
-          "savePolicy": "保存策略"
+          "savePolicy": "保存策略",
+          "fieldInvalid": "字段 {key} 缺失或类型错误"
         }
       }
     },
@@ -1449,7 +1610,8 @@
       "deleteFailed": "注销失败",
       "extra": {
         "securityEntry": "账号安全（二步验证 / 登录记录）",
-        "deleteService": "注销服务"
+        "deleteService": "注销服务",
+        "confirmDeleteHint": "请输入你的账号名「{name}」以确认注销："
       }
     },
     "quickcreate": {
@@ -1496,7 +1658,25 @@
           "pageTitle": "学校（机构）",
           "refresh": "刷新",
           "howSchoolsWork": "学校是怎么来的",
-          "goToClasses": "去班级管理"
+          "goToClasses": "去班级管理",
+          "subtitle": "同一所学校的班级聚在一起：共享时间表/课程表/设置/策略，设备和通知也能在校内统一处理。",
+          "howBeforeCreate": "两条路：① 上面直接",
+          "howAfterCreate": "（只有 1 个班、或想先建好再挂班都行）；",
+          "howBeforeCandidate": "② 在「班级管理」里同机构有",
+          "howCandidateBold": "2 个及以上班级",
+          "howAfterCandidate": " 时会出现「建议升级为学校维度聚合管理」的提示，点一下建校并把共享资源带进来。",
+          "howBeforeInvite": "两种方式都",
+          "howInviteBold1": "不会按机构名自动合并别人的学校",
+          "howMidInvite": "。要进别人已经建好的学校，只有一条路：让该校管理员在「学校 → 成员」里生成",
+          "howInviteBold2": "邀请链接",
+          "howAfterInvite": "，你登录后点链接加入。",
+          "howNoOrgHint": "没填机构的班级不会被处理，保持个人模式。",
+          "classDeviceCount": "{classes} 个班级 · {devices} 台设备",
+          "onlineSuffix": "{n} 在线",
+          "createHintBefore": "创建后你就是这所学校的",
+          "createHintAfter": "，可以生成邀请链接让其他电教委员加入，也能把学校级的资源统一分配给各班。",
+          "createNameHint": "如果这个名字已经被其他账号建过，会让你走邀请链接加入，不会把两所学校合并。",
+          "createdSchool": "已创建「{name}」"
         }
       },
       "join": {
@@ -1520,7 +1700,12 @@
             "memberReadOnlySuffix": "，不能修改别人共享的内容。",
             "doNotShareLink": "邀请链接不要外传，拿到它的人都能进来。",
             "attachOwnClasses": "把自己的班级一并挂进来（可选）",
-            "noClassesToAttach": "你名下没有可以挂入的班级（没填机构或已在其他学校）。"
+            "noClassesToAttach": "你名下没有可以挂入的班级（没填机构或已在其他学校）。",
+            "existingClasses": "已有 {n} 个班级 ·",
+            "joinRole": "加入后身份为",
+            "joinedExisting": "已挂入「{name}」",
+            "joinedNew": "已加入「{name}」",
+            "joinedLinked": "，挂入 {n} 个班级"
           }
         }
       },
@@ -1629,7 +1814,38 @@
           "onlyThisSchool": "只发给这所学校的设备",
           "bootstrapHint": "客户端需要先装好「引导插件」才收得到分发指令；离线设备会在下次上线后自行拉取配置。",
           "noPluginsHint": "还没有插件，先去「插件管理」上传或从市场添加。",
-          "deliver": "下发"
+          "deliver": "下发",
+          "membersHintBefore": "学校有多人时，",
+          "membersHintBold": "创建者和管理员",
+          "membersHintAfter": "能改学校级资源，普通成员只读 —— 免得统一的时间表被随手改掉。",
+          "inviteHintBefore": "对方登录后点链接即可加入。",
+          "inviteHintBold": "不要公开发出去",
+          "inviteHintAfter": " —— 拿到链接的人都能进校。",
+          "usesCount": "用 {uses}/{maxUses} 次 ·",
+          "expiresAt": "到期 {date}",
+          "seconds": "{n} 秒",
+          "sendToSelected": "将发给已选中的 {n} 台在线设备。",
+          "mergeTitle": "合并是把「{name}」整个并进去，然后删掉这个学校",
+          "schoolOption": "{name}（{n} 个班）",
+          "mergePreviewFrom": "把 ",
+          "mergePreviewFromStats": "（{classes} 班 / {resources} 份学校级资源）",
+          "mergePreviewInto": "并入 ",
+          "mergePreviewIntoStats": "（{classes} 班）",
+          "duplicateNamesHint": "注意：有 {n} 份资源在两边同名",
+          "scopeAllDevices": "全校在线设备（{n} 台）",
+          "scopeSelectedDevices": "已选中的 {n} 台",
+          "linkedClasses": "已挂入 {n} 个班级",
+          "unlinkConfirm": "把「{name}」移出学校？班级会退回个人模式，资源和设备数据都不动。",
+          "shareConfirm": "把{label}「{name}」共享给这个学校？之后同校的管理员都能修改，全校班级都能选用。",
+          "sentToDevices": "已发送到 {n} 台设备",
+          "setRoleSuccess": "已设为{role}",
+          "mergeConfirm": "把「{from}」整个并进「{into}」，然后删除前者。这个操作不可撤销。",
+          "mergeSuccess": "已并入「{into}」：班级 {classes}、资源 {resources}、成员 {members}",
+          "cannotDeleteDetail": "这所学校里还有 {classes} 个班级、{resources} 份学校级资源。",
+          "deleteConfirm": "确定删除空学校「{name}」？删掉后邀请链接和成员关系一起失效。",
+          "notifiedRefresh": "已通知 {n} 台设备重新拉取配置",
+          "pluginDelivered": "已下发到 {sent} 台设备",
+          "pluginRejected": "（{n} 台不在本范围内被忽略）"
         }
       }
     },
@@ -1734,7 +1950,15 @@
         "lastMethodWarningSuffix": "」是你最后一种两步验证方式。删除后两步验证会被关闭——之后只凭一枚登录令牌就能进入你的账号，令牌被拷走就能一直用到 30 天后。确定要删除吗？",
         "deletePasskeyPrefix": "删除后「",
         "deletePasskeySuffix": "」就不能用来登录了，确定吗？",
-        "deleteFailed": "删除失败"
+        "deleteFailed": "删除失败",
+        "lastMethodWarning": "「{name}」是你最后一种两步验证方式。删除后两步验证会被关闭——之后只凭一枚登录令牌就能进入你的账号，令牌被拷走就能一直用到 30 天后。确定要删除吗？",
+        "deletePasskeyMessage": "删除后「{name}」就不能用来登录了，确定吗？",
+        "boundCount": "已绑定 {count} 个",
+        "passkeyCount": "通行密钥 · {count} 把",
+        "totpEnabledAtTime": "动态码开启于 {time}",
+        "boundAtTime": "绑定于 {time}",
+        "lastUsedAtTime": " · 最后使用 {time}",
+        "tokenVersionValue": "当前凭证版本：v{version}"
       }
     },
     "snapshots": {
@@ -1757,7 +1981,10 @@
         "alertBold4": "批量修复前",
         "alertBody5": "都留。资源被删掉之后，历史版本跟着没了，快照还在 —— 所以在这里可以把已经删掉的资源原地恢复回来。",
         "empty": "还没有任何快照。修改或删除资源之后，这里会自动出现记录。",
-        "restoreToMoment": "恢复到这一刻"
+        "restoreToMoment": "恢复到这一刻",
+        "restoreConfirm": "将把「{name}」恢复成 {time} 时的内容。",
+        "restoreTitle": "恢复到「{reason}」",
+        "restoredNewVersion": "已恢复（新版本 v{version}）"
       }
     },
     "subaccounts": {
@@ -1808,7 +2035,8 @@
         "copy": "复制",
         "resetConfirmHint": "重置后「{name}」已登录的会话会立刻失效，旧密码也不能再用。",
         "deleteConfirmHint": "删除「{name}」会撤销它名下的权限、把已登录的会话踢下线，账号本身也会删掉。这个操作不可恢复。",
-        "copyText": "登录名：{login}\n密码：{password}\n登录地址：{url}"
+        "copyText": "登录名：{login}\n密码：{password}\n登录地址：{url}",
+        "daysLabel": "{d} 天"
       }
     },
     "subjects": {
@@ -1823,7 +2051,10 @@
     },
     "slug": {
       "pageNotFound": "页面未找到",
-      "pageNotFoundHint": "抱歉，您访问的页面不存在。"
+      "pageNotFoundHint": "抱歉，您访问的页面不存在。",
+      "notFoundTitle": "页面未找到",
+      "notFoundDesc": "抱歉，您访问的页面不存在。",
+      "goHome": "带我回家！"
     }
   },
   "stores": {
@@ -1836,5 +2067,14 @@
     "getplatformdata": {
       "missingBusinessSku": "缺少业务SKU"
     }
+  },
+  "layouts": {
+    "default": {
+      "delegateSuffix": "（代操作）"
+    }
+  },
+  "config": {
+    "pwaName": "MornheIsland · 莫宁岛",
+    "pwaDescription": "ClassIsland 集控服务"
   }
 }

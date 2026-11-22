@@ -109,7 +109,10 @@ async function doLogin() {
 
     const caps = Array.isArray(res?.data?.caps) ? res.data.caps.join("、") : "";
     ElMessage.success(
-      `已进入${res?.data?.ownerName ? ` ${res.data.ownerName} 的` : ""}委托${caps ? `：${caps}` : ""}`,
+      t("pages.d.extra.loginSuccess", {
+        ownerHint: res?.data?.ownerName ? t("pages.d.extra.ownerHint", { owner: res.data.ownerName }) : "",
+        capsHint: caps ? t("pages.d.extra.capsHint", { caps }) : "",
+      }),
     );
     navigateTo("/classes");
   } catch (e: any) {

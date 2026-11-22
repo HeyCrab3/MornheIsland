@@ -96,7 +96,7 @@ export function useManagementPreset() {
   async function copyPreset(cls: any, mode: PresetMode = "serverless", grpcAddress?: string) {
     try {
       await navigator.clipboard.writeText(buildPreset(cls, mode, grpcAddress));
-      ElMessage.success(`已复制 ${cls?.name || cls?.identity} 的配置文件（${mode === "grpc" ? "集控服务器" : "静态配置"}模式）`);
+      ElMessage.success(t('composables.usemanagementpreset.copiedConfig', { name: cls?.name || cls?.identity, mode: mode === "grpc" ? t('composables.usemanagementpreset.modeGrpc') : t('composables.usemanagementpreset.modeStatic') }));
     } catch {
       ElMessage.error(t('components.cw2centralpanel.copyFailed'));
     }

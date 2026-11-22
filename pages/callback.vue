@@ -371,7 +371,7 @@ const login = async () => {
       return;
     }
     if (loginChannel !== "1" && loginChannel !== "2") {
-      ElMessageBox.alert(`无效的登录渠道：${loginChannel}`, t('pages.callback.error'), {
+      ElMessageBox.alert(t('pages.callback.invalidChannel', { channel: loginChannel }), t('pages.callback.error'), {
         type: "error",
       }).then(() => router.push("/login"));
       return;

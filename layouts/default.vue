@@ -61,6 +61,7 @@
 import { Menu, Sunny, Moon } from "@element-plus/icons-vue";
 
 const dark = useDarkMode();
+const { t } = useI18n();
 const runtimeConfig = useRuntimeConfig();
 const userStore = useUserStore();
 const layoutStore = useLayoutStore();
@@ -80,7 +81,7 @@ onBeforeUnmount(() => {
 
 const watermarkContent = computed(() => {
   if (!userStore.isLoggedIn) return [];
-  const who = userStore.isDelegate ? `${userStore.userName || ""}（代操作）` : userStore.userName || "";
+  const who = userStore.isDelegate ? `${userStore.userName || ""}${t('layouts.default.delegateSuffix')}` : userStore.userName || "";
   return [who, String(userStore.userId || ""), watermarkClock.value.toLocaleString("zh-CN", { hour12: false })];
 });
 </script>

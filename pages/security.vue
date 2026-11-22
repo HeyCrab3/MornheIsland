@@ -58,7 +58,7 @@
             {{ $t('pages.security.extra.totpLabel') }} {{ overview?.methods?.totp ? $t('pages.security.enabled') : $t('pages.security.disabled') }}
           </el-tag>
           <el-tag :type="overview?.methods?.passkey ? 'success' : 'info'" size="small" effect="plain">
-            {{ $t('pages.security.extra.passkeyCountPrefix') }}{{ overview?.passkeyCount || 0 }} {{ $t('pages.security.extra.passkeyUnit') }}
+            {{ $t('pages.security.extra.passkeyCount', { count: overview?.passkeyCount || 0 }) }}
           </el-tag>
         </div>
 
@@ -74,7 +74,7 @@
         </el-alert>
 
         <div v-if="overview?.mfaEnabledAt" class="text-xs text-gray-400 mt-3">
-          {{ $t('pages.security.extra.totpEnabledAt') }} {{ fmtTime(overview.mfaEnabledAt) }}
+          {{ $t('pages.security.extra.totpEnabledAtTime', { time: fmtTime(overview.mfaEnabledAt) }) }}
         </div>
 
         <div class="mt-4 flex gap-2">
@@ -94,7 +94,7 @@
         <p class="text-sm text-gray-500 leading-relaxed">
           {{ $t('pages.security.extra.credentialsDesc') }}
         </p>
-        <div class="text-xs text-gray-400 mt-2">{{ $t('pages.security.extra.tokenVersion') }}v{{ overview?.tokenVersion ?? 0 }}</div>
+        <div class="text-xs text-gray-400 mt-2">{{ $t('pages.security.extra.tokenVersionValue', { version: overview?.tokenVersion ?? 0 }) }}</div>
 
         <div class="mt-4 flex flex-wrap gap-2">
           <el-button :loading="revoking" @click="revokeOthers">{{ $t('pages.security.signOutOtherDevices') }}</el-button>
@@ -111,7 +111,7 @@
           <div class="flex items-center justify-between">
             <span class="font-medium">{{ $t('pages.security.extra.passkeyTitle') }}</span>
             <el-tag :type="passkeys.length ? 'success' : 'info'" size="small">
-              {{ passkeys.length ? `${$t('pages.security.extra.boundCountPrefix')}${passkeys.length} ${$t('pages.security.extra.passkeyUnit')}` : $t('pages.security.notBound') }}
+              {{ passkeys.length ? $t('pages.security.extra.boundCount', { count: passkeys.length }) : $t('pages.security.notBound') }}
             </el-tag>
           </div>
         </template>
@@ -139,8 +139,8 @@
                 <el-icon class="align-middle mr-1"><Key /></el-icon>{{ p.name }}
               </div>
               <div class="text-xs text-gray-400">
-                {{ $t('pages.security.extra.boundAt') }} {{ fmtTime(p.createdAt) }}
-                <span v-if="p.lastUsedAt"> · {{ $t('pages.security.extra.lastUsedAt') }} {{ fmtTime(p.lastUsedAt) }}</span>
+                {{ $t('pages.security.extra.boundAtTime', { time: fmtTime(p.createdAt) }) }}
+                <span v-if="p.lastUsedAt">{{ $t('pages.security.extra.lastUsedAtTime', { time: fmtTime(p.lastUsedAt) }) }}</span>
                 <span v-else> · {{ $t('pages.security.extra.neverUsed') }}</span>
               </div>
             </div>
@@ -472,8 +472,8 @@ async function removePasskey(p: any, retried = false, confirmed = false) {
   if (!confirmed) {
     const okConfirm = await ElMessageBox.confirm(
       lastOne
-        ? `${t('pages.security.extra.lastMethodWarningPrefix')}${p.name}${t('pages.security.extra.lastMethodWarningSuffix')}`
-        : `${t('pages.security.extra.deletePasskeyPrefix')}${p.name}${t('pages.security.extra.deletePasskeySuffix')}`,
+        ? t('pages.security.extra.lastMethodWarning', { name: p.name })
+        : t('pages.security.extra.deletePasskeyMessage', { name: p.name }),
       lastOne ? t('pages.security.willDisableTwoFactor') : t('pages.security.deletePasskey'),
       {
         type: "warning",

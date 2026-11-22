@@ -20,14 +20,14 @@
 
     <div v-if="current" class="notice-body">
       <div class="notice-meta">
-        发布于 {{ fmtTime(current.publishAt) }}
-        <span v-if="pending.length > 1" class="ml-2">· 还有 {{ pending.length - 1 }} 条待查看</span>
+        {{ $t('components.platformnoticepopup.publishedAt', { time: fmtTime(current.publishAt) }) }}
+        <span v-if="pending.length > 1" class="ml-2">{{ $t('components.platformnoticepopup.morePending', { count: pending.length - 1 }) }}</span>
       </div>
       <div class="notice-content">{{ current.content }}</div>
     </div>
 
     <template #footer>
-      <el-button type="primary" @click="acknowledge">我知道了</el-button>
+      <el-button type="primary" @click="acknowledge">{{ $t('components.platformnoticepopup.gotIt') }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -45,6 +45,8 @@
  *    否则中台里 4 条历史公告会让每个新用户一进来就连弹 4 个窗。
  * 这样无论发布时选的是哪一档，刚发出的公告都能弹出来，又不会被积压的历史刷屏。
  */
+const { t } = useI18n();
+
 const STORAGE_KEY = "mi-dismissed-notices-v1";
 const POLL_INTERVAL = 5 * 60 * 1000;
 /** 非紧急公告只在这个时间窗口内弹 */
@@ -134,10 +136,10 @@ function acknowledge() {
 }
 
 function priorityLabel(p: any): string {
-  if (isHighPriority(p)) return "紧急公告";
+  if (isHighPriority(p)) return t('components.platformnoticepopup.urgent');
   const v = String(p ?? "").toLowerCase();
-  if (/(medium|normal|中)/.test(v)) return "重要公告";
-  return "公告";
+  if (/(medium|normal|中)/.test(v)) return t('components.platformnoticepopup.important');
+  return t('components.platformnoticepopup.normal');
 }
 
 function tagType(p: any): "danger" | "warning" | "info" | "success" {
@@ -148,7 +150,7 @@ function tagType(p: any): "danger" | "warning" | "info" | "success" {
 }
 
 function fmtTime(v: any): string {
-  if (!v) return "未知时间";
+  if (!v) return t('components.platformnoticepopup.unknownTime');
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleString("zh-CN", { hour12: false });
 }

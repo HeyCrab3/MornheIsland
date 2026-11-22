@@ -4,8 +4,8 @@
       <div>
         <h1 class="text-xl font-semibold">{{ $t('pages.grants.extra.pageTitle') }}</h1>
         <p class="text-sm text-gray-500 mt-1">
-          把某个班的运维权临时交给别人：指定<b>能做哪些事</b>、<b>到什么时候为止</b>、<b>最多几个人</b>。
-          对方用他自己的账号接受，所以每一步都追得到人；随时可以撤销，撤销即刻生效。
+          {{ $t('pages.grants.extra.intro1') }}
+          {{ $t('pages.grants.extra.intro2') }}
         </p>
       </div>
       <el-button type="primary" @click="openCreate">{{ $t('pages.grants.createGrant') }}</el-button>
@@ -40,8 +40,8 @@
                   <el-tag v-for="c in g.capLabels" :key="c" size="small" effect="plain">{{ c }}</el-tag>
                 </div>
                 <div class="mt-2 text-xs text-gray-500">
-                  到期 {{ fmt(g.expiresAt) }} · 名额 {{ g.usedCount }}/{{ g.maxUses || $t('pages.g.token.unlimited') }}
-                  <span v-if="g.note"> · 备注：{{ g.note }}</span>
+                  {{ $t('pages.grants.extra.expirySlots', { date: fmt(g.expiresAt), used: g.usedCount, max: g.maxUses || $t('pages.g.token.unlimited') }) }}
+                  <span v-if="g.note">{{ $t('pages.grants.extra.notePrefix') }}{{ g.note }}</span>
                 </div>
                 <div v-if="g.members?.length" class="mt-2 text-xs text-gray-500">
                   {{ $t('pages.grants.extra.acceptedLabel') }}
@@ -82,12 +82,12 @@
               <div class="min-w-0">
                 <div class="font-medium">
                   {{ g.classes.map((c: any) => c.name || c.identity).join('、') }}
-                  <span class="text-xs text-gray-500 font-normal">（{{ g.ownerName || $t('pages.grants.others') }} 委托）</span>
+                  <span class="text-xs text-gray-500 font-normal">（{{ g.ownerName || $t('pages.grants.others') }}{{ $t('pages.grants.extra.ownerGrantSuffix') }}</span>
                 </div>
                 <div class="mt-2 flex flex-wrap gap-1">
                   <el-tag v-for="c in g.capLabels" :key="c" size="small" effect="plain">{{ c }}</el-tag>
                 </div>
-                <div class="mt-2 text-xs text-gray-500">到期 {{ fmt(g.expiresAt) }}</div>
+                <div class="mt-2 text-xs text-gray-500">{{ $t('pages.grants.extra.expiry', { date: fmt(g.expiresAt) }) }}</div>
               </div>
               <div class="flex gap-2 shrink-0">
                 <el-button size="small" type="primary" @click="navigateTo('/classes')">{{ $t('pages.grants.extra.enterClasses') }}</el-button>
@@ -145,7 +145,7 @@
 
     <el-dialog v-model="showLink" :title="$t('pages.grants.grantLinkCreated')" width="560px">
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-        把这条链接发给对方，对方<b>用自己的账号登录</b>后点「接受委托」即可。
+        {{ $t('pages.grants.extra.linkHint') }}
       </p>
       <el-input v-model="createdLink" readonly>
         <template #append>
@@ -162,9 +162,9 @@
 
     <el-dialog v-model="showDelegate" :title="$t('pages.grants.delegateCode')" width="520px">
       <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-        给<b>没有账号</b>的人用（学弟、家长、临时帮忙的人）。他打开
+         {{ $t('pages.grants.extra.delegateHint1') }}
         <code class="px-1 rounded bg-gray-100 dark:bg-gray-800">/d</code>
-        输入这串码和自己的名字就能进来 —— 不做注册，但每一步都记在他填的名字下。
+        {{ $t('pages.grants.extra.delegateHint2') }}
       </p>
       <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 text-center mb-3">
         <div class="text-2xl font-mono tracking-[0.3em] select-all">{{ delegateCode }}</div>
@@ -227,7 +227,11 @@ function fmt(v: any) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return t("pages.grants.extra.dateFormat", {
+    month: d.getMonth() + 1,
+    day: d.getDate(),
+    time: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+  });
 }
 
 async function reauthViaMfa(): Promise<boolean> {

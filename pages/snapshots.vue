@@ -109,9 +109,9 @@ async function restore(r: any) {
   if (!type) return ElMessage.error(t('pages.snapshots.unsupportedResourceType'));
   try {
     await ElMessageBox.confirm(
-      `将把「${r.name || "未命名"}」恢复成 ${fmt(r.at)} 时的内容。\n` +
+      t('pages.snapshots.extra.restoreConfirm', { name: r.name || t('components.resourceeditor.untitled'), time: fmt(r.at) }) + "\n" +
         t('pages.snapshots.snapshotBeforeRestore'),
-      `恢复到「${r.reasonLabel}」`,
+      t('pages.snapshots.extra.restoreTitle', { reason: r.reasonLabel }),
       { type: "warning", confirmButtonText: t('components.resourceeditor.restore'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
@@ -123,7 +123,7 @@ async function restore(r: any) {
       { method: "POST", headers: authHeaders() },
     );
     const recreated = res?.data?.recreated;
-    ElMessage.success(recreated ? t('pages.snapshots.resourceRebuilt') : `已恢复（新版本 v${res?.data?.version}）`);
+    ElMessage.success(recreated ? t('pages.snapshots.resourceRebuilt') : t('pages.snapshots.extra.restoredNewVersion', { version: res?.data?.version }));
     await load();
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t('pages.snapshots.restoreFailed'));

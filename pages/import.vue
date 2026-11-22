@@ -289,7 +289,7 @@ async function doImport() {
       },
     });
     result.value = res?.data || null;
-    ElMessage.success(`导入完成，共创建 ${result.value?.total ?? 0} 份资源`);
+    ElMessage.success(t('pages.import.extra.importCompleted', { total: result.value?.total ?? 0 }));
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t('pages.backup.importFailed'));
   } finally {

@@ -272,7 +272,7 @@
                 {{ $t('components.timelayouteditor.extra.keepOriginalActions') }}
               </el-checkbox>
               <span class="text-xs text-gray-400">
-                {{ p.raw?.ActionSet ? `原有 ${JSON.stringify(p.raw.ActionSet).length} 字节` : $t('components.timelayouteditor.originallyAbsent') }}
+                {{ p.raw?.ActionSet ? $t('components.timelayouteditor.extra.originalActionBytes', { count: JSON.stringify(p.raw.ActionSet).length }) : $t('components.timelayouteditor.originallyAbsent') }}
               </span>
             </div>
             <el-input
@@ -605,7 +605,7 @@ function attachedSummary(p: Seg): string {
   const a = p.raw?.AttachedObjects;
   if (!a || typeof a !== "object") return t('components.timelayouteditor.none');
   const n = Object.keys(a).length;
-  return n ? `${n} 项（原样保留）` : t('components.timelayouteditor.none');
+  return n ? t('components.timelayouteditor.extra.itemCountKept', { count: n }) : t('components.timelayouteditor.none');
 }
 
 /** 时间轴一致性检查：结束早于开始、跟前一段重叠、倒序 */
@@ -614,13 +614,15 @@ const warnings = computed(() => {
   let prevEnd = "";
   let prevLabel = "";
   segs.value.forEach((s, i) => {
-    const label = `第 ${i + 1} 段${s.name ? `（${s.name}）` : ""}`;
+    const label =
+      t('components.timelayouteditor.extra.segmentLabel', { index: i + 1 }) +
+      (s.name ? t('components.timelayouteditor.extra.segmentNameSuffix', { name: s.name }) : '');
     const zeroLen = s.TimeType === 2 || s.TimeType === 3;
     if (!zeroLen && s.start && s.end && s.end <= s.start) {
-      out.push(`${label}：结束时间不晚于开始时间`);
+      out.push(t('components.timelayouteditor.extra.endBeforeStart', { label }));
     }
     if (prevEnd && s.start && s.start < prevEnd) {
-      out.push(`${label}：开始时间早于前一段（${prevLabel}）的结束时间 ${prevEnd}`);
+      out.push(t('components.timelayouteditor.extra.overlapPrev', { label, prevLabel, prevEnd }));
     }
     if (s.end) {
       prevEnd = s.end;
@@ -659,12 +661,12 @@ function doSave() {
   const parsedActions = new Map<string, any>();
   for (const s of segs.value) {
     if (s.actionsCleared) continue;
-    const t = String(s.actionsText ?? "").trim();
-    if (!t || t === s.actionsTextOrigin) continue;
+    const rawText = String(s.actionsText ?? "").trim();
+    if (!rawText || rawText === s.actionsTextOrigin) continue;
     try {
-      parsedActions.set(s._id, JSON.parse(t));
+      parsedActions.set(s._id, JSON.parse(rawText));
     } catch {
-      ElMessage.error(`「${s.name || `第 ${segs.value.indexOf(s) + 1} 段`}」的动作 JSON 格式错误，先改好再保存`);
+      ElMessage.error(t('components.timelayouteditor.extra.actionJsonError', { name: s.name || t('components.timelayouteditor.extra.segmentLabel', { index: segs.value.indexOf(s) + 1 }) }));
       actionOpenId.value = s._id;
       return;
     }

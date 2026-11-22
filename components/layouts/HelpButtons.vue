@@ -78,7 +78,7 @@
       type="warning"
       class="mb-2"
     />
-    <el-alert v-if="error" type="error" show-icon :title='`获取设备指纹信息失败：${error}`' class="mb-2"/>
+    <el-alert v-if="error" type="error" show-icon :title="t('components.layouts.helpbuttons.extra.fetchFingerprintFailed', { error })" class="mb-2"/>
     <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.visitorId') }} {{data?.visitor_id}}</p>
     <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.sessionId') }} {{data?.event_id}}</p>
     <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.userAgent') }} {{diagnosedData.userAgent}}</p>
@@ -112,8 +112,11 @@ import {
   Tools,
 } from "@element-plus/icons-vue";
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useUserStore } from "@/stores/user";
 import { useVisitorData } from "@fingerprint/vue";
+
+const { t } = useI18n();
 
 const store = useUserStore();
 const showExtra = ref(false);

@@ -28,8 +28,8 @@
           <div class="min-w-0">
             <div class="font-semibold truncate">{{ info.school.name }}</div>
             <div class="text-xs text-gray-400 mt-0.5">
-              已有 {{ info.classCount }} 个班级 ·
-              加入后身份为 <b>{{ roleLabel(info.role) }}</b>
+              {{ $t('pages.schools.join.token.extra.existingClasses', { n: info.classCount }) }}
+              {{ $t('pages.schools.join.token.extra.joinRole') }} <b>{{ roleLabel(info.role) }}</b>
             </div>
           </div>
         </div>
@@ -131,8 +131,9 @@ async function accept() {
     });
     const d = res?.data;
     ElMessage.success(
-      `${d?.alreadyMember ? "已挂入" : "已加入"}「${d?.schoolName || "学校"}」` +
-        (d?.linked ? `，挂入 ${d.linked} 个班级` : ""),
+      t(d?.alreadyMember ? "pages.schools.join.token.extra.joinedExisting" : "pages.schools.join.token.extra.joinedNew", {
+        name: d?.schoolName || t("sidebar.items.schools"),
+      }) + (d?.linked ? t("pages.schools.join.token.extra.joinedLinked", { n: d.linked }) : ""),
     );
     navigateTo(`/schools/${d?.schoolId}`);
   } catch (e: any) {

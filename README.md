@@ -93,6 +93,16 @@ pnpm install
 pnpm dev                          # 默认端口 6003，API 代理到 7000
 ```
 
+## 国际化（i18n）
+
+前端已接入 `@nuxtjs/i18n`，只注册了 `zh-CN`，界面文案保持原样。
+
+- 配置在 `nuxt.config.ts` 的 `i18n` 段，URL 不带语言前缀，不自动切换语言。
+- 字典在 `i18n/locales/zh-CN.json`，收录全站中文原文（860 条），按文件分组。key 是英文，value 是中文原文。
+- 页面标题可用 `defineI18nPageMeta("key")`。
+
+加新语言：复制 `zh-CN.json` 改名为 `en.json` 并填入译文，在 `nuxt.config.ts` 的 `i18n.locales` 注册，然后把模板里的中文替换为 `$t("...")`。
+
 ## ClassIsland 集成
 
 1. 在 MornheIsland 中创建班级，配置课表、时间表、策略

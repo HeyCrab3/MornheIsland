@@ -12,8 +12,8 @@
 
       <div v-if="url" class="qr-meta">
         <span :class="['qr-dot', online ? 'is-on' : 'is-off']"></span>
-        {{ online ? `${online} 台设备在线` : $t('components.notifyqrdialog.noOnlineDevice') }}
-        <span class="text-gray-400">{{ $t('components.notifyqrdialog.extra.totalPrefix') }} {{ deviceCount }} {{ $t('components.notifyqrdialog.extra.totalUnit') }}</span>
+        {{ online ? $t('components.notifyqrdialog.extra.onlineDevices', { count: online }) : $t('components.notifyqrdialog.noOnlineDevice') }}
+        <span class="text-gray-400">{{ $t('components.notifyqrdialog.extra.totalDevices', { count: deviceCount }) }}</span>
       </div>
 
       <el-input v-if="url" :model-value="url" readonly size="small" class="mt-3">

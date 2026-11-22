@@ -113,7 +113,7 @@
             <tbody>
               <tr v-for="(tp, tpi) in timePoints" :key="tpi">
                 <td class="border p-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-600 align-top">
-                  <div class="font-medium">{{ tp.TimePointName || `第${tpi + 1}节` }}</div>
+                  <div class="font-medium">{{ tp.TimePointName || $t('components.classplaneditor.extra.periodLabel', { index: tpi + 1 }) }}</div>
                   <div class="text-gray-400">{{ tp.Start }}-{{ tp.End }}</div>
                 </td>
                 <td
@@ -156,7 +156,7 @@
       <div class="mt-3 text-xs text-gray-400">
         {{ $t('components.classplaneditor.extra.dismissalLineA') }}{{ weekLabel(activeWeekDiv) }}{{ $t('components.classplaneditor.extra.dismissalLineB') }}
         <span class="text-gray-500">
-          {{ activeDays.map((d) => `${DAYS.find((x) => x.value === d)?.label}第${lastEnabled(d) + 1}节`).join(" · ") }}
+          {{ activeDays.map((d) => DAYS.find((x) => x.value === d)?.label + $t('components.classplaneditor.extra.periodLabel', { index: lastEnabled(d) + 1 })).join(" · ") }}
         </span>
       </div>
 
@@ -416,7 +416,7 @@ function copyWeekTo(dst: number) {
     enabledFlag[target][d] = [...(enabledFlag[src]?.[d] || [])];
   }
   existingUuids[target] = {};
-  ElMessage.success(`已将「${weekLabel(src)}」复制到「${weekLabel(target)}」`);
+  ElMessage.success(t('components.classplaneditor.extra.weekCopied', { from: weekLabel(src), to: weekLabel(target) }));
   forceRender.value++;
 }
 

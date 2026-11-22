@@ -150,10 +150,10 @@ async function fixAllNullGuid() {
     });
     const d = res?.data || {};
     if (!d.fixedFields) {
-      ElMessage.success(`检查了 ${d.scannedClassPlans ?? 0} 份课表、${d.scannedTimeLayouts ?? 0} 份时间表，没有发现问题`);
+      ElMessage.success(t('pages.health.extra.noIssuesFound', { plans: d.scannedClassPlans ?? 0, layouts: d.scannedTimeLayouts ?? 0 }));
     } else {
       ElMessage.success(
-        `已修复：课表 ${d.fixedClassPlans} 份、时间表 ${d.fixedTimeLayouts} 份，共 ${d.fixedFields} 处`,
+        t('pages.health.extra.fixSummary', { plans: d.fixedClassPlans, layouts: d.fixedTimeLayouts, fields: d.fixedFields }),
       );
       await load();
     }
@@ -200,7 +200,7 @@ async function fix(row: any) {
     });
     const fixed: string[] = res?.data?.fixed || [];
     if (fixed.length) {
-      ElMessage.success(`已修复：${fixed.join(", ")}`);
+      ElMessage.success(t('pages.health.extra.fixedItems', { items: fixed.join(", ") }));
       await load();
     } else {
       ElMessage.info(res?.data?.message || t('pages.health.nothingToAutoFix'));

@@ -16,7 +16,7 @@
       <template v-else>
         <div class="mnp-status" :class="online ? 'is-on' : 'is-off'">
           <span class="mnp-dot"></span>
-          {{ online ? `${online} 台设备在线` : $t('pages.n.token.deviceOffline') }}
+          {{ online ? $t('pages.n.token.onlineDevices', { count: online }) : $t('pages.n.token.deviceOffline') }}
         </div>
 
         <el-input
@@ -38,7 +38,7 @@
         <div class="mnp-slider">
           <span class="mnp-slider-label">{{ $t('pages.n.token.extra.durationLabel') }}</span>
           <el-slider v-model="durationSeconds" :min="0" :max="120" :step="10" class="mnp-slider-ctl" />
-          <span class="mnp-slider-val">{{ durationSeconds ? `${durationSeconds} 秒` : $t('pages.n.token.doNotAutoClose') }}</span>
+          <span class="mnp-slider-val">{{ durationSeconds ? $t('pages.n.token.seconds', { count: durationSeconds }) : $t('pages.n.token.doNotAutoClose') }}</span>
         </div>
 
         <el-button
@@ -107,7 +107,7 @@ async function send() {
       },
     });
     const sent = Number(res?.data?.sent) || 0;
-    ElMessage.success(`已发送到 ${sent} 台设备`);
+    ElMessage.success(t('pages.n.token.sentTo', { count: sent }));
     message.value = "";
   } catch (e: any) {
     ElMessage.error(e?.data?.msg || t('pages.n.token.sendFailed'));

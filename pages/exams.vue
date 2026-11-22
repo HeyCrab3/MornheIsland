@@ -165,7 +165,7 @@ function cleanPast() {
   entries.value = entries.value.filter((e) => e.date >= today.value);
   const removed = before - entries.value.length;
   if (removed) dirty.value = true;
-  ElMessage.success(removed ? `已移除 ${removed} 条过期安排，记得保存` : t('pages.exams.noExpiredSchedules'));
+  ElMessage.success(removed ? t('pages.exams.extra.pastRemoved', { count: removed }) : t('pages.exams.noExpiredSchedules'));
 }
 
 async function save() {

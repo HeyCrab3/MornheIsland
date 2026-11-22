@@ -45,7 +45,7 @@
               <el-button size="small" text @click.stop="rename(item._id, item.name)">
                 {{ $t('components.resourcelist.extra.rename') }}
               </el-button>
-              <el-popconfirm :title="`确定删除「${item.name}」？`" @confirm="remove(item._id)">
+              <el-popconfirm :title="$t('components.resourcelist.extra.deleteConfirm', { name: item.name })" @confirm="remove(item._id)">
                 <template #reference>
                   <el-button size="small" text type="danger" @click.stop>{{ $t('components.resourceeditor.delete') }}</el-button>
                 </template>
@@ -55,13 +55,13 @@
         </el-card>
       </div>
 
-      <el-empty v-else :image-size="100" :description="`暂无${label}，点击右上角「新建${label}」开始`" />
+      <el-empty v-else :image-size="100" :description="$t('components.resourcelist.extra.emptyHint', { label })" />
     </div>
 
-    <el-dialog v-model="showCreate" :title="`新建${label}`" width="400px">
+    <el-dialog v-model="showCreate" :title="$t('components.resourcelist.extra.createTitle', { label })" width="400px">
       <el-form @submit.prevent="doCreate">
-        <el-form-item :label="`${label}名称`" required>
-          <el-input v-model="newName" :placeholder="`如「高中标准${label}」`" @keyup.enter="doCreate" />
+        <el-form-item :label="$t('components.resourcelist.extra.nameLabel', { label })" required>
+          <el-input v-model="newName" :placeholder="$t('components.resourcelist.extra.namePlaceholder', { label })" @keyup.enter="doCreate" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -102,7 +102,7 @@ async function doCreate() {
   creating.value = true;
   try {
     await createItem(newName.value.trim());
-    ElMessage.success(`${props.label}已创建`);
+    ElMessage.success(t('components.resourcelist.extra.created', { label: props.label }));
     showCreate.value = false;
     newName.value = "";
     await fetchList();

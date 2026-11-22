@@ -84,7 +84,10 @@ function fmt(v: any) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return t("pages.g.token.extra.dateFormat", {
+    year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate(),
+    time: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`,
+  });
 }
 
 async function load() {
