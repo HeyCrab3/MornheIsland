@@ -39,6 +39,14 @@ export default defineNuxtConfig({
     importStyle: "scss",
     defaultLocale: "zh-CN"
   },
+  i18n: {
+    defaultLocale: "zh-CN",
+    strategy: "no_prefix",
+    detectBrowserLanguage: false,
+    locales: [
+      { code: "zh-CN", name: "简体中文", file: "zh-CN.json" },
+    ],
+  },
   routeRules: {
     "/spa/**": { ssr: false },
     "/callback": { ssr: false },
@@ -124,6 +132,7 @@ export default defineNuxtConfig({
   modules: [
     "@pinia/nuxt",
     "@element-plus/nuxt",
+    "@nuxtjs/i18n",
     "@nuxt/content",
     "nuxt-gtag",
     "@vite-pwa/nuxt",
