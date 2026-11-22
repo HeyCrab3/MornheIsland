@@ -1,6 +1,6 @@
 <template>
   <div class="legal">
-    <h1>隐私政策</h1>
+    <h1>{{ $t('sidebar.privacyPolicy') }}</h1>
     <p class="meta">
       生效日期：2026 年 11 月 14 日 ｜ 版本：v1.0 ｜ 运营者：Crab Studio
     </p>

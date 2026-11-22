@@ -5,7 +5,7 @@
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
       <div>
-        <h1 class="text-xl font-semibold">{{ cls?.name || cls?.identity || '班级详情' }}</h1>
+        <h1 class="text-xl font-semibold">{{ cls?.name || cls?.identity || $t('pages.classes.id.classDetails') }}</h1>
         <div class="text-xs text-gray-400 font-mono mt-0.5">{{ cls?.identity }}</div>
       </div>
       <div class="ml-auto flex items-center gap-2">
@@ -25,12 +25,12 @@
       <el-form label-position="top" @submit.prevent="doSave">
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12">
-            <el-form-item label="班级名称" required>
+            <el-form-item :label="$t('pages.classes.index.className')" required>
               <el-input v-model="form.name" />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
-            <el-form-item label="班级标识">
+            <el-form-item :label="$t('pages.classes.id.classIdentity')">
               <el-input v-model="form.identity" disabled />
               <span class="text-xs text-gray-400">创建后不可修改</span>
             </el-form-item>
@@ -108,7 +108,7 @@
           <div class="text-xs text-gray-500 mb-2">
             客户端与集控服务器保持 gRPC 长连接，支持实时下发通知 / 刷新数据 / 分发插件。
           </div>
-          <el-input v-model="grpcAddress" size="small" placeholder="如 http://your-host:20722">
+          <el-input v-model="grpcAddress" size="small" :placeholder="$t('pages.classes.index.hostUrlExample')">
             <template #prepend>gRPC 地址</template>
           </el-input>
           <div class="text-xs text-gray-500 mt-2 leading-relaxed">
@@ -123,8 +123,8 @@
             :closable="false"
             show-icon
             class="mt-2"
-            title="当前用的是推断地址（控制台域名 + 端口），不一定可达"
-            description="这只是按控制台域名推出来的。请确认该端口对教室网络放行，否则改用 nginx 反代 443 并在 config 里配置 public_grpc_address。"
+            :title="$t('pages.classes.id.inferredAddressWarning')"
+            :description="$t('pages.classes.id.inferredAddressHint')"
           />
           <GrpcProxyNotice :address="grpcAddress" />
         </div>
@@ -148,7 +148,7 @@
 
       <el-alert type="warning" :closable="false" show-icon>
         <template #title>
-          请先关联{{ missingRequired.map((s) => s.label).join("、") || "必填资源" }}后再下发配置
+          请先关联{{ missingRequired.map((s) => s.label).join("、") || $t('pages.classes.id.requiredResources') }}后再下发配置
         </template>
         档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。
       </el-alert>

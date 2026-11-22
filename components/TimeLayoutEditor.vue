@@ -6,7 +6,7 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="这份时间表是学校共享的，你只有查看权限；需要修改请找学校管理员，或复制一份成自己的。"
+      :title="$t('components.timelayouteditor.sharedLayoutReadOnlyNotice')"
     />
     <el-alert
       v-else-if="mobile"
@@ -14,14 +14,14 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="时间表编辑建议在电脑上进行，以下为只读预览。"
+      :title="$t('components.timelayouteditor.desktopEditNotice')"
     />
 
     <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
       <span class="text-sm font-medium">关联课程表：</span>
       <el-select
         v-model="selectedSubjectsId"
-        placeholder="选择课程表（可选）"
+        :placeholder="$t('components.timelayouteditor.selectSubjectsOptional')"
         clearable
         :disabled="viewOnly"
         @change="onSubjectsChange"
@@ -84,10 +84,10 @@
           style="width: 86px"
           :disabled="viewOnly"
         >
-          <el-option :value="0" label="上课" />
-          <el-option :value="1" label="课间" />
-          <el-option :value="2" label="分割线" />
-          <el-option :value="3" label="行动" />
+          <el-option :value="0" :label="$t('components.timelayouteditor.classPeriod')" />
+          <el-option :value="1" :label="$t('components.timelayouteditor.break')" />
+          <el-option :value="2" :label="$t('components.timelayouteditor.divider')" />
+          <el-option :value="3" :label="$t('components.timelayouteditor.action')" />
         </el-select>
 
         <!-- 分割线和行动都是"零长度时间点"：只需要一个时刻，不需要结束时间 -->
@@ -100,12 +100,12 @@
           :disabled="mobile || viewOnly"
         />
         <div v-else class="flex-1 min-w-24 text-xs text-gray-400">
-          {{ p.TimeType === 2 ? "分割线：在时间表里穿插一条分隔，不占时长" : "行动：到点执行一组动作" }}
+          {{ p.TimeType === 2 ? $t('components.timelayouteditor.dividerHint') : $t('components.timelayouteditor.actionHint') }}
         </div>
 
         <el-time-picker
           v-model="p.start"
-          placeholder="开始"
+          :placeholder="$t('components.timelayouteditor.start')"
           size="small"
           format="HH:mm"
           value-format="HH:mm:ss"
@@ -116,7 +116,7 @@
           <span class="text-gray-300 text-xs">—</span>
           <el-time-picker
             v-model="p.end"
-            placeholder="结束"
+            :placeholder="$t('components.timelayouteditor.end')"
             size="small"
             format="HH:mm"
             value-format="HH:mm:ss"
@@ -138,7 +138,7 @@
           <el-option v-for="sn in subjectNames" :key="sn" :label="sn" :value="sn" />
         </el-select>
 
-        <el-tooltip content="在客户端时间表里隐藏这一段" placement="top">
+        <el-tooltip :content="$t('components.timelayouteditor.hideInClient')" placement="top">
           <el-checkbox v-model="p.hideDefault" size="small" :disabled="mobile || viewOnly">
             隐藏
           </el-checkbox>
@@ -241,9 +241,9 @@
                     :disabled="viewOnly || !getAttached(p, def).IsAttachSettingsEnabled"
                     @update:model-value="(v: any) => setAttachedField(p, def, m.key, Number(v))"
                   >
-                    <el-option :value="0" label="禁用" />
-                    <el-option :value="1" label="强制启用" />
-                    <el-option :value="2" label="继承全局设置" />
+                    <el-option :value="0" :label="$t('components.timelayouteditor.disabled')" />
+                    <el-option :value="1" :label="$t('components.timelayouteditor.forceEnable')" />
+                    <el-option :value="2" :label="$t('components.timelayouteditor.inheritGlobal')" />
                   </el-select>
                 </div>
                 <div v-for="t in def.texts || []" :key="t.key" class="mt-1.5">
@@ -274,7 +274,7 @@
                 保留原动作
               </el-checkbox>
               <span class="text-xs text-gray-400">
-                {{ p.raw?.ActionSet ? `原有 ${JSON.stringify(p.raw.ActionSet).length} 字节` : "原本没有" }}
+                {{ p.raw?.ActionSet ? `原有 ${JSON.stringify(p.raw.ActionSet).length} 字节` : $t('components.timelayouteditor.originallyAbsent') }}
               </span>
             </div>
             <el-input
@@ -282,7 +282,7 @@
               type="textarea"
               :rows="3"
               :disabled="viewOnly || p.actionsCleared"
-              placeholder="留空表示 null"
+              :placeholder="$t('components.timelayouteditor.blankMeansNull')"
               @update:model-value="(v: string) => (p.actionsText = v)"
             />
           </div>
@@ -293,7 +293,7 @@
     <el-empty
       v-if="!loading && !segs.length"
       :image-size="80"
-      description="还没有任何时段，点上面的「添加课时」开始"
+      :description="$t('components.timelayouteditor.noPeriodsHint')"
     />
 
     <el-button
@@ -315,6 +315,7 @@ import isMobile from "@/util/is-mobile";
 
 const props = defineProps<{ modelValue: any; name?: string; viewOnly?: boolean }>();
 const emit = defineEmits<{ save: [data: any] }>();
+const { t } = useI18n();
 const saving = ref(false);
 const loading = ref(false);
 const mobile = ref(false);
@@ -491,7 +492,7 @@ const ATTACHED_DEFS: AttachedDef[] = [
   {
     key: "classNotification",
     guid: "08F0D9C3-C770-4093-A3D0-02F3D90C24BC",
-    label: "上课提醒设置",
+    label: t('components.timelayouteditor.classReminderSettings'),
     defaults: {
       IsAttachSettingsEnabled: true,
       IsClassOnNotificationEnabled: true,
@@ -500,41 +501,41 @@ const ATTACHED_DEFS: AttachedDef[] = [
       ClassPreparingDeltaTime: 60,
     },
     toggles: [
-      { key: "IsClassOnNotificationEnabled", label: "上课提醒" },
-      { key: "IsClassOnPreparingNotificationEnabled", label: "预备铃提醒" },
+      { key: "IsClassOnNotificationEnabled", label: t('components.timelayouteditor.classReminder') },
+      { key: "IsClassOnPreparingNotificationEnabled", label: t('components.timelayouteditor.prepBellReminder') },
       // 用户最常要关的就是这个
-      { key: "IsClassOffNotificationEnabled", label: "下课提醒" },
+      { key: "IsClassOffNotificationEnabled", label: t('components.timelayouteditor.dismissReminder') },
     ],
     numbers: [
-      { key: "ClassPreparingDeltaTime", label: "预备提前（秒）", min: 0, max: 600, step: 10, fallback: 60 },
+      { key: "ClassPreparingDeltaTime", label: t('components.timelayouteditor.prepAdvanceSeconds'), min: 0, max: 600, step: 10, fallback: 60 },
     ],
   },
   {
     key: "afterSchool",
     guid: "8FBC3A26-6D20-44DD-B895-B9411E3DDC51",
-    label: "放学提醒设置",
+    label: t('components.timelayouteditor.dismissalReminderSettings'),
     defaults: {
       IsAttachSettingsEnabled: true,
       IsEnabled: true,
-      NotificationMsg: "今天的课程已结束，请同学们有序离开。",
+      NotificationMsg: t('components.timelayouteditor.schoolDismissalMessage'),
     },
-    toggles: [{ key: "IsEnabled", label: "放学时提醒" }],
-    texts: [{ key: "NotificationMsg", label: "提醒内容" }],
+    toggles: [{ key: "IsEnabled", label: t('components.timelayouteditor.dismissalReminder') }],
+    texts: [{ key: "NotificationMsg", label: t('components.timelayouteditor.reminderContent') }],
   },
   {
     key: "weather",
     guid: "7625DE96-38AA-4B71-B478-3F156DD9458D",
-    label: "天气提醒设置",
+    label: t('components.timelayouteditor.weatherReminderSettings'),
     defaults: { IsAttachSettingsEnabled: true, AlertShowMode: 2, ForecastShowMode: 2 },
     modes: [
-      { key: "AlertShowMode", label: "气象预警提醒" },
-      { key: "ForecastShowMode", label: "天气预报提醒" },
+      { key: "AlertShowMode", label: t('components.timelayouteditor.weatherAlertReminder') },
+      { key: "ForecastShowMode", label: t('components.timelayouteditor.weatherForecastReminder') },
     ],
   },
   {
     key: "lessonControl",
     guid: "58e5b69a-764a-472b-bcf7-003b6a8c7fdf",
-    label: "课程显示设置",
+    label: t('components.timelayouteditor.courseDisplaySettings'),
     defaults: {
       IsAttachSettingsEnabled: true,
       ShowExtraInfoOnTimePoint: true,
@@ -542,10 +543,10 @@ const ATTACHED_DEFS: AttachedDef[] = [
       CountdownSeconds: 60,
     },
     toggles: [
-      { key: "ShowExtraInfoOnTimePoint", label: "此时刻显示额外信息" },
-      { key: "IsCountdownEnabled", label: "显示倒计时" },
+      { key: "ShowExtraInfoOnTimePoint", label: t('components.timelayouteditor.showExtraInfo') },
+      { key: "IsCountdownEnabled", label: t('components.timelayouteditor.showCountdown') },
     ],
-    numbers: [{ key: "CountdownSeconds", label: "倒计时（秒）", min: 0, max: 3600, step: 10, fallback: 60 }],
+    numbers: [{ key: "CountdownSeconds", label: t('components.timelayouteditor.countdownSeconds'), min: 0, max: 3600, step: 10, fallback: 60 }],
   },
 ];
 
@@ -604,9 +605,9 @@ function setActionsCleared(p: Seg, cleared: boolean) {
 
 function attachedSummary(p: Seg): string {
   const a = p.raw?.AttachedObjects;
-  if (!a || typeof a !== "object") return "无";
+  if (!a || typeof a !== "object") return t('components.timelayouteditor.none');
   const n = Object.keys(a).length;
-  return n ? `${n} 项（原样保留）` : "无";
+  return n ? `${n} 项（原样保留）` : t('components.timelayouteditor.none');
 }
 
 /** 时间轴一致性检查：结束早于开始、跟前一段重叠、倒序 */

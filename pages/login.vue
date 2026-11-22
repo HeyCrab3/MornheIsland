@@ -1,19 +1,19 @@
 <template>
-  <h2 class="text-xl font-semibold mb-1">欢迎回来</h2>
+  <h2 class="text-xl font-semibold mb-1">{{ $t('login.welcome') }}</h2>
   <p class="text-sm text-gray-500 dark:text-gray-400 my-1 mb-4">
-    登录以继续管理您的集控服务
+    {{ $t('login.subtitle') }}
   </p>
 
   <div class="custom-style">
     <el-segmented
       class="mb-4"
       v-model="loginMode"
-      :options="['主账号登录', '子账号登录']"
+      :options="loginModeOptions"
       block
     />
   </div>
 
-  <template v-if="loginMode == '主账号登录'">
+  <template v-if="loginMode == loginModeOptions[0]">
     <el-button
       :loading="loginLoading"
       type="primary"
@@ -22,7 +22,7 @@
       @click="loginByCrabCity"
     >
       <span class="flex items-center justify-center gap-2">
-        通过 CrabCity 登录
+        {{ $t('login.viaCrabCity') }}
       </span>
     </el-button>
     <br />
@@ -32,18 +32,18 @@
       class="w-full mb-3"
       @click="loginBySTCN"
     >
-      通过智教联盟登录
+      {{ $t('login.viaStcn') }}
     </el-button>
   </template>
 
-  <template v-if="loginMode == '子账号登录'">
+  <template v-if="loginMode == loginModeOptions[1]">
     <!-- 第一步：登录名 + 密码 -->
     <template v-if="!mfaTicket">
       <div class="mb-3">
         <el-input
           v-model="subForm.login"
           size="large"
-          placeholder="子账户名@主账号名，例如 dianjiao@heycrab3"
+          :placeholder="$t('login.subLoginPlaceholder')"
           autocomplete="username"
           @keyup.enter="doSubLogin()"
         ></el-input>
@@ -54,7 +54,7 @@
           v-model="subForm.password"
           type="password"
           size="large"
-          placeholder="密码"
+          :placeholder="$t('login.passwordPlaceholder')"
           show-password
           autocomplete="current-password"
           @keyup.enter="doSubLogin()"
@@ -68,7 +68,7 @@
         :loading="subLoading"
         @click="doSubLogin()"
       >
-        登录
+        {{ $t('login.login') }}
       </el-button>
 
       <p class="text-xs text-neutral-400 text-center">
@@ -83,9 +83,9 @@
         <div class="mfa-icon">
           <el-icon :size="30"><Key /></el-icon>
         </div>
-        <h3 class="text-base font-semibold mt-2">两步验证</h3>
+        <h3 class="text-base font-semibold mt-2">{{ $t('login.mfaTitle') }}</h3>
         <p class="text-xs text-neutral-500 mt-1">
-          打开验证器 App，输入当前的 6 位动态码
+          {{ $t('login.mfaDesc') }}
         </p>
       </div>
 
@@ -94,7 +94,7 @@
         class="mt-4"
         size="large"
         maxlength="12"
-        placeholder="6 位动态码"
+        :placeholder="$t('login.codePlaceholder')"
         :disabled="subLoading"
         @keyup.enter="doSubLogin(true)"
       >
@@ -111,7 +111,7 @@
         :disabled="!subForm.code.trim()"
         @click="doSubLogin(true)"
       >
-        验证并登录
+        {{ $t('login.verifyAndLogin') }}
       </el-button>
 
       <p v-if="subError" class="text-xs text-red-500 mt-2 text-center">
@@ -119,47 +119,46 @@
       </p>
 
       <p class="text-xs text-neutral-400 mt-4 text-center leading-relaxed">
-        手机丢了？改用一枚恢复码登录。<br />
-        恢复码用过一次就作废。
+        {{ $t('login.recoveryHint') }}
       </p>
 
       <template v-if="subMethods.passkey">
-        <div class="mfa-or"><span>或者</span></div>
+        <div class="mfa-or"><span>{{ $t('login.or') }}</span></div>
         <el-button
           class="w-full"
           size="large"
           :loading="passkeyLoading"
           @click="subPasskey"
         >
-          <el-icon class="mr-1"><Key /></el-icon>用通行密钥验证
+          <el-icon class="mr-1"><Key /></el-icon>{{ $t('login.passkey') }}
         </el-button>
         <p class="text-xs text-neutral-400 mt-2 text-center">
-          手机指纹、Windows Hello 或硬件密钥
+          {{ $t('login.passkeyHint') }}
         </p>
       </template>
 
       <p class="text-xs text-center mt-2">
         <a class="text-[var(--mi-brand)] cursor-pointer" @click="resetMfa"
-          >返回重新输入密码</a
+          >{{ $t('login.backToPassword') }}</a
         >
       </p>
     </template>
   </template>
 
   <p class="text-xs text-gray-400 mt-4 text-center">
-    登录即表示同意
+    {{ $t('login.agreePrefix') }}
     <NuxtLink to="/terms" class="text-blue-500 hover:underline"
-      >《用户协议》</NuxtLink
+      >《{{ $t('sidebar.userAgreement') }}》</NuxtLink
     >
     与
     <NuxtLink to="/privacy" class="text-blue-500 hover:underline"
-      >《隐私政策》</NuxtLink
+      >《{{ $t('sidebar.privacyPolicy') }}》</NuxtLink
     >。不同登录方式数据不互通。
   </p>
   <p class="text-xs text-gray-400 mt-2 text-center">
-    别人把班级委托给你了？
+    {{ $t('login.delegateHint') }}
     <NuxtLink to="/d" class="text-blue-500 hover:underline"
-      >通过委托方式登录</NuxtLink
+      >{{ $t('login.delegateLink') }}</NuxtLink
     >
   </p>
 </template>
@@ -176,8 +175,14 @@
 import { Key } from "@element-plus/icons-vue";
 import api from "@/util/api";
 
+const { t } = useI18n();
+
 const loginLoading = ref(false);
-const loginMode = ref("主账号登录");
+const loginModeOptions = computed(() => [
+  t('login.modeMain'),
+  t('login.modeSub'),
+]);
+const loginMode = ref(loginModeOptions.value[0]);
 
 async function ssoLogin(
   channel: number,
@@ -192,12 +197,12 @@ async function ssoLogin(
         `${authorizeUrl}/login/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(`${window.location.origin}/callback?loginChannel=${channel}`)}&scope=openid profile email phone&state=${state}`,
         "_self",
       );
-      ElMessage.success("正在跳转...");
+      ElMessage.success(t('login.errors.redirecting'));
     } else {
-      ElMessage.error("登录失败，请稍后再试");
+      ElMessage.error(t('login.errors.loginFailed'));
     }
   } catch {
-    ElMessage.error("登录失败，请稍后再试");
+    ElMessage.error(t('login.errors.loginFailed'));
   } finally {
     loginLoading.value = false;
   }
@@ -268,7 +273,7 @@ watch(loginMode, () => {
 async function finishLogin(token: string) {
   localStorage.setItem("token", token);
   await useUserStore().fetchUserData();
-  ElMessage.success("登录成功");
+  ElMessage.success(t('login.errors.loginSuccess'));
 
   let target = "/classes";
   try {
@@ -284,11 +289,11 @@ async function finishLogin(token: string) {
 async function doSubLogin(withCode = false) {
   if (subLoading.value) return;
   if (!withCode && (!subForm.login.trim() || !subForm.password)) {
-    ElMessage.warning("请填写登录名和密码");
+    ElMessage.warning(t('login.errors.needLoginNameAndPassword'));
     return;
   }
   if (withCode && !subForm.code.trim()) {
-    ElMessage.warning("请输入动态码或恢复码");
+    ElMessage.warning(t('login.errors.needCode'));
     return;
   }
   subLoading.value = true;
@@ -313,7 +318,7 @@ async function doSubLogin(withCode = false) {
 
     const token = pickToken(data);
     if (!token) {
-      subError.value = "登录失败，请稍后再试";
+      subError.value = t('login.errors.loginFailed');
       return;
     }
 
@@ -324,7 +329,7 @@ async function doSubLogin(withCode = false) {
     subError.value = msg;
     if (msg.includes("票据") || msg.includes("重新登录")) {
       resetMfa();
-      ElMessage.warning("登录票据已失效，请重新输入密码");
+      ElMessage.warning(t('login.errors.ticketExpired'));
       return;
     }
     subForm.code = "";
@@ -380,7 +385,7 @@ async function subPasskey() {
       })),
     };
     const cred: any = await navigator.credentials.get({ publicKey });
-    if (!cred) throw new Error("没有拿到凭据");
+    if (!cred) throw new Error(t('login.errors.noCredential'));
     const r = cred.response;
 
     const res: any = await api.post("/v1/public/webauthn/login", {
@@ -398,25 +403,28 @@ async function subPasskey() {
     });
     const token = pickToken(res);
     if (!token) {
-      subError.value = "登录失败，请重试";
+      subError.value = t('pages.callback.loginFailedRetry');
       return;
     }
     await finishLogin(token);
   } catch (e: any) {
     if (e?.name === "NotAllowedError") {
-      subError.value = "已取消";
+      subError.value = t('login.errors.cancelled');
       return;
     }
     const msg = String(e?.message || e || "");
-    subError.value = msg || "通行密钥验证失败";
+    subError.value = msg || t('login.errors.passkeyFailed');
     if (msg.includes("票据") || msg.includes("重新登录")) {
       resetMfa();
-      ElMessage.warning("登录票据已失效，请重新输入密码");
+      ElMessage.warning(t('login.errors.ticketExpired'));
     }
   } finally {
     passkeyLoading.value = false;
   }
 }
 
-definePageMeta({ layout: "login", title: "登录" });
+definePageMeta({
+  layout: "login",
+  title: "登录",
+});
 </script>

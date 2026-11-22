@@ -31,7 +31,7 @@
       >
         <el-icon :size="28" class="text-gray-400"><UploadFilled /></el-icon>
         <div class="text-sm mt-2">
-          {{ fileName || "把 .cidata 拖到这里，或点击选择" }}
+          {{ fileName || $t('pages.import.dropCidataHere') }}
         </div>
         <div v-if="fileSize" class="text-xs text-gray-400 mt-1">{{ fileSize }}</div>
       </div>
@@ -57,19 +57,19 @@
         <el-form label-position="top">
           <el-row :gutter="16">
             <el-col :xs="24" :sm="8">
-              <el-form-item label="导入哪个档案">
+              <el-form-item :label="$t('pages.import.whichArchiveToImport')">
                 <el-select v-model="profileName" class="w-full" @change="doPreview">
                   <el-option v-for="p in preview.availableProfiles" :key="p" :label="p" :value="p" />
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="8">
-              <el-form-item label="资源名前缀">
+              <el-form-item :label="$t('pages.import.resourceNamePrefix')">
                 <el-input v-model="prefix" maxlength="30" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="8">
-              <el-form-item label="额外内容">
+              <el-form-item :label="$t('pages.import.extraContent')">
                 <div class="flex flex-col gap-1">
                   <el-checkbox v-model="includeSettings" :disabled="!preview.hasSettings">
                     应用设置（{{ preview.settingsKeys }} 个键）
@@ -107,7 +107,7 @@
               <span class="font-medium">课表群「{{ g.groupName }}」</span>
               <el-tag size="small" effect="plain">{{ g.planCount }} 个计划</el-tag>
               <el-tag size="small" type="success" effect="plain">
-                {{ g.weekDays.map((d: number) => ["日","一","二","三","四","五","六"][d] ?? "?").join("/") }}
+                {{ g.weekDays.map((d: number) => [$t('pages.import.day'),$t('pages.import.mondayShort'),$t('pages.import.tuesdayShort'),$t('pages.import.wednesdayShort'),$t('pages.import.thursdayShort'),$t('pages.import.fridayShort'),$t('pages.import.saturdayShort')][d] ?? "?").join("/") }}
               </el-tag>
               <span class="text-xs text-gray-400">→ 时间轴「{{ g.timeLayoutName }}」</span>
             </div>
@@ -124,7 +124,7 @@
 
         <div class="mt-4">
           <el-button type="primary" size="large" :loading="importing" @click="doImport">
-            确认导入
+            {{ $t('pages.backup.confirmImport') }}
           </el-button>
         </div>
       </el-card>
@@ -176,6 +176,8 @@ import { UploadFilled } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "导入档案", protected: true });
 
+const { t } = useI18n();
+
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -196,10 +198,10 @@ const includePolicy = ref(true);
 
 /** 已知附加设置的 GUID → 中文名（来源：ClassIsland 的 AttachedSettingsControlInfo 特性） */
 const ATTACHED_NAMES: Record<string, string> = {
-  "08f0d9c3-c770-4093-a3d0-02f3d90c24bc": "上课提醒",
-  "8fbc3a26-6d20-44dd-b895-b9411e3ddc51": "放学提醒",
-  "7625de96-38aa-4b71-b478-3f156dd9458d": "天气提醒",
-  "58e5b69a-764a-472b-bcf7-003b6a8c7fdf": "课程显示",
+  "08f0d9c3-c770-4093-a3d0-02f3d90c24bc": t('components.timelayouteditor.classReminder'),
+  "8fbc3a26-6d20-44dd-b895-b9411e3ddc51": t('pages.import.dismissalReminder'),
+  "7625de96-38aa-4b71-b478-3f156dd9458d": t('pages.import.weatherReminder'),
+  "58e5b69a-764a-472b-bcf7-003b6a8c7fdf": t('pages.import.courseDisplay'),
 };
 function attachedName(guid: string) {
   return ATTACHED_NAMES[String(guid).toLowerCase()] || String(guid).slice(0, 8);
@@ -217,7 +219,7 @@ function pickFile() {
 
 function readFile(f: File) {
   if (f.size > 64 * 1024 * 1024) {
-    ElMessage.error("文件太大（上限 64 MB）");
+    ElMessage.error(t('pages.import.fileTooLarge'));
     return;
   }
   fileName.value = f.name;
@@ -227,9 +229,9 @@ function readFile(f: File) {
     // 去掉 data:...;base64, 前缀
     const s = String(reader.result || "");
     fileBase64.value = s.slice(s.indexOf(",") + 1);
-    ElMessage.success("文件已读取，点「解析并预览」");
+    ElMessage.success(t('pages.import.fileReadClickParse'));
   };
-  reader.onerror = () => ElMessage.error("读取文件失败");
+  reader.onerror = () => ElMessage.error(t('pages.import.readFileFailed'));
   reader.readAsDataURL(f);
 }
 
@@ -266,7 +268,7 @@ async function doPreview() {
       profileName.value = preview.value.importedProfiles[0].profile;
     }
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "解析失败");
+    ElMessage.error(e?.data?.msg || t('pages.import.parseFailed'));
   } finally {
     previewing.value = false;
   }
@@ -290,7 +292,7 @@ async function doImport() {
     result.value = res?.data || null;
     ElMessage.success(`导入完成，共创建 ${result.value?.total ?? 0} 份资源`);
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "导入失败");
+    ElMessage.error(e?.data?.msg || t('pages.backup.importFailed'));
   } finally {
     importing.value = false;
   }

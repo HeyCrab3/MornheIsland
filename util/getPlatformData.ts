@@ -103,11 +103,12 @@ const getEnv = () => {
 
 // 拼接URL参数
 const getSkuUrl = (sku: string) => {
+  const { t } = useI18n();
   const baseUrl =
     "https://middleend-platform.crabapi.cn/api/bootstrap?product={0}&env={1}";
   if (!sku) {
-    log("缺少业务SKU", "error");
-    throw new TypeError("缺少业务SKU");
+    log(t('util.getplatformdata.missingBusinessSku'), "error");
+    throw new TypeError(t('util.getplatformdata.missingBusinessSku'));
   }
   const url = baseUrl.replace("{0}", sku).replace("{1}", getEnv());
   return url;
@@ -115,9 +116,10 @@ const getSkuUrl = (sku: string) => {
 
 // 获取中台数据结果
 const getPlatformData = async () => {
+  const { t } = useI18n();
   if (!sku) {
-    log("缺少业务SKU", "error");
-    throw new TypeError("缺少业务SKU");
+    log(t('util.getplatformdata.missingBusinessSku'), "error");
+    throw new TypeError(t('util.getplatformdata.missingBusinessSku'));
   }
   try {
     log(`当前SKU：${sku}，运行环境：${getEnv()}`);

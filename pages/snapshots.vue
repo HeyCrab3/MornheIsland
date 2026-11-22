@@ -60,6 +60,8 @@
 <script setup lang="ts">
 definePageMeta({ title: "数据恢复", protected: true });
 
+const { t } = useI18n();
+
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
 const loading = ref(false);
@@ -74,11 +76,11 @@ const TYPE_OF: Record<string, string> = {
   ci_policies: "policy",
 };
 const LABEL_OF: Record<string, string> = {
-  ci_classplans: "课表",
+  ci_classplans: t('composables.useciresource.plan'),
   ci_timelayouts: "时间表",
-  ci_subjects: "科目",
-  ci_settings: "设置",
-  ci_policies: "策略",
+  ci_subjects: t('composables.useciresource.subject'),
+  ci_settings: t('composables.useciresource.settings'),
+  ci_policies: t('composables.useciresource.policy'),
 };
 
 function typeLabel(c: string) {
@@ -98,7 +100,7 @@ async function load() {
     });
     rows.value = res.data || [];
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "加载失败");
+    ElMessage.error(e?.data?.msg || t('pages.snapshots.loadFailed'));
   } finally {
     loading.value = false;
   }
@@ -106,13 +108,13 @@ async function load() {
 
 async function restore(r: any) {
   const type = TYPE_OF[r.collection];
-  if (!type) return ElMessage.error("不支持的资源类型");
+  if (!type) return ElMessage.error(t('pages.snapshots.unsupportedResourceType'));
   try {
     await ElMessageBox.confirm(
       `将把「${r.name || "未命名"}」恢复成 ${fmt(r.at)} 时的内容。\n` +
-        `当前内容会先另存一份快照，所以这一步也能反悔。`,
+        t('pages.snapshots.snapshotBeforeRestore'),
       `恢复到「${r.reasonLabel}」`,
-      { type: "warning", confirmButtonText: "恢复", cancelButtonText: "取消" },
+      { type: "warning", confirmButtonText: t('components.resourceeditor.restore'), cancelButtonText: "取消" },
     );
   } catch {
     return;
@@ -123,10 +125,10 @@ async function restore(r: any) {
       { method: "POST", headers: authHeaders() },
     );
     const recreated = res?.data?.recreated;
-    ElMessage.success(recreated ? "资源已从快照重建" : `已恢复（新版本 v${res?.data?.version}）`);
+    ElMessage.success(recreated ? t('pages.snapshots.resourceRebuilt') : `已恢复（新版本 v${res?.data?.version}）`);
     await load();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "恢复失败");
+    ElMessage.error(e?.data?.msg || t('pages.snapshots.restoreFailed'));
   }
 }
 

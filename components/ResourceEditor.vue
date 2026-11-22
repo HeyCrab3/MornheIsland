@@ -22,11 +22,11 @@
           <el-dropdown-menu>
             <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">关联资源管理</el-dropdown-item>
             <el-dropdown-item @click="showLinkedClasses = true">关联班级管理</el-dropdown-item>
-            <el-dropdown-item @click="showHistory = true">历史版本</el-dropdown-item>
-            <el-dropdown-item @click="openSnapshots">数据快照</el-dropdown-item>
+            <el-dropdown-item @click="showHistory = true">{{ $t('components.resourceeditor.historyVersions') }}</el-dropdown-item>
+            <el-dropdown-item @click="openSnapshots">{{ $t('components.resourceeditor.dataSnapshot') }}</el-dropdown-item>
             <el-dropdown-item divided @click="doCopy">复制</el-dropdown-item>
             <el-dropdown-item @click="doDelete" :disabled="viewOnly">
-              <span :class="viewOnly ? 'text-gray-400' : 'text-red-500'">删除</span>
+              <span :class="viewOnly ? 'text-gray-400' : 'text-red-500'">{{ $t('components.resourceeditor.delete') }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -50,11 +50,11 @@
       class="mb-4"
     >
       <template #title>
-        {{ viewOnly ? "学校共享资源 · 只读" : "学校共享资源 · 你可以修改" }}
+        {{ viewOnly ? $t('components.resourceeditor.schoolSharedReadOnly') : $t('components.resourceeditor.schoolSharedEditable') }}
       </template>
       {{ viewOnly
-        ? "这份资源由学校共享给全校使用，只有学校管理员或创建者能修改。需要自己的版本就点右上角「复制」。"
-        : "同校所有班级都能选用这份资源；你在这里的修改会直接影响使用它的班级。" }}
+        ? $t('components.resourceeditor.schoolSharedNotice')
+        : $t('components.resourceeditor.schoolSharedImpact') }}
     </el-alert>
 
     <!-- 自定义编辑器 -->
@@ -63,11 +63,11 @@
       <div class="flex justify-end mb-3">
         <el-button type="primary" :loading="saving" :disabled="viewOnly" @click="doSave()">保存</el-button>
       </div>
-      <el-input v-model="jsonText" type="textarea" :rows="18" placeholder="粘贴 JSON 数据" :disabled="viewOnly" />
+      <el-input v-model="jsonText" type="textarea" :rows="18" :placeholder="$t('components.resourceeditor.pasteJson')" :disabled="viewOnly" />
     </template>
 
     <!-- 历史版本（桌面 Dialog / 移动底部抽屉） -->
-    <ResponsiveDrawer v-model:open="showHistory" title="历史版本">
+    <ResponsiveDrawer v-model:open="showHistory" :title="$t('components.resourceeditor.historyVersions')">
       <div v-if="historyList.length === 0" class="py-4 text-sm text-gray-400 text-center">暂无历史版本</div>
       <div
         v-for="h in historyList"
@@ -81,14 +81,14 @@
           <div class="text-xs text-gray-400 mt-0.5">{{ fmt(h.createdAt) }}</div>
         </div>
         <div class="flex items-center gap-1 shrink-0">
-          <el-button size="small" text type="primary" @click.stop="previewHistory(h)">查看</el-button>
-          <el-button size="small" text type="primary" @click.stop="doRestore(h.version)">恢复</el-button>
+          <el-button size="small" text type="primary" @click.stop="previewHistory(h)">{{ $t('components.resourcelist.view') }}</el-button>
+          <el-button size="small" text type="primary" @click.stop="doRestore(h.version)">{{ $t('components.resourceeditor.restore') }}</el-button>
         </div>
       </div>
     </ResponsiveDrawer>
 
     <!-- 数据快照（修改前 / 删除前 / 导入覆盖前 的原始数据） -->
-    <ResponsiveDrawer v-model:open="showSnapshots" title="数据快照">
+    <ResponsiveDrawer v-model:open="showSnapshots" :title="$t('components.resourceeditor.dataSnapshot')">
       <div class="text-xs text-gray-400 mb-3 leading-relaxed">
         每次修改、删除、导入覆盖、批量修复之前，系统都会自动存一份当时的完整数据。
         历史版本按「版本号」记；这里按「动作」记，两者互为冗余。
@@ -105,8 +105,8 @@
           <div class="text-xs text-gray-400 mt-0.5 truncate">{{ fmt(s.at) }}</div>
         </div>
         <div class="flex items-center gap-1 shrink-0">
-          <el-button size="small" text type="primary" @click="previewSnapshot(s)">查看</el-button>
-          <el-button size="small" text type="primary" :disabled="viewOnly" @click="doRestoreSnapshot(s)">恢复</el-button>
+          <el-button size="small" text type="primary" @click="previewSnapshot(s)">{{ $t('components.resourcelist.view') }}</el-button>
+          <el-button size="small" text type="primary" :disabled="viewOnly" @click="doRestoreSnapshot(s)">{{ $t('components.resourceeditor.restore') }}</el-button>
         </div>
       </div>
     </ResponsiveDrawer>
@@ -122,7 +122,7 @@
             class="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm"
           >
             <span class="w-6 text-xs text-gray-400 shrink-0">{{ Number(i) + 1 }}</span>
-            <span class="font-medium">{{ tp.name || '未命名' }}</span>
+            <span class="font-medium">{{ tp.name || $t('components.resourceeditor.untitled') }}</span>
             <span class="text-xs text-gray-400 ml-auto">{{ tp.start }} - {{ tp.end }}</span>
           </div>
         </div>
@@ -138,8 +138,8 @@
             class="flex items-center gap-3 py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0 text-sm"
           >
             <span class="font-medium">{{ s.name }}</span>
-            <span class="text-xs text-gray-400">{{ s.teacherName || '无教师' }}</span>
-            <el-tag v-if="s.isOutDoor" size="small" type="warning" class="ml-auto">室外</el-tag>
+            <span class="text-xs text-gray-400">{{ s.teacherName || $t('components.resourceeditor.noTeacher') }}</span>
+            <el-tag v-if="s.isOutDoor" size="small" type="warning" class="ml-auto">{{ $t('components.subjectseditor.outdoor') }}</el-tag>
           </div>
         </div>
         <div v-else class="text-gray-400 text-sm py-6 text-center">暂无科目</div>
@@ -186,7 +186,7 @@
     </ResponsiveDrawer>
 
     <!-- 关联资源管理（仅课表） -->
-    <ResponsiveDrawer v-model:open="showLinkedResources" title="关联资源">
+    <ResponsiveDrawer v-model:open="showLinkedResources" :title="$t('components.resourceeditor.linkedResources')">
       <div class="text-sm space-y-3 py-2">
         <div class="flex items-center justify-between">
           <span>时间表：</span>
@@ -202,7 +202,7 @@
     </ResponsiveDrawer>
 
     <!-- 关联班级管理 -->
-    <ResponsiveDrawer v-model:open="showLinkedClasses" title="关联班级">
+    <ResponsiveDrawer v-model:open="showLinkedClasses" :title="$t('components.resourceeditor.linkedClasses')">
       <div v-if="linkedClasses.length > 0" class="space-y-0.5 py-1">
         <div
           v-for="c in linkedClasses"
@@ -252,6 +252,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const props = defineProps<{ collection: string; label: string }>();
+const { t } = useI18n();
 const { doc, persistedData, loading, dataReady, save } = useCiResourceEditor(props.collection, props.label);
 const { isDirty } = useUnsavedGuard();
 
@@ -301,11 +302,11 @@ async function previewHistory(h: any) {
     if (props.collection === "classplan") {
       await loadClassplanPreview(previewData.value);
     }
-  } catch { ElMessage.error("加载版本失败"); }
+  } catch { ElMessage.error(t('components.resourceeditor.loadVersionFailed')); }
 }
 
 async function doRestore(version: number) {
-  askConfirm("确认恢复", `确定恢复到 v${version}？当前内容将存入历史。`, "恢复", () => doRestoreConfirmed(version));
+  askConfirm(t('components.resourceeditor.confirmRestore'), `确定恢复到 v${version}？当前内容将存入历史。`, t('components.resourceeditor.restore'), () => doRestoreConfirmed(version));
 }
 
 async function doRestoreConfirmed(version: number) {
@@ -362,14 +363,14 @@ async function previewSnapshot(s: any) {
     if (props.collection === "classplan") {
       await loadClassplanPreview(previewData.value);
     }
-  } catch { ElMessage.error("加载快照失败"); }
+  } catch { ElMessage.error(t('components.resourceeditor.loadSnapshotFailed')); }
 }
 
 function doRestoreSnapshot(s: any) {
   askConfirm(
-    "从快照恢复",
+    t('components.resourceeditor.restoreFromSnapshot'),
     `确定恢复到「${s.reasonLabel}」（${fmt(s.at)}）时的数据？当前内容会先另存一份快照。`,
-    "恢复",
+    t('components.resourceeditor.restore'),
     () => doRestoreSnapshotConfirmed(s),
   );
 }
@@ -382,7 +383,7 @@ async function doRestoreSnapshotConfirmed(s: any) {
       method: "POST",
       headers: authHeaders(),
     });
-    ElMessage.success("已从快照恢复");
+    ElMessage.success(t('components.resourceeditor.restoredFromSnapshot'));
     const fresh: any = await $fetch(`/api/v1/console/ci/${props.collection}/${id}`, { headers: authHeaders() });
     doc.value = fresh.data;
     isDirty.value = false;
@@ -532,12 +533,12 @@ async function loadClassplanPreview(data: any) {
 
 async function doSave(raw?: any) {
   if (viewOnly.value) {
-    ElMessage.warning("这份资源是学校共享的，你没有修改权限");
+    ElMessage.warning(t('components.resourceeditor.noEditPermission'));
     return;
   }
   const data = raw ?? (() => {
     try { return JSON.parse(jsonText.value); }
-    catch { ElMessage.error("JSON 格式错误"); return null; }
+    catch { ElMessage.error(t('components.resourceeditor.invalidJson')); return null; }
   })();
   if (!data && !raw) return;
   const submittedText = jsonText.value;
@@ -545,9 +546,9 @@ async function doSave(raw?: any) {
   try {
     await save(data);
     if (jsonText.value === submittedText) isDirty.value = false;
-    ElNotification.success({ title: "已保存", message: `当前版本：v${doc.value.version}，更新后请重新启动一遍 ClassIsland 以加载最新的集控配置` });
+    ElNotification.success({ title: t('components.resourceeditor.saved'), message: `当前版本：v${doc.value.version}，更新后请重新启动一遍 ClassIsland 以加载最新的集控配置` });
     await fetchHistory();
-  } catch { ElMessage.error("保存失败"); }
+  } catch { ElMessage.error(t('components.resourceeditor.saveFailed')); }
   finally { saving.value = false; }
 }
 
@@ -598,7 +599,7 @@ async function doCopy() {
       headers: authHeaders(),
       body: { name: `${doc.value.name} - 副本`, data: persistedData.value },
     });
-    ElMessage.success("已复制");
+    ElMessage.success(t('components.resourceeditor.copied'));
     navigateTo(`/${props.collection}/${res.data._id}`);
   } catch (e: any) {
     ElMessage.error(e?.response?._data?.msg || "复制失败");
@@ -607,7 +608,7 @@ async function doCopy() {
 
 async function doDelete() {
   if (!doc.value) return;
-  askConfirm("删除确认", `确定删除「${doc.value.name}」？此操作不可撤销。`, "删除", () => doDeleteConfirmed(), true);
+  askConfirm(t('components.resourceeditor.deleteConfirm'), `确定删除「${doc.value.name}」？此操作不可撤销。`, t('components.resourceeditor.delete'), () => doDeleteConfirmed(), true);
 }
 
 async function doDeleteConfirmed() {
@@ -618,11 +619,11 @@ async function doDeleteConfirmed() {
       method: "DELETE",
       headers: authHeaders(),
     });
-    ElMessage.success("已删除");
+    ElMessage.success(t('components.resourceeditor.deleted'));
     navigateTo(`/${props.collection}`);
   } catch (e: any) {
     const msg = e?.response?._data?.msg;
-    if (msg) ElMessageBox.alert(msg, "无法删除", { type: "warning" });
+    if (msg) ElMessageBox.alert(msg, t('components.resourceeditor.cannotDelete'), { type: "warning" });
   }
 }
 
@@ -631,7 +632,7 @@ const confirmOpen = ref(false);
 const confirmState = ref({
   title: "",
   description: "",
-  confirmText: "确定",
+  confirmText: t('components.resourceeditor.confirm'),
   danger: false,
   onConfirm: null as null | (() => void),
 });

@@ -2,7 +2,7 @@
   <div class="mnp-root">
     <div class="mnp-card">
       <div class="mnp-head">
-        <div class="mnp-title">班级通知</div>
+        <div class="mnp-title">{{ $t('pages.n.token.classNotification') }}</div>
         <div v-if="className" class="mnp-sub">{{ className }}</div>
       </div>
 
@@ -16,7 +16,7 @@
       <template v-else>
         <div class="mnp-status" :class="online ? 'is-on' : 'is-off'">
           <span class="mnp-dot"></span>
-          {{ online ? `${online} 台设备在线` : "设备当前不在线" }}
+          {{ online ? `${online} 台设备在线` : $t('pages.n.token.deviceOffline') }}
         </div>
 
         <el-input
@@ -25,7 +25,7 @@
           :rows="4"
           maxlength="200"
           show-word-limit
-          placeholder="输入要发到班级大屏上的通知内容"
+          :placeholder="$t('pages.n.token.enterNotificationForBoard')"
           class="mnp-textarea"
         />
 
@@ -38,7 +38,7 @@
         <div class="mnp-slider">
           <span class="mnp-slider-label">显示时长</span>
           <el-slider v-model="durationSeconds" :min="0" :max="120" :step="10" class="mnp-slider-ctl" />
-          <span class="mnp-slider-val">{{ durationSeconds ? `${durationSeconds} 秒` : "不自动关闭" }}</span>
+          <span class="mnp-slider-val">{{ durationSeconds ? `${durationSeconds} 秒` : $t('pages.n.token.doNotAutoClose') }}</span>
         </div>
 
         <el-button
@@ -62,6 +62,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false, title: "班级通知" });
+
+const { t } = useI18n();
 
 const route = useRoute();
 const token = String(route.params.token ?? "");
@@ -108,7 +110,7 @@ async function send() {
     ElMessage.success(`已发送到 ${sent} 台设备`);
     message.value = "";
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "发送失败");
+    ElMessage.error(e?.data?.msg || t('pages.n.token.sendFailed'));
   } finally {
     sending.value = false;
   }

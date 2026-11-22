@@ -98,11 +98,11 @@
               </div>
               <div class="flex-1 min-w-0">
                 <div class="font-semibold truncate flex items-center gap-1.5">
-                  <span class="truncate">{{ d.className || d.identity || '未命名设备' }}</span>
+                  <span class="truncate">{{ d.className || d.identity || $t('pages.devices.unnamedDevice') }}</span>
                   <el-tooltip
                     v-if="d.drift"
                     placement="top"
-                    content="这台设备上报的班级标识与它实际在用的班级不一致（多见于改过绑定），建议在班级详情里重新下发配置"
+                    :content="$t('pages.devices.classIdentityMismatch')"
                   >
                     <el-tag size="small" type="warning" effect="plain" class="shrink-0">归属待确认</el-tag>
                   </el-tooltip>
@@ -131,7 +131,7 @@
                 >
                   {{ d.plugins.length }} 个 {{ expandedPlugins === d.cuid ? '▲' : '▼' }}
                 </span>
-                <span v-else>{{ d.pluginsUpdatedAt ? '0 个' : '未采集' }}</span>
+                <span v-else>{{ d.pluginsUpdatedAt ? $t('pages.devices.zeroCount') : $t('pages.devices.notCollected') }}</span>
               </div>
               <div v-if="d.pluginsUpdatedAt" class="flex justify-between gap-2">
                 <span>插件采集于</span><span>{{ formatTime(d.pluginsUpdatedAt) }}</span>
@@ -170,8 +170,8 @@
           :closable="false"
           show-icon
           class="mb-3"
-          title="静态模式设备按清单轮询"
-          description="这类客户端不在集控服务器上注册，服务端拿不到它的 CUID/MAC，也无法下发实时指令。要远程控制请让它改为集控模式加入。"
+          :title="$t('pages.devices.staticModePolling')"
+          :description="$t('pages.devices.unregisteredClientHint')"
         />
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <el-card v-for="d in visibleStatic" :key="d.ip" shadow="hover" class="device-card">
@@ -180,7 +180,7 @@
                 <el-icon :size="20"><Monitor /></el-icon>
               </div>
               <div class="flex-1 min-w-0">
-                <div class="font-semibold truncate">{{ d.className || '未识别班级' }}</div>
+                <div class="font-semibold truncate">{{ d.className || $t('pages.devices.unrecognizedClass') }}</div>
                 <div class="text-xs text-gray-400 font-mono truncate">{{ d.ip }}</div>
               </div>
               <el-tag size="small" type="info" effect="plain">静态</el-tag>
@@ -226,26 +226,26 @@
       "
     >
       <el-form label-position="top" class="py-2">
-        <el-form-item label="通知内容" required>
+        <el-form-item :label="$t('pages.devices.notificationContent')" required>
           <el-input
             v-model="notifyForm.messageContent"
             type="textarea"
             :rows="3"
-            placeholder="如：今天下午第三节调整为数学课"
+            :placeholder="$t('pages.devices.notificationExample')"
           />
         </el-form-item>
-        <el-form-item label="顶部掩码文字（可选）">
-          <el-input v-model="notifyForm.messageMask" placeholder="留空则显示「集控通知」" />
+        <el-form-item :label="$t('pages.devices.topMaskTextOptional')">
+          <el-input v-model="notifyForm.messageMask" :placeholder="$t('pages.devices.defaultMaskText')" />
         </el-form-item>
         <div class="flex flex-wrap gap-4 text-sm">
           <el-checkbox v-model="notifyForm.isEmergency">紧急（置顶覆盖）</el-checkbox>
           <el-checkbox v-model="notifyForm.isSpeechEnabled">语音朗读</el-checkbox>
         </div>
         <div class="flex gap-4 mt-3">
-          <el-form-item label="显示时长（秒）" class="flex-1">
+          <el-form-item :label="$t('pages.devices.displayDurationSeconds')" class="flex-1">
             <el-input-number v-model="notifyForm.durationSeconds" :min="0" :max="600" class="w-full" />
           </el-form-item>
-          <el-form-item label="重复次数" class="flex-1">
+          <el-form-item :label="$t('pages.devices.repeatCount')" class="flex-1">
             <el-input-number v-model="notifyForm.repeatCounts" :min="1" :max="20" class="w-full" />
           </el-form-item>
         </div>
@@ -292,6 +292,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 definePageMeta({ title: "设备追踪", protected: true });
+
+const { t } = useI18n();
 
 const loading = ref(false);
 const clients = ref<any[]>([]);
@@ -389,7 +391,7 @@ function openNotify(d: any) {
 }
 
 function openNotifyBatch() {
-  if (!selectedCuids.value.length) return ElMessage.warning("请先勾选要推送的设备");
+  if (!selectedCuids.value.length) return ElMessage.warning(t('pages.devices.selectDevicesFirst'));
   notifyTarget.value = null;
   notifyBatch.value = [...selectedCuids.value];
   resetNotifyForm();
@@ -397,7 +399,7 @@ function openNotifyBatch() {
 }
 
 async function sendNotify() {
-  if (!notifyForm.messageContent.trim()) return ElMessage.warning("请输入通知内容");
+  if (!notifyForm.messageContent.trim()) return ElMessage.warning(t('pages.devices.enterNotificationContent'));
   const batch = notifyBatch.value;
   const body: any = batch?.length
     ? { cuids: batch, ...notifyForm }
@@ -419,7 +421,7 @@ async function sendNotify() {
     notifyVisible.value = false;
     if (batch?.length) selectedCuids.value = [];
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "推送失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.devices.pushFailed'));
   } finally {
     notifySending.value = false;
   }
@@ -434,7 +436,7 @@ async function sendDataUpdated(d: any) {
     });
     ElMessage.success(`已通知刷新（${res.data?.sent ?? 0} 台）`);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "操作失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.devices.operationFailed'));
   }
 }
 
@@ -459,10 +461,10 @@ async function refreshPlugins(d: any) {
       d.pluginsUpdatedAt = new Date().toISOString();
       ElMessage.success(`已获取 ${res.data.plugins.length} 个插件`);
     } else {
-      ElMessage.warning(res.msg || "设备未响应");
+      ElMessage.warning(res.msg || t('pages.devices.deviceNotResponding'));
     }
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "查询失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.devices.queryFailed'));
   } finally {
     refreshingCuid.value = "";
   }
@@ -479,9 +481,9 @@ const confirmState = ref({
 
 function confirmRestart(d: any) {
   confirmState.value = {
-    title: "重启设备",
+    title: t('pages.devices.restartDevice'),
     description: `确定让「${d.className || d.identity}」重启 ClassIsland？`,
-    confirmText: "重启",
+    confirmText: t('pages.devices.restart'),
     onConfirm: () => doRestart(d),
   };
   confirmOpen.value = true;
@@ -500,7 +502,7 @@ async function doRestart(d: any) {
     });
     ElMessage.success(`已下发重启（${res.data?.sent ?? 0} 台）`);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "操作失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.devices.operationFailed'));
   }
 }
 

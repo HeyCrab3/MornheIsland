@@ -28,7 +28,7 @@
             "
           >
             <el-icon class="mr-2"><Tools /></el-icon>
-            诊断信息
+            {{ $t('components.layouts.helpbuttons.diagnosticInfo') }}
           </el-button>
           <el-button
             @click="openExternalLink('https://qm.qq.com/q/rgRifYcGvm')"
@@ -71,9 +71,9 @@
   <el-button circle size="large" type="primary" @click="showExtra = !showExtra">
     <el-icon><Transition name="fade"><More v-if="!showExtra" /><Close v-else /></Transition></el-icon>
   </el-button>
-  <el-dialog title="诊断信息" v-model="showDialog">
+  <el-dialog :title="$t('components.layouts.helpbuttons.diagnosticInfo')" v-model="showDialog">
     <el-alert
-      title="数据含有您的浏览器指纹等敏感信息，请不要在非反馈页面上输入这些信息。"
+      :title="$t('components.layouts.helpbuttons.diagnosticPrivacyHint')"
       show-icon
       type="warning"
       class="mb-2"

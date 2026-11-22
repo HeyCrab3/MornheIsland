@@ -1,5 +1,5 @@
 <template>
-  <ResourceEditor collection="classplan" label="课表">
+  <ResourceEditor collection="classplan" :label="$t('composables.useciresource.plan')">
     <template #default="{ doc, save, saving, viewOnly }">
       <ClassPlanEditor v-if="doc" :model-value="doc.data" :view-only="viewOnly" @save="save" />
     </template>

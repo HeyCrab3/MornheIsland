@@ -8,6 +8,7 @@
  * 只读：地址由后端部署配置提供。
  */
 export function useBootstrapPlugin() {
+  const { t } = useI18n();
   const url = ref("");
   const isDefault = ref(true);
   const loading = ref(false);
@@ -34,7 +35,7 @@ export function useBootstrapPlugin() {
   async function copy() {
     try {
       await navigator.clipboard.writeText(url.value);
-      ElMessage.success("已复制引导插件地址");
+      ElMessage.success(t('composables.usebootstrapplugin.bootstrapUrlCopied'));
     } catch {
       ElMessage.error("复制失败");
     }

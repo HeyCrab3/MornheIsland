@@ -6,7 +6,7 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="这份课表是学校共享的，你只有查看权限；需要修改请找学校管理员，或复制一份成自己的。"
+      :title="$t('components.classplaneditor.sharedPlanReadOnlyNotice')"
     />
     <el-alert
       v-else-if="mobile"
@@ -14,14 +14,14 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="课表网格编辑在手机上体验有限，以下为只读预览，请在电脑上编辑。"
+      :title="$t('components.classplaneditor.mobileReadOnlyNotice')"
     />
 
     <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
       <span class="text-sm font-medium">时间表：</span>
       <el-select
         v-model="selectedTimelayoutId"
-        placeholder="必选"
+        :placeholder="$t('components.classplaneditor.required')"
         :disabled="viewOnly"
         @change="onTimelayoutChange"
         class="w-48"
@@ -31,7 +31,7 @@
       <span class="text-sm font-medium ml-4">课程表：</span>
       <el-select
         v-model="selectedSubjectsId"
-        placeholder="必选"
+        :placeholder="$t('components.classplaneditor.required')"
         :disabled="viewOnly"
         @change="onSubjectsChange"
         class="w-48"
@@ -132,7 +132,7 @@
                     @click="setCell(d, tpi)"
                   >
                     <span class="cell-subject">
-                      {{ getCellSubjectName(d, tpi) || (isEnabled(d, tpi) ? "空课" : "—") }}
+                      {{ getCellSubjectName(d, tpi) || (isEnabled(d, tpi) ? $t('components.classplaneditor.emptyClass') : "—") }}
                     </span>
                     <el-checkbox
                       :model-value="isEnabled(d, tpi)"
@@ -171,7 +171,7 @@
       </el-button>
     </template>
 
-    <el-empty v-else :description="!timePoints.length ? '请先选择时间表' : '请先选择课程表'" />
+    <el-empty v-else :description="!timePoints.length ? $t('components.classplaneditor.selectTimeLayoutFirst') : $t('components.classplaneditor.selectSubjectsFirst')" />
   </div>
 </template>
 
@@ -193,6 +193,7 @@ interface TimePoint {
 
 const props = defineProps<{ modelValue: any; viewOnly?: boolean }>();
 const emit = defineEmits<{ save: [data: any] }>();
+const { t } = useI18n();
 const saving = ref(false);
 const loading = ref(false);
 const forceRender = ref(0);
@@ -201,19 +202,19 @@ const forceRender = ref(0);
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
 const DAYS = [
-  { value: "Monday", label: "周一", weekDay: 1 },
-  { value: "Tuesday", label: "周二", weekDay: 2 },
-  { value: "Wednesday", label: "周三", weekDay: 3 },
-  { value: "Thursday", label: "周四", weekDay: 4 },
-  { value: "Friday", label: "周五", weekDay: 5 },
-  { value: "Saturday", label: "周六", weekDay: 6 },
-  { value: "Sunday", label: "周日", weekDay: 0 },
+  { value: "Monday", label: t('components.classplaneditor.monday'), weekDay: 1 },
+  { value: "Tuesday", label: t('components.classplaneditor.tuesday'), weekDay: 2 },
+  { value: "Wednesday", label: t('components.classplaneditor.wednesday'), weekDay: 3 },
+  { value: "Thursday", label: t('components.classplaneditor.thursday'), weekDay: 4 },
+  { value: "Friday", label: t('components.classplaneditor.friday'), weekDay: 5 },
+  { value: "Saturday", label: t('components.classplaneditor.saturday'), weekDay: 6 },
+  { value: "Sunday", label: t('components.classplaneditor.sunday'), weekDay: 0 },
 ];
 
 const WEEK_TABS = [
-  { value: 0, label: "每周" },
-  { value: 1, label: "单周" },
-  { value: 2, label: "双周" },
+  { value: 0, label: t('components.classplaneditor.everyWeek') },
+  { value: 1, label: t('components.classplaneditor.oddWeek') },
+  { value: 2, label: t('components.classplaneditor.evenWeek') },
 ] as const;
 
 const activeDays = ref(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
@@ -236,7 +237,7 @@ const existingUuids = reactive<Record<0 | 1 | 2, Record<string, string>>>({ 0: {
 const otherWeeks = computed(() => WEEK_TABS.filter((t) => t.value !== activeWeekDiv.value));
 
 function weekLabel(v: number): string {
-  return v === 0 ? "每周" : v === 1 ? "单周" : "双周";
+  return v === 0 ? t('components.classplaneditor.everyWeek') : v === 1 ? t('components.classplaneditor.oddWeek') : t('components.classplaneditor.evenWeek');
 }
 
 function authHeaders() {
@@ -420,14 +421,14 @@ function copyWeekTo(dst: number) {
 }
 
 function doSave() {
-  if (!selectedTimelayoutId.value) return ElMessage.warning("请先选择时间表");
-  if (!selectedSubjectsId.value) return ElMessage.warning("请先选择课程表");
-  if (!activeDays.value.length) return ElMessage.warning("请至少选择一个上课日");
+  if (!selectedTimelayoutId.value) return ElMessage.warning(t('components.classplaneditor.selectTimeLayoutFirst'));
+  if (!selectedSubjectsId.value) return ElMessage.warning(t('components.classplaneditor.selectSubjectsFirst'));
+  if (!activeDays.value.length) return ElMessage.warning(t('components.classplaneditor.selectAtLeastOneDay'));
 
   const classPlans: Record<string, any> = {};
   const tl = timelayouts.value.find((t: any) => t._id === selectedTimelayoutId.value);
   const tlUuid = tl?.data ? Object.keys(tl.data)[0] || "" : "";
-  if (!tlUuid) return ElMessage.warning("这份时间表里没有可用的时间轴，请先修时间表");
+  if (!tlUuid) return ElMessage.warning(t('components.classplaneditor.noAvailableTimePoints'));
 
   for (const d of activeDays.value) {
     const dayInfo = DAYS.find((x) => x.value === d)!;
@@ -490,7 +491,7 @@ function doSave() {
   }
 
   if (Object.keys(classPlans).length === 0) {
-    return ElMessage.warning("课表为空，请先填入课程或勾选启用");
+    return ElMessage.warning(t('components.classplaneditor.planEmptyHint'));
   }
 
   const data: any = { classPlans, timelayoutId: selectedTimelayoutId.value, subjectsId: selectedSubjectsId.value };

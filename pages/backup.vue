@@ -28,7 +28,7 @@
         <div class="flex items-start gap-3 flex-wrap">
           <el-select
             v-model="classId"
-            placeholder="选择要导出的班级"
+            :placeholder="$t('pages.backup.selectClassesToExport')"
             class="w-64"
             filterable
             :loading="classesLoading"
@@ -110,8 +110,8 @@
             type="warning"
             :closable="false"
             show-icon
-            title="覆盖模式会改动现有数据"
-            description="同 id 的班级、课表、时间表等会被备份里的版本替换，请先确认备份文件来源可靠。"
+            :title="$t('pages.backup.overwriteModeWarning')"
+            :description="$t('pages.backup.overwriteModeDetail')"
           />
 
           <div class="flex items-center gap-2">
@@ -122,12 +122,12 @@
           </div>
         </template>
 
-        <el-empty v-else-if="!parseError" :image-size="80" description="选择一个备份文件以查看内容" />
+        <el-empty v-else-if="!parseError" :image-size="80" :description="$t('pages.backup.selectBackupToPreview')" />
       </div>
     </el-card>
 
     <!-- 导入结果 -->
-    <ResponsiveDrawer v-model:open="resultVisible" title="导入结果">
+    <ResponsiveDrawer v-model:open="resultVisible" :title="$t('pages.backup.importResult')">
       <div v-if="result" class="py-2 space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div class="report-stat">
@@ -181,15 +181,17 @@ import ResponsiveDrawer from "@/components/ui/ResponsiveDrawer.vue";
 
 definePageMeta({ title: "配置备份", protected: true });
 
+const { t } = useI18n();
+
 const LABELS: Record<string, string> = {
   classes: "班级",
-  classplans: "课表",
+  classplans: t('composables.useciresource.plan'),
   timelayouts: "时间表",
   subjects: "课程表",
-  settings: "设置",
-  policies: "策略",
-  plugins: "插件",
-  pluginProfiles: "插件配置组",
+  settings: t('composables.useciresource.settings'),
+  policies: t('composables.useciresource.policy'),
+  plugins: t('pages.backup.plugins'),
+  pluginProfiles: t('pages.backup.pluginConfigGroups'),
 };
 
 function auth() {
@@ -242,9 +244,9 @@ async function exportFull() {
   try {
     const res: any = await $fetch("/api/v1/console/ci/backup/export", { headers: auth() });
     downloadJson(res.data, `mornheisland-backup-full-${stamp()}.json`);
-    ElMessage.success("已开始下载");
+    ElMessage.success(t('pages.backup.downloadStarted'));
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "导出失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.backup.exportFailed'));
   } finally {
     exporting.value = "";
   }
@@ -259,9 +261,9 @@ async function exportClass() {
     });
     const name = res.data?.scope?.className || res.data?.scope?.identity || classId.value;
     downloadJson(res.data, `mornheisland-backup-${name}-${stamp()}.json`);
-    ElMessage.success("已开始下载");
+    ElMessage.success(t('pages.backup.downloadStarted'));
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "导出失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.backup.exportFailed'));
   } finally {
     exporting.value = "";
   }
@@ -279,8 +281,8 @@ const result = ref<any>(null);
 
 const scopeText = computed(() => {
   const s = parsed.value?.scope;
-  if (!s) return "未标注";
-  if (s.type === "full") return "全量";
+  if (!s) return t('pages.backup.unlabeled');
+  if (s.type === "full") return t('pages.backup.full');
   if (s.type === "class") return `班级：${s.className || s.identity || s.classId}`;
   return s.type;
 });
@@ -290,7 +292,7 @@ const countsText = computed(() => {
   const parts = Object.entries(c)
     .filter(([, n]) => Number(n) > 0)
     .map(([k, n]) => `${LABELS[k] || k} ${n}`);
-  return parts.length ? parts.join(" · ") : "空备份";
+  return parts.length ? parts.join(" · ") : t('pages.backup.emptyBackup');
 });
 
 function onFileChange(e: Event) {
@@ -316,7 +318,7 @@ function onFileChange(e: Event) {
       }
       parsed.value = obj;
     } catch (err: any) {
-      parseError.value = "无法解析该文件：" + (err?.message || err);
+      parseError.value = t('pages.backup.cannotParseFile') + (err?.message || err);
     } finally {
       input.value = "";
     }
@@ -340,9 +342,9 @@ async function doImport() {
   if (importMode.value === "overwrite") {
     try {
       await ElMessageBox.confirm(
-        "覆盖模式会用备份里的内容替换现有同 id 数据，且无法撤销。确定继续？",
-        "确认覆盖导入",
-        { type: "warning", confirmButtonText: "确认导入", cancelButtonText: "取消" },
+        t('pages.backup.confirmOverwriteWarning'),
+        t('pages.backup.confirmOverwriteImport'),
+        { type: "warning", confirmButtonText: t('pages.backup.confirmImport'), cancelButtonText: "取消" },
       );
     } catch {
       return;
@@ -360,7 +362,7 @@ async function doImport() {
     resultVisible.value = true;
     ElMessage.success(`导入完成：新建 ${res.data?.totals?.created ?? 0}，覆盖 ${res.data?.totals?.updated ?? 0}`);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "导入失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.backup.importFailed'));
   } finally {
     importing.value = false;
   }
@@ -368,7 +370,7 @@ async function doImport() {
 
 function reloadAll() {
   resultVisible.value = false;
-  ElMessage.info("请切换到对应页面查看（数据已写入）");
+  ElMessage.info(t('pages.backup.switchPageToView'));
 }
 
 onMounted(fetchClasses);

@@ -9,7 +9,7 @@
       </div>
       <div class="flex items-center gap-2">
         <el-button type="primary" @click="createVisible = true">
-          <el-icon class="mr-1"><Plus /></el-icon>创建学校
+          <el-icon class="mr-1"><Plus /></el-icon>{{ $t('pages.schools.index.createSchool') }}
         </el-button>
         <el-button :loading="loading" @click="load">刷新</el-button>
       </div>
@@ -55,14 +55,14 @@
         </el-card>
       </div>
 
-      <el-empty v-else :image-size="100" description="还没有学校。可以直接创建，也可以去班级管理升级同机构班级">
-        <el-button type="primary" @click="createVisible = true">创建学校</el-button>
+      <el-empty v-else :image-size="100" :description="$t('pages.schools.index.noSchools')">
+        <el-button type="primary" @click="createVisible = true">{{ $t('pages.schools.index.createSchool') }}</el-button>
         <el-button @click="navigateTo('/classes')">去班级管理</el-button>
       </el-empty>
     </div>
 
     <!-- 手动创建学校 -->
-    <el-dialog v-model="createVisible" title="创建学校" width="420px">
+    <el-dialog v-model="createVisible" :title="$t('pages.schools.index.createSchool')" width="420px">
       <el-alert type="info" :closable="false" show-icon class="mb-3">
         创建后你就是这所学校的<b>创建者</b>，可以生成邀请链接让其他电教委员加入，
         也能把学校级的资源统一分配给各班。
@@ -71,7 +71,7 @@
         v-model="createName"
         maxlength="60"
         show-word-limit
-        placeholder="学校全称，如 XX市第一中学"
+        :placeholder="$t('pages.schools.index.schoolFullNameHint')"
         @keyup.enter="doCreate"
       />
       <div class="text-xs text-gray-400 mt-2">
@@ -91,6 +91,8 @@
 import { OfficeBuilding, Plus } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "学校", protected: true });
+
+const { t } = useI18n();
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
@@ -126,7 +128,7 @@ async function doCreate() {
       return;
     }
     if (d?.data?.needInvite) {
-      ElMessageBox.alert(d.msg, "这所学校已存在", { type: "warning", confirmButtonText: "知道了" }).catch(() => {});
+      ElMessageBox.alert(d.msg, t("pages.schools.index.schoolAlreadyExists"), { type: "warning", confirmButtonText: "知道了" }).catch(() => {});
       return;
     }
     ElMessage.error(d?.msg || "创建失败");
@@ -136,7 +138,7 @@ async function doCreate() {
 }
 
 function roleLabel(role: string) {
-  return role === "owner" ? "创建者" : role === "admin" ? "管理员" : "成员";
+  return role === "owner" ? t("pages.schools.index.creator") : role === "admin" ? t("pages.schools.index.admin") : t("pages.schools.index.member");
 }
 function roleType(role: string) {
   return role === "owner" ? "warning" : role === "admin" ? "success" : "info";
@@ -148,7 +150,7 @@ async function load() {
     const res: any = await $fetch("/api/v1/console/ci/schools", { headers: authHeaders() });
     schools.value = Array.isArray(res?.data) ? res.data : [];
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "读取学校列表失败");
+    ElMessage.error(e?.data?.msg || t("pages.schools.index.loadSchoolsFailed"));
   } finally {
     loading.value = false;
   }

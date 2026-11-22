@@ -4,7 +4,7 @@
       <el-button circle text @click="navigateTo('/schools')">
         <el-icon><ArrowLeft /></el-icon>
       </el-button>
-      <h1 class="text-xl font-semibold">加入学校</h1>
+      <h1 class="text-xl font-semibold">{{ $t('pages.schools.join.token.joinSchool') }}</h1>
     </div>
 
     <el-card v-loading="loading">
@@ -50,7 +50,7 @@
           <div class="text-sm font-medium mb-2">把自己的班级一并挂进来（可选）</div>
           <el-checkbox-group v-model="selected" class="flex flex-col gap-2">
             <el-checkbox v-for="c in classes" :key="c.id" :value="c.id" class="!mr-0">
-              {{ c.name || "（未命名）" }}
+              {{ c.name || $t('pages.schools.join.token.unnamed') }}
               <span class="text-xs text-gray-400 ml-1">#{{ c.identity }}</span>
             </el-checkbox>
           </el-checkbox-group>
@@ -61,7 +61,7 @@
 
         <div class="flex gap-2">
           <el-button type="primary" :loading="accepting" @click="accept">
-            {{ info.alreadyMember ? "挂入班级" : "加入" }}
+            {{ info.alreadyMember ? $t('pages.schools.join.token.attachClass') : $t('pages.schools.join.token.join') }}
           </el-button>
           <el-button @click="navigateTo('/schools')">取消</el-button>
         </div>
@@ -74,6 +74,8 @@
 import { ArrowLeft, OfficeBuilding } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "加入学校", protected: true });
+
+const { t } = useI18n();
 
 const route = useRoute();
 const token = String(route.params.token ?? "");
@@ -88,7 +90,7 @@ const classes = ref<any[]>([]);
 const selected = ref<string[]>([]);
 
 function roleLabel(role: string) {
-  return role === "owner" ? "创建者" : role === "admin" ? "管理员" : "成员";
+  return role === "owner" ? t("pages.schools.index.creator") : role === "admin" ? t("pages.schools.index.admin") : t("pages.schools.index.member");
 }
 
 async function load() {
@@ -101,7 +103,7 @@ async function load() {
     await loadMyClasses();
   } catch (e: any) {
     state.value = "invalid";
-    errorMsg.value = e?.data?.msg || "邀请链接无效";
+    errorMsg.value = e?.data?.msg || t("pages.schools.join.token.invalidInviteLink");
   } finally {
     loading.value = false;
   }
@@ -134,7 +136,7 @@ async function accept() {
     );
     navigateTo(`/schools/${d?.schoolId}`);
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "加入失败");
+    ElMessage.error(e?.data?.msg || t("pages.schools.join.token.joinFailed"));
   } finally {
     accepting.value = false;
   }

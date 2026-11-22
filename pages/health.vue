@@ -8,7 +8,7 @@
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <el-button :loading="fixingAll" @click="fixAllNullGuid">批量修复过期课表</el-button>
+        <el-button :loading="fixingAll" @click="fixAllNullGuid">{{ $t('pages.health.batchFixExpiredClassplans') }}</el-button>
         <el-button :loading="loading" @click="load">重新检查</el-button>
       </div>
     </div>
@@ -23,7 +23,7 @@
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
       <template #title>为什么需要体检</template>
-      档案库里显示"已关联"的，看的是班级自己的字段；而客户端真正读的是<b>课表资源里记录的那一份</b>。
+      档案库里显示{{ $t('pages.health.linked') }}的，看的是班级自己的字段；而客户端真正读的是<b>课表资源里记录的那一份</b>。
       两者指向不同资源时，界面一切正常，但 ClassIsland 会报「未配置时间表」或者下发一份空白时间表。
       这类问题只能靠比对引用链发现。
     </el-alert>
@@ -51,7 +51,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-num" :class="summary.warnCount ? 'text-amber-500' : ''">{{ summary.warnCount }}</div>
-        <div class="stat-label">警告</div>
+        <div class="stat-label">{{ $t('pages.health.warning') }}</div>
       </div>
     </div>
 
@@ -70,7 +70,7 @@
         <div class="flex items-start justify-between gap-3 flex-wrap">
           <div class="min-w-0">
             <div class="font-medium truncate">
-              {{ row.className || "（未命名班级）" }}
+              {{ row.className || $t('pages.health.unnamedClass') }}
               <span v-if="row.identity" class="text-xs text-gray-400 ml-1">#{{ row.identity }}</span>
               <el-tag v-if="row.mine === false" size="small" type="info" effect="plain" class="ml-1">
                 别人的班
@@ -84,7 +84,7 @@
                   effect="plain"
                   class="shrink-0 mt-0.5"
                 >
-                  {{ it.level === "error" ? "错误" : "警告" }}
+                  {{ it.level === "error" ? "错误" : $t('pages.health.warning') }}
                 </el-tag>
                 <span class="leading-relaxed">{{ it.message }}</span>
               </li>
@@ -116,6 +116,8 @@
 <script setup lang="ts">
 definePageMeta({ title: "档案体检", protected: true });
 
+const { t } = useI18n();
+
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
 const loading = ref(false);
@@ -133,10 +135,10 @@ const failed = ref(false);
 async function fixAllNullGuid() {
   try {
     await ElMessageBox.confirm(
-      "会把我名下所有课表资源里的 null Guid 统一修成 00000000-0000-0000-0000-000000000000，" +
-        "并同时检查时间表。这个操作是幂等的，不会改动其它字段。继续？",
-      "批量修复过期课表",
-      { type: "warning", confirmButtonText: "开始修复", cancelButtonText: "取消" },
+      t('pages.health.nullGuidFixHint') +
+        t('pages.health.nullGuidFixConfirm'),
+      t('pages.health.batchFixExpiredClassplans'),
+      { type: "warning", confirmButtonText: t('pages.health.startFix'), cancelButtonText: "取消" },
     );
   } catch {
     return;
@@ -157,7 +159,7 @@ async function fixAllNullGuid() {
       await load();
     }
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "修复失败");
+    ElMessage.error(e?.data?.msg || t('pages.health.fixFailed'));
   } finally {
     fixingAll.value = false;
   }
@@ -183,7 +185,7 @@ async function load() {
     failed.value = true;
     rows.value = [];
     summary.value = null;
-    ElMessage.error(e?.data?.msg || "体检失败");
+    ElMessage.error(e?.data?.msg || t('pages.health.checkFailed'));
   } finally {
     loading.value = false;
   }
@@ -202,10 +204,10 @@ async function fix(row: any) {
       ElMessage.success(`已修复：${fixed.join(", ")}`);
       await load();
     } else {
-      ElMessage.info(res?.data?.message || "没有可自动修复的项");
+      ElMessage.info(res?.data?.message || t('pages.health.nothingToAutoFix'));
     }
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "修复失败");
+    ElMessage.error(e?.data?.msg || t('pages.health.fixFailed'));
   } finally {
     fixing.value = "";
   }

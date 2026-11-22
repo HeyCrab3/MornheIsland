@@ -39,7 +39,7 @@
 
           <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-end gap-1.5">
             <el-button size="small" text type="primary" @click.stop="navigateTo(`/${collection}/${item._id}`)">
-              {{ item.editable === false ? "查看" : "编辑" }}
+              {{ item.editable === false ? $t('components.resourcelist.view') : $t('components.resourcelist.edit') }}
             </el-button>
             <template v-if="item.editable !== false">
               <el-button size="small" text @click.stop="rename(item._id, item.name)">
@@ -66,7 +66,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showCreate = false">取消</el-button>
-        <el-button type="primary" :loading="creating" @click="doCreate">确定</el-button>
+        <el-button type="primary" :loading="creating" @click="doCreate">{{ $t('components.resourceeditor.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -76,6 +76,7 @@
 import { Plus, Notebook, Timer, Collection, Lock, Document } from "@element-plus/icons-vue";
 
 const props = defineProps<{ collection: string; label: string }>();
+const { t } = useI18n();
 const { items, loading, fetchList, createItem, removeItem, renameItem } = useCiResource(props.collection, props.label);
 const remove = removeItem;
 const rename = renameItem;
@@ -106,7 +107,7 @@ async function doCreate() {
     newName.value = "";
     await fetchList();
   } catch {
-    ElMessage.error("创建失败");
+    ElMessage.error(t('components.resourcelist.createFailed'));
   } finally {
     creating.value = false;
   }

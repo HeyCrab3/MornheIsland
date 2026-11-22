@@ -2,16 +2,16 @@
   <div>
     <HomeWelcomeBanner />
     <HomeQuickStartupGuide />
-    <h1 class="text-2xl font-semibold mb-1">仪表盘</h1>
+    <h1 class="text-2xl font-semibold mb-1">{{ $t('dashboard.title') }}</h1>
     <p class="text-sm text-gray-500 mb-6">
-      在这里查看当前账号下关联的资源情况。
+      {{ $t('dashboard.subtitle') }}
     </p>
 
     <!-- 平台概览：全站规模，让新用户一眼知道这里不是空壳 -->
     <el-card shadow="never" class="mb-6">
       <div class="pb-head">
-        <span class="font-medium">平台概览</span>
-        <span class="text-xs text-gray-400">一些伟大的数据。很显然我只是觉得主页太空了才加的。</span>
+        <span class="font-medium">{{ $t('dashboard.platformOverview') }}</span>
+        <span class="text-xs text-gray-400">{{ $t('dashboard.platformOverviewHint') }}</span>
       </div>
       <div class="pb-grid">
         <div v-for="item in platformCards" :key="item.label" class="pb-item">
@@ -29,18 +29,17 @@
           <el-icon :size="20" color="#fff"><EditPen /></el-icon>
         </div>
         <div class="min-w-0 flex-1">
-          <div class="font-semibold text-base">考试安排</div>
+          <div class="font-semibold text-base">{{ $t('dashboard.examEntry') }}</div>
           <div class="text-xs text-gray-500 mt-0.5 leading-relaxed">
-            设置哪一天考什么科目、几点到几点。按账号保存，本账号下所有班级的看板共用，
-            考试时段会覆盖与之重合的标准课时。
+            {{ $t('dashboard.examEntryDesc') }}
           </div>
         </div>
         <div class="flex gap-2 shrink-0">
           <el-button type="primary" @click="navigateTo('/exams')">
-            <el-icon class="mr-1"><EditPen /></el-icon>配置考试安排
+            <el-icon class="mr-1"><EditPen /></el-icon>{{ $t('dashboard.configureExams') }}
           </el-button>
           <el-button @click="openBoard">
-            <el-icon class="mr-1"><Picture /></el-icon>查看看板
+            <el-icon class="mr-1"><Picture /></el-icon>{{ $t('dashboard.viewBoard') }}
           </el-button>
         </div>
       </div>
@@ -73,7 +72,7 @@
     <el-row :gutter="16">
       <!-- 公告 -->
       <el-col :xs="24" :lg="8">
-        <el-card header="公告" class="mb-4 lg:mb-0">
+        <el-card :header="$t('dashboard.notices')" class="mb-4 lg:mb-0">
           <el-carousel v-if="platform.notices.length !== 0" height="200px">
             <el-carousel-item v-for="(item, index) in platform.notices" :key="index">
               <p class="text-lg font-medium">{{ item.title }}</p>
@@ -81,7 +80,7 @@
               <p class="text-gray-600 dark:text-gray-400 mt-2">{{ item.content }}</p>
             </el-carousel-item>
           </el-carousel>
-          <el-empty v-else description="暂无公告" />
+          <el-empty v-else :description="$t('dashboard.noNotices')" />
         </el-card>
       </el-col>
 
@@ -89,7 +88,7 @@
       <el-col :xs="24" :lg="16">
         <!-- 资源分布 -->
         <el-card shadow="hover" class="mb-4">
-          <template #header><span class="font-medium">资源分布</span></template>
+          <template #header><span class="font-medium">{{ $t('dashboard.resourceDistribution') }}</span></template>
           <div v-if="resourceBars.length" class="space-y-3">
             <div v-for="bar in resourceBars" :key="bar.label">
               <div class="flex justify-between text-xs mb-1">
@@ -104,14 +103,14 @@
               </div>
             </div>
           </div>
-          <div v-else class="text-center text-gray-400 py-8 text-sm">暂无资源</div>
+          <div v-else class="text-center text-gray-400 py-8 text-sm">{{ $t('dashboard.noResources') }}</div>
         </el-card>
 
         <!-- 最近活跃 -->
         <el-card shadow="hover">
           <template #header>
             <div class="flex items-center justify-between">
-              <span class="font-medium">最近活跃</span>
+              <span class="font-medium">{{ $t('dashboard.recentActivity') }}</span>
               <span class="text-xs text-gray-400">集控 gRPC {{ deviceSummary.grpcOnline }}/{{ deviceSummary.grpc }} 在线 · 静态 {{ deviceSummary.static }}</span>
             </div>
           </template>
@@ -125,17 +124,17 @@
                 <span
                   class="w-2 h-2 rounded-full shrink-0"
                   :class="r.online ? 'bg-green-400' : 'bg-gray-300'"
-                  :title="r.online ? '在线' : '离线'"
+                  :title="r.online ? $t('dashboard.online') : $t('dashboard.offline')"
                 />
                 <el-tag size="small" :type="r.mode === 'grpc' ? 'primary' : 'info'" effect="plain">
-                  {{ r.mode === 'grpc' ? '集控' : '静态' }}
+                  {{ r.mode === 'grpc' ? $t('dashboard.grpc') : $t('dashboard.static') }}
                 </el-tag>
                 <span class="text-xs truncate" :title="r.title">{{ r.label }}</span>
               </div>
               <span class="text-xs text-gray-400 whitespace-nowrap">{{ r.time }}</span>
             </div>
           </div>
-          <div v-else class="text-center text-gray-400 py-8 text-sm">暂无活跃记录</div>
+          <div v-else class="text-center text-gray-400 py-8 text-sm">{{ $t('dashboard.noActivity') }}</div>
         </el-card>
       </el-col>
     </el-row>
@@ -147,6 +146,7 @@ import { School, Monitor, Notebook, Lock, EditPen, Picture } from "@element-plus
 import { usePlatformStore } from "#imports";
 
 definePageMeta({ title: "仪表盘", protected: true });
+const { t } = useI18n();
 
 /** 看板是独立裸页面，新标签页打开，别把控制台顶掉 */
 function openBoard() {
@@ -190,28 +190,28 @@ function fmtTime(t: any): string {
 
 const statCards = computed(() => [
   {
-    label: "班级总数",
+    label: t('dashboard.cards.classCount'),
     value: stats.classCount,
     hint: "",
     gradient: "linear-gradient(135deg, #A6C2F7 0%, #859BC6 100%)",
     icon: School,
   },
   {
-    label: "已连接设备",
+    label: t('dashboard.cards.deviceCount'),
     value: stats.deviceCount,
     hint: `集控 ${deviceSummary.grpcOnline} 在线 · 静态 ${deviceSummary.static}`,
     gradient: "linear-gradient(135deg, #9B8FC2 0%, #4D3B8E 100%)",
     icon: Monitor,
   },
   {
-    label: "已下发课表",
+    label: t('dashboard.cards.classplanCount'),
     value: stats.classplanCount,
     hint: "",
     gradient: "linear-gradient(135deg, #34D399 0%, #10B981 100%)",
     icon: Notebook,
   },
   {
-    label: "策略数",
+    label: t('dashboard.cards.policyCount'),
     value: stats.policyCount,
     hint: "",
     gradient: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)",
@@ -237,31 +237,31 @@ function formatCount(n: number): string {
 
 const platformCards = computed(() => [
   {
-    label: "注册用户",
+    label: t('dashboard.cards.users'),
     value: formatCount(platformStats.users),
-    hint: "已注册的主账号",
+    hint: t('dashboard.cards.usersHint'),
   },
   {
-    label: "班级",
+    label: t('dashboard.cards.classes'),
     value: formatCount(platformStats.classes),
-    hint: platformStats.schools ? `分布在 ${platformStats.schools} 个机构` : "尚未建立机构",
+    hint: platformStats.schools ? `分布在 ${platformStats.schools} 个机构` : t('pages.index.noOrganizationYet'),
   },
   {
-    label: "资源资产",
+    label: t('dashboard.cards.resources'),
     value: formatCount(platformStats.resourceTotal),
     hint: platformStats.resourceTypes.length
       ? platformStats.resourceTypes.map((t) => `${t.label} ${t.count}`).join(" · ")
       : "",
   },
   {
-    label: "机构",
+    label: t('dashboard.cards.schools'),
     value: formatCount(platformStats.schools),
-    hint: "学校维度聚合",
+    hint: t('pages.index.schoolAggregation'),
   },
   {
-    label: "设备",
+    label: t('dashboard.cards.devices'),
     value: `${formatCount(platformStats.deviceOnline)} / ${formatCount(platformStats.deviceTotal)}`,
-    hint: "在线 / 全部",
+    hint: t('dashboard.cards.devicesHint'),
   },
 ]);
 
@@ -313,10 +313,10 @@ onMounted(async () => {
 
     // 资源统计
     const resCounts = [
-      { label: "课表", value: ((cpRes as any)?.data || []).length, color: "#4CAF50" },
-      { label: "时间表", value: ((tlRes as any)?.data || []).length, color: "#2196F3" },
-      { label: "课程表", value: ((sjRes as any)?.data || []).length, color: "#FF9800" },
-      { label: "策略", value: ((polRes as any)?.data || []).length, color: "#9C27B0" },
+      { label: t('composables.useciresource.plan'), value: ((cpRes as any)?.data || []).length, color: "#4CAF50" },
+      { label: t('components.home.quickstartupguide.timeLayout'), value: ((tlRes as any)?.data || []).length, color: "#2196F3" },
+      { label: t('components.home.quickstartupguide.subjects'), value: ((sjRes as any)?.data || []).length, color: "#FF9800" },
+      { label: t('composables.useciresource.policy'), value: ((polRes as any)?.data || []).length, color: "#9C27B0" },
     ];
     const max = Math.max(...resCounts.map((r) => r.value), 1);
     resourceBars.value = resCounts.map((r) => ({

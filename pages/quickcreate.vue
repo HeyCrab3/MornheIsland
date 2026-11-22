@@ -10,14 +10,14 @@
         <div class="ai-badge">
           <el-icon :size="18"><MagicStick /></el-icon>
         </div>
-        <h1 class="text-2xl font-semibold">快速创建资源</h1>
+        <h1 class="text-2xl font-semibold">{{ $t('pages.quickcreate.quickCreateResource') }}</h1>
       </div>
       <p class="text-sm text-gray-500 mb-6">上传作息表或课表照片，AI 自动识别并生成可编辑的结构化数据</p>
 
       <el-steps :active="step" finish-status="success" align-center simple class="mb-7">
-        <el-step title="上传图片" />
-        <el-step title="确认结果" />
-        <el-step title="保存资源" />
+        <el-step :title="$t('pages.quickcreate.uploadImage')" />
+        <el-step :title="$t('pages.quickcreate.confirmResult')" />
+        <el-step :title="$t('pages.quickcreate.saveResource')" />
       </el-steps>
 
       <!-- ==================== Step 0: 上传 ==================== -->
@@ -25,7 +25,7 @@
         <div class="text-sm font-medium mb-2">创建类型</div>
         <el-radio-group v-model="resourceType" class="mb-4">
           <el-radio-button value="timelayout">作息时间表</el-radio-button>
-          <el-radio-button value="classplan">课程表</el-radio-button>
+          <el-radio-button value="classplan">{{ $t('components.home.quickstartupguide.subjects') }}</el-radio-button>
         </el-radio-group>
 
         <div
@@ -81,7 +81,7 @@
               />
             </div>
             <el-collapse class="mt-3">
-              <el-collapse-item title="查看 OCR 识别原文">
+              <el-collapse-item :title="$t('pages.quickcreate.viewOcrOriginal')">
                 <pre class="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-neutral-700 rounded p-3 max-h-48 overflow-auto m-0">{{ result.ocrText }}</pre>
               </el-collapse-item>
             </el-collapse>
@@ -105,12 +105,12 @@
                     <el-input v-model="row.name" size="small" />
                   </template>
                 </el-table-column>
-                <el-table-column label="开始" width="110">
+                <el-table-column :label="$t('components.timelayouteditor.start')" width="110">
                   <template #default="{ row }">
                     <el-input v-model="row.start" size="small" />
                   </template>
                 </el-table-column>
-                <el-table-column label="结束" width="110">
+                <el-table-column :label="$t('components.timelayouteditor.end')" width="110">
                   <template #default="{ row }">
                     <el-input v-model="row.end" size="small" />
                   </template>
@@ -147,11 +147,11 @@
       <!-- ==================== Step 2: 保存 ==================== -->
       <div v-if="step === 2" class="max-w-md mx-auto">
         <el-form label-position="top">
-          <el-form-item label="资源名称" required>
-            <el-input v-model="saveName" placeholder="如：高一标准作息" />
+          <el-form-item :label="$t('pages.quickcreate.resourceName')" required>
+            <el-input v-model="saveName" :placeholder="$t('pages.quickcreate.resourceNameExample')" />
           </el-form-item>
           <el-button type="primary" class="ai-btn w-full" :loading="saving" @click="doSave">
-            保存资源
+            {{ $t('pages.quickcreate.saveResource') }}
           </el-button>
         </el-form>
         <div v-if="savedId" class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded text-sm">
@@ -171,6 +171,7 @@ import { UploadFilled, MagicStick } from "@element-plus/icons-vue";
 import AIBackground from '@/assets/images/ai_background.jpeg'
 
 definePageMeta({ title: "快速创建资源", protected: true });
+const { t } = useI18n();
 
 const step = ref(0);
 const resourceType = ref<"timelayout" | "classplan">("timelayout");
@@ -257,7 +258,7 @@ async function doAnalyze() {
     result.value = res.data;
     step.value = 1;
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "识别失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.quickcreate.recognitionFailed'));
   } finally {
     analyzing.value = false;
   }
@@ -265,7 +266,7 @@ async function doAnalyze() {
 
 async function doSave() {
   if (!saveName.value.trim()) {
-    ElMessage.warning("请输入资源名称");
+    ElMessage.warning(t('pages.quickcreate.enterResourceName'));
     return;
   }
   saving.value = true;
@@ -277,9 +278,9 @@ async function doSave() {
       body: { name: saveName.value, data: result.value.data },
     });
     savedId.value = res.data._id;
-    ElMessage.success("资源已创建");
+    ElMessage.success(t('pages.quickcreate.resourceCreated'));
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "保存失败");
+    ElMessage.error(e?.response?._data?.msg || t('components.resourceeditor.saveFailed'));
   } finally {
     saving.value = false;
   }

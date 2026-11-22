@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">考试安排</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('dashboard.examEntry') }}</h1>
         <p class="text-sm text-gray-500">
           按<b>账号</b>保存，该账号下所有班级的看板共用这一份，不用每个班重复录入。
         </p>
@@ -28,22 +28,22 @@
           v-model="draft.date"
           type="date"
           value-format="YYYY-MM-DD"
-          placeholder="考试日期"
+          :placeholder="$t('pages.exams.examDate')"
           style="width: 160px"
         />
-        <el-input v-model="draft.subject" placeholder="科目，如 数学" style="width: 150px" />
+        <el-input v-model="draft.subject" :placeholder="$t('pages.exams.subjectExample')" style="width: 150px" />
         <el-time-picker
           v-model="draft.start"
           format="HH:mm"
           value-format="HH:mm"
-          placeholder="开始"
+          :placeholder="$t('components.timelayouteditor.start')"
           style="width: 118px"
         />
         <el-time-picker
           v-model="draft.end"
           format="HH:mm"
           value-format="HH:mm"
-          placeholder="结束"
+          :placeholder="$t('components.timelayouteditor.end')"
           style="width: 118px"
         />
         <el-button type="primary" @click="add">添加</el-button>
@@ -61,27 +61,27 @@
       </template>
 
       <el-table v-if="entries.length" :data="entries" size="small">
-        <el-table-column label="日期" width="180">
+        <el-table-column :label="$t('pages.exams.date')" width="180">
           <template #default="{ row }">
             <span :class="{ 'font-semibold': row.date === today }">{{ row.date }}</span>
             <span class="text-xs text-gray-400 ml-2">{{ weekLabel(row.date) }}</span>
             <el-tag v-if="row.date === today" size="small" type="warning" effect="plain" class="ml-1">
-              今天
+              {{ $t('pages.board.today') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="subject" label="科目" min-width="120" />
-        <el-table-column label="时间" width="140">
+        <el-table-column prop="subject" :label="$t('composables.useciresource.subject')" min-width="120" />
+        <el-table-column :label="$t('pages.exams.time')" width="140">
           <template #default="{ row }">{{ row.start }} – {{ row.end }}</template>
         </el-table-column>
         <el-table-column width="70" align="right">
           <template #default="{ $index }">
-            <el-button size="small" text type="danger" @click="removeAt($index)">删除</el-button>
+            <el-button size="small" text type="danger" @click="removeAt($index)">{{ $t('components.resourceeditor.delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-empty v-else description="还没有安排考试" :image-size="80" />
+      <el-empty v-else :description="$t('pages.exams.noExamsScheduled')" :image-size="80" />
     </el-card>
 
     <div class="max-w-3xl mt-3 text-xs text-gray-400 leading-relaxed">
@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 definePageMeta({ title: "考试安排", protected: true });
+const { t } = useI18n();
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
@@ -113,7 +114,7 @@ const hasPast = computed(() => entries.value.some((e) => e.date < today.value));
 function weekLabel(date: string): string {
   const d = new Date(`${date}T00:00:00`);
   if (Number.isNaN(d.getTime())) return "";
-  return ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][d.getDay()] || "";
+  return [t('components.classplaneditor.sunday'), t('components.classplaneditor.monday'), t('components.classplaneditor.tuesday'), t('components.classplaneditor.wednesday'), t('components.classplaneditor.thursday'), t('components.classplaneditor.friday'), t('components.classplaneditor.saturday')][d.getDay()] || "";
 }
 
 function sortEntries() {
@@ -127,7 +128,7 @@ async function fetchEntries() {
     entries.value = Array.isArray(res?.data?.entries) ? res.data.entries : [];
     dirty.value = false;
   } catch {
-    ElMessage.error("读取考试安排失败");
+    ElMessage.error(t('pages.exams.loadExamsFailed'));
   } finally {
     loading.value = false;
   }
@@ -135,15 +136,15 @@ async function fetchEntries() {
 
 function add() {
   const { date, subject, start, end } = draft;
-  if (!date) return ElMessage.warning("请选择考试日期");
-  if (!subject.trim()) return ElMessage.warning("请填写考试科目");
-  if (!start || !end) return ElMessage.warning("请选择起止时间");
-  if (end <= start) return ElMessage.warning("结束时间要晚于开始时间");
+  if (!date) return ElMessage.warning(t('pages.exams.selectExamDate'));
+  if (!subject.trim()) return ElMessage.warning(t('pages.exams.enterExamSubject'));
+  if (!start || !end) return ElMessage.warning(t('pages.exams.selectStartTimeAndEndTime'));
+  if (end <= start) return ElMessage.warning(t('pages.exams.endAfterStart'));
 
   const dup = entries.value.some(
     (e) => e.date === date && e.start === start && e.end === end && e.subject === subject.trim(),
   );
-  if (dup) return ElMessage.warning("这条已经存在了");
+  if (dup) return ElMessage.warning(t('pages.exams.alreadyExists'));
 
   entries.value.push({ date, subject: subject.trim(), start, end });
   sortEntries();
@@ -164,7 +165,7 @@ function cleanPast() {
   entries.value = entries.value.filter((e) => e.date >= today.value);
   const removed = before - entries.value.length;
   if (removed) dirty.value = true;
-  ElMessage.success(removed ? `已移除 ${removed} 条过期安排，记得保存` : "没有过期的安排");
+  ElMessage.success(removed ? `已移除 ${removed} 条过期安排，记得保存` : t('pages.exams.noExpiredSchedules'));
 }
 
 async function save() {
@@ -176,10 +177,10 @@ async function save() {
       body: { entries: entries.value },
     });
     dirty.value = false;
-    ElMessage.success("已保存");
+    ElMessage.success(t('components.resourceeditor.saved'));
     await fetchEntries();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "保存失败");
+    ElMessage.error(e?.data?.msg || t('components.resourceeditor.saveFailed'));
   } finally {
     saving.value = false;
   }

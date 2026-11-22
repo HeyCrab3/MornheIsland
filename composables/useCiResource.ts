@@ -3,6 +3,7 @@
  * 课表/时间表/科目/设置/策略的列表和编辑共用。
  */
 export function useCiResource(collection: string, label: string) {
+  const { t } = useI18n();
   const items = ref<any[]>([]);
   const loading = ref(false);
 
@@ -41,10 +42,10 @@ export function useCiResource(collection: string, label: string) {
       await fetchList();
     } catch (e: any) {
       if (e?.response?.status === 409) {
-        const msg = e?.response?._data?.msg || "该资源被班级引用，无法删除";
-        ElMessageBox.alert(msg, "无法删除", { type: "warning", confirmButtonText: "知道了" });
+        const msg = e?.response?._data?.msg || t('composables.useciresource.resourceInUseCannotDelete');
+        ElMessageBox.alert(msg, "无法删除", { type: "warning", confirmButtonText: t('composables.useciresource.gotIt') });
       } else {
-        ElMessage.error("删除失败");
+        ElMessage.error(t('composables.useciresource.deleteFailed'));
       }
     }
   }
@@ -61,9 +62,9 @@ export function useCiResource(collection: string, label: string) {
         cancelButtonText: "取消",
         inputValue: currentName,
         inputValidator: (v: string) => {
-          const t = String(v ?? "").trim();
-          if (!t) return "名称不能为空";
-          if (t.length > 100) return "名称不能超过 100 个字符";
+          const val = String(v ?? "").trim();
+          if (!val) return t('composables.useciresource.nameRequired');
+          if (val.length > 100) return t('composables.useciresource.nameTooLong');
           return true;
         },
       });
@@ -82,7 +83,7 @@ export function useCiResource(collection: string, label: string) {
       ElMessage.success(`已重命名为「${input}」`);
       await fetchList();
     } catch (e: any) {
-      ElMessage.error(e?.data?.msg || "重命名失败");
+      ElMessage.error(e?.data?.msg || t('composables.useciresource.renameFailed'));
     }
   }
 

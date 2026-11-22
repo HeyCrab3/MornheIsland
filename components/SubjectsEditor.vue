@@ -8,27 +8,27 @@
     </div>
 
     <el-table :data="subjects" stripe size="small">
-      <el-table-column label="简称" width="70">
+      <el-table-column :label="$t('components.subjectseditor.shortName')" width="70">
         <template #default="{ row }">
           <el-input v-model="row.initial" size="small" class="w-14" maxlength="2" />
         </template>
       </el-table-column>
-      <el-table-column label="科目名称" min-width="120">
+      <el-table-column :label="$t('components.subjectseditor.subjectName')" min-width="120">
         <template #default="{ row }">
           <el-input v-model="row.name" size="small" />
         </template>
       </el-table-column>
-      <el-table-column label="教师" min-width="100">
+      <el-table-column :label="$t('components.subjectseditor.teacher')" min-width="100">
         <template #default="{ row }">
-          <el-input v-model="row.teacherName" size="small" placeholder="(选填)" />
+          <el-input v-model="row.teacherName" size="small" :placeholder="$t('components.subjectseditor.optional')" />
         </template>
       </el-table-column>
-      <el-table-column label="室外" width="70">
+      <el-table-column :label="$t('components.subjectseditor.outdoor')" width="70">
         <template #default="{ row }">
           <el-checkbox v-model="row.isOutDoor" size="small" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="70">
+      <el-table-column :label="$t('components.subjectseditor.actions')" width="70">
         <template #default="{ $index }">
           <el-button text size="small" type="danger" @click="subjects.splice($index, 1)">
             <el-icon><Delete /></el-icon>
@@ -49,13 +49,17 @@ interface SubjectRow { uuid: string; name: string; initial: string; teacherName:
 
 const props = defineProps<{ modelValue: any }>();
 const emit = defineEmits<{ save: [data: any] }>();
+const { t } = useI18n();
 const saving = ref(false);
 
 const subjects = ref<SubjectRow[]>([]);
 
 const DEFAULT_NAMES = [
-  "语文", "数学", "英语", "物理", "化学", "生物",
-  "政治", "历史", "地理", "音乐", "体育", "美术", "信息技术",
+  t('components.subjectseditor.chinese'), t('components.subjectseditor.math'), t('components.subjectseditor.english'),
+  t('components.subjectseditor.physics'), t('components.subjectseditor.chemistry'), t('components.subjectseditor.biology'),
+  t('components.subjectseditor.politics'), t('components.subjectseditor.history'), t('components.subjectseditor.geography'),
+  t('components.subjectseditor.music'), t('components.subjectseditor.pe'), t('components.subjectseditor.art'),
+  t('components.subjectseditor.informationTech'),
 ];
 
 function loadSubjects() {
@@ -85,7 +89,7 @@ function loadSubjects() {
         name,
         initial: name.charAt(0),
         teacherName: "",
-        isOutDoor: name === "体育",
+        isOutDoor: name === t('components.subjectseditor.pe'),
       });
     }
   }

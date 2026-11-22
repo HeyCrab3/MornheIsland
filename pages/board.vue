@@ -36,13 +36,13 @@
         <template v-if="identity">
           <template v-if="currentEntry">
             <div class="subject-label">
-              <span v-if="currentEntry.isExam" class="exam-chip">考试</span>
+              <span v-if="currentEntry.isExam" class="exam-chip">{{ $t('pages.board.exam') }}</span>
               {{
                 currentEntry.isExam
-                  ? "考试中"
+                  ? $t('pages.board.examInProgress')
                   : currentEntry.type === "class"
-                    ? "正在上"
-                    : "当前"
+                    ? $t('pages.board.currentlyTeaching')
+                    : $t('pages.board.current')
               }}
             </div>
             <div class="subject-name">{{ currentMain }}</div>
@@ -65,11 +65,11 @@
           </template>
           <template v-else>
             <div class="subject-label">
-              <span v-if="nextEntry?.isExam" class="exam-chip">考试</span>
-              {{ nextEntry ? "下一节" : "今天" }}
+              <span v-if="nextEntry?.isExam" class="exam-chip">{{ $t('pages.board.exam') }}</span>
+              {{ nextEntry ? $t('pages.board.nextClass') : $t('pages.board.today') }}
             </div>
             <div class="subject-name">
-              {{ nextEntry ? nextMain : "今天没有课了" }}
+              {{ nextEntry ? nextMain : $t('pages.board.noClassesToday') }}
             </div>
             <div v-if="nextEntry" class="subject-sub">
               {{ nextEntry.start }}–{{ nextEntry.end }}
@@ -147,7 +147,7 @@
                   class="warning-tag"
                   :class="warningLevelClass(w.severityColor)"
                 >
-                  {{ w.level || w.typeName || "预警" }}
+                  {{ w.level || w.typeName || $t('pages.board.warning') }}
                 </span>
                 <span class="warning-title">{{ w.title }}</span>
                 <span v-if="w.text" class="warning-detail">{{ w.text }}</span>
@@ -185,11 +185,11 @@
       <!-- 设置入口 -->
       <button
         class="board-gear"
-        title="打开看板设置（快捷键 E 切换布局编辑）"
+        :title="$t('pages.board.openBoardSettings')"
         @click="drawer = true"
       >
         <span class="gear-icon">⚙</span>
-        <span>设置</span>
+        <span>{{ $t('composables.useciresource.settings') }}</span>
       </button>
       <div v-if="editMode" class="board-edithint">
         布局编辑中：拖动元素调整位置，再按 E 退出
@@ -199,7 +199,7 @@
     <!-- 设置抽屉 -->
     <el-drawer
       v-model="drawer"
-      title="看板设置"
+      :title="$t('pages.board.boardSettings')"
       size="380px"
       :append-to-body="true"
     >
@@ -210,7 +210,7 @@
             v-model="settings.identity"
             clearable
             filterable
-            placeholder="从我的班级里选"
+            :placeholder="$t('pages.board.selectFromMyClasses')"
             class="w-full mb-2"
             @change="onPickClass"
           >
@@ -223,7 +223,7 @@
           </el-select>
           <el-input
             v-model="settings.identity"
-            placeholder="班级 ID（或班级标识，如 1-101）"
+            :placeholder="$t('pages.board.classIdHint')"
             clearable
           />
           <div class="hint">
@@ -247,11 +247,11 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="天气位置">
+        <el-form-item :label="$t('pages.board.weatherLocation')">
           <div class="flex gap-2 w-full">
             <el-input
               v-model="cityQuery"
-              placeholder="输入城市名，如 济南"
+              :placeholder="$t('pages.board.cityNameHint')"
               clearable
               @keyup.enter="searchCity"
             />
@@ -276,7 +276,7 @@
           </div>
           <div class="hint">
             当前：<b>{{
-              settings.weatherLocationName || "跟随服务端默认城市"
+              settings.weatherLocationName || $t('pages.board.followServerDefaultCity')
             }}</b>
             <span v-if="settings.weatherLocation"
               >（{{ settings.weatherLocation }}）</span
@@ -292,12 +292,12 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="开学日期（用于单双周判定）">
+        <el-form-item :label="$t('pages.board.schoolStartDate')">
           <el-date-picker
             v-model="settings.termStart"
             type="date"
             value-format="YYYY-MM-DD"
-            placeholder="选择开学日期，可留空"
+            :placeholder="$t('pages.board.selectSchoolStartDate')"
             clearable
             class="!w-full"
           />
@@ -329,7 +329,7 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="显示项">
+        <el-form-item :label="$t('pages.board.displayItems')">
           <div class="flex flex-wrap gap-3">
             <el-checkbox v-model="settings.showClock">时间</el-checkbox>
             <el-checkbox v-model="settings.showSubject">科目</el-checkbox>
@@ -340,14 +340,14 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="配色">
+        <el-form-item :label="$t('pages.board.colorScheme')">
           <el-radio-group v-model="settings.theme">
             <el-radio-button value="dark">深色文字</el-radio-button>
             <el-radio-button value="light">浅色文字</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="文字阴影">
+        <el-form-item :label="$t('pages.board.textShadow')">
           <el-radio-group v-model="settings.textShadow">
             <el-radio-button value="auto">跟随配色</el-radio-button>
             <el-radio-button value="dark">深色</el-radio-button>
@@ -381,7 +381,7 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="背景">
+        <el-form-item :label="$t('pages.board.background')">
           <el-radio-group v-model="settings.bgType" class="mb-2">
             <el-radio-button value="gradient">渐变</el-radio-button>
             <el-radio-button value="image">图片</el-radio-button>
@@ -423,7 +423,7 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="公告（支持 Markdown）">
+        <el-form-item :label="$t('pages.board.announcementMarkdown')">
           <el-input
             v-model="settings.notice"
             type="textarea"
@@ -435,7 +435,7 @@
           </div>
         </el-form-item>
 
-        <el-form-item label="嵌入壁纸引擎（iframe）">
+        <el-form-item :label="$t('pages.board.embedWallpaperEngine')">
           <el-input
             :model-value="iframeCode"
             type="textarea"
@@ -452,9 +452,9 @@
         </el-form-item>
 
         <div class="flex gap-2 mt-4">
-          <el-button size="small" @click="resetLayout">重置元素位置</el-button>
+          <el-button size="small" @click="resetLayout">{{ $t('pages.board.elementPositionReset') }}</el-button>
           <el-button size="small" type="primary" @click="toggleEdit">
-            {{ editMode ? "退出布局编辑" : "调整元素位置" }}
+            {{ editMode ? $t('pages.board.exitLayoutEdit') : $t('pages.board.adjustElementPosition') }}
           </el-button>
           <el-button size="small" text @click="backToConsole"
             >返回控制台</el-button
@@ -470,6 +470,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false, title: "看板" });
+
+const { t } = useI18n();
 
 const STORAGE_KEY = "mi-board-settings-v1";
 
@@ -551,7 +553,7 @@ const clockText = computed(
 );
 const secondsText = computed(() => `:${pad(now.value.getSeconds())}`);
 const dateText = computed(() => {
-  const w = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+  const w = [t('components.classplaneditor.sunday'), t('components.classplaneditor.monday'), t('components.classplaneditor.tuesday'), t('components.classplaneditor.wednesday'), t('components.classplaneditor.thursday'), t('components.classplaneditor.friday'), t('components.classplaneditor.saturday')][
     now.value.getDay()
   ];
   return `${now.value.getFullYear()}年${now.value.getMonth() + 1}月${now.value.getDate()}日 ${w}`;
@@ -659,7 +661,7 @@ const todayExams = computed<any[]>(() => {
         e.end > e.start,
     )
     .map((e: any) => ({
-      name: "考试",
+      name: t('pages.board.exam'),
       type: "exam",
       start: e.start,
       end: e.end,
@@ -721,19 +723,19 @@ const remainMinutes = computed(() => {
 const currentMain = computed(() => {
   const e = currentEntry.value;
   if (!e) return "";
-  if (e.isExam) return e.subject || "考试";
-  if (e.type === "class") return e.subject || e.name || "上课";
+  if (e.isExam) return e.subject || t('pages.board.exam');
+  if (e.type === "class") return e.subject || e.name || t('components.timelayouteditor.classPeriod');
   return (
     e.name ||
-    (e.type === "break" ? "课间" : e.type === "activity" ? "活动" : "休息")
+    (e.type === "break" ? t('components.timelayouteditor.break') : e.type === "activity" ? t('pages.board.activity') : t('pages.board.rest'))
   );
 });
 const nextMain = computed(() => {
   const e = nextEntry.value;
   if (!e) return "";
-  if (e.isExam) return e.subject || "考试";
-  if (e.type === "class") return e.subject || e.name || "上课";
-  return e.name || (e.type === "break" ? "课间" : "下一节");
+  if (e.isExam) return e.subject || t('pages.board.exam');
+  if (e.type === "class") return e.subject || e.name || t('components.timelayouteditor.classPeriod');
+  return e.name || (e.type === "break" ? t('components.timelayouteditor.break') : t('pages.board.nextClass'));
 });
 
 const noticeHtml = computed(() => renderMarkdownLite(settings.notice || ""));
@@ -771,7 +773,7 @@ function onPointerUp() {
 function resetLayout() {
   settings.layout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT));
   saveSettings();
-  ElMessage.success("已重置元素位置");
+  ElMessage.success(t('pages.board.elementPositionReset'));
 }
 function toggleEdit() {
   editMode.value = !editMode.value;
@@ -862,7 +864,7 @@ const citySearching = ref(false);
 async function searchCity() {
   const q = cityQuery.value.trim();
   if (q.length < 2) {
-    ElMessage.warning("请至少输入 2 个字的城市名");
+    ElMessage.warning(t('pages.board.cityNameTooShort'));
     return;
   }
   citySearching.value = true;
@@ -871,9 +873,9 @@ async function searchCity() {
       `/api/v1/public/weather/lookup?q=${encodeURIComponent(q)}`,
     );
     cityResults.value = Array.isArray(res?.results) ? res.results : [];
-    if (!cityResults.value.length) ElMessage.info("没找到匹配的城市");
+    if (!cityResults.value.length) ElMessage.info(t('pages.board.cityNotFound'));
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "城市搜索失败");
+    ElMessage.error(e?.data?.msg || t('pages.board.citySearchFailed'));
   } finally {
     citySearching.value = false;
   }
@@ -987,7 +989,7 @@ function downscaleImage(
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("浏览器不支持 canvas"));
+      if (!ctx) return reject(new Error(t('pages.board.canvasUnsupported')));
       ctx.drawImage(img, 0, 0, w, h);
       resolve(canvas.toDataURL("image/jpeg", quality));
     };

@@ -8,7 +8,7 @@
 
     <ResourceList collection="classplan" label="档案" />
 
-    <el-dialog v-model="showImport" title="导入 CSES 课程表" width="560px" :close-on-click-modal="false">
+    <el-dialog v-model="showImport" :title="$t('pages.classplan.index.importCsesSchedule')" width="560px" :close-on-click-modal="false">
       <p class="text-sm text-gray-500 mb-3">
         拖入或选择 .yaml/.yml 文件，自动创建课程表、时间表和课表。
         <br><span class="text-orange-500">注意：含「临时」字样的临时层不会被导入。</span>
@@ -35,7 +35,7 @@
         </p>
       </div>
 
-      <el-input v-model="importName" placeholder="导入名称（可选）" class="mt-3" />
+      <el-input v-model="importName" :placeholder="$t('pages.classplan.index.importNameOptional')" class="mt-3" />
 
       <template #footer>
         <el-button @click="showImport = false">取消</el-button>
@@ -51,6 +51,8 @@
 import { Upload, UploadFilled, Document } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "档案库", protected: true });
+
+const { t } = useI18n();
 
 const showImport = ref(false);
 const importing = ref(false);
@@ -97,14 +99,14 @@ async function doImport() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       body: { yaml: yamlText.value, name: importName.value },
     });
-    ElMessage.success("导入成功！课程表、时间表、课表已创建。");
+    ElMessage.success(t('pages.classplan.index.importSuccess'));
     showImport.value = false;
     yamlText.value = "";
     fileName.value = "";
     importName.value = "";
     location.reload();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "导入失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.backup.importFailed'));
   } finally {
     importing.value = false;
   }

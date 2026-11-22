@@ -11,6 +11,8 @@ import {
 } from "../types/user";
 
 export const useUserStore = defineStore("user", () => {
+  const { t } = useI18n();
+
   // 使用useStorage替代useSessionStorage，支持持久化登录状态
   const user = useStorage<UserData>("user_data", {
     loggedIn: false,
@@ -23,7 +25,7 @@ export const useUserStore = defineStore("user", () => {
   const checkAuthentication = (): string | null => {
     const token = localStorage.getItem("token");
     if (!token) {
-      message.warning("未登录");
+      message.warning(t('api.notLoggedIn'));
       return null;
     }
     return token;
@@ -79,7 +81,7 @@ export const useUserStore = defineStore("user", () => {
 
       return { isSuccess: true };
     } catch (error: any) {
-      console.error("获取用户数据失败:", error);
+      console.error(t('stores.user.fetchUserFailedWithColon'), error);
 
       // 如果是token无效，清空登录状态
       if (error.message === INVALID_TOKEN_MSG) {
@@ -88,7 +90,7 @@ export const useUserStore = defineStore("user", () => {
 
       return {
         isSuccess: false,
-        msg: error.message || "获取用户数据失败",
+        msg: error.message || t('stores.user.fetchUserFailed'),
       };
     }
   };

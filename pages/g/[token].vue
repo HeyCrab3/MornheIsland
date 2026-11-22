@@ -14,7 +14,7 @@
       <template v-else-if="info">
         <h2 class="text-lg font-semibold mb-1">班级运维委托</h2>
         <p class="text-sm text-gray-500 mb-4">
-          <b>{{ info.ownerName || "某位用户" }}</b> 邀请你协助管理下面的班级。
+          <b>{{ info.ownerName || $t('pages.g.token.someUser') }}</b> 邀请你协助管理下面的班级。
         </p>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3 mb-4">
@@ -32,7 +32,7 @@
         </div>
 
         <div class="text-xs text-gray-500 mb-4">
-          有效至 {{ fmt(info.expiresAt) }} · 已接受 {{ info.usedCount }}/{{ info.maxUses || "不限" }} 人
+          有效至 {{ fmt(info.expiresAt) }} · 已接受 {{ info.usedCount }}/{{ info.maxUses || $t('pages.g.token.unlimited') }} 人
           <span v-if="info.note"> · 备注：{{ info.note }}</span>
         </div>
 
@@ -45,8 +45,8 @@
           :closable="false"
           show-icon
           class="mb-4"
-          title="接受后你就是操作记录上的那个人"
-          description="你对这些班级做的每一次修改都会记在你的账号名下。请勿把本链接转发给他人。"
+          :title="$t('pages.g.token.acceptAsAuditIdentity')"
+          :description="$t('pages.g.token.changesUnderYourName')"
         />
 
         <div class="flex gap-2 justify-end">
@@ -57,7 +57,7 @@
             :loading="accepting"
             @click="doAccept"
           >
-            {{ info.accepted ? "已接受，前往班级" : "接受委托" }}
+            {{ info.accepted ? $t('pages.g.token.acceptedGoToClass') : $t('pages.g.token.acceptGrant') }}
           </el-button>
         </div>
       </template>
@@ -67,6 +67,8 @@
 
 <script setup lang="ts">
 definePageMeta({ title: "接受委托", protected: true });
+
+const { t } = useI18n();
 
 const route = useRoute();
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
@@ -95,18 +97,18 @@ async function load() {
     });
     info.value = res?.data || null;
     if (!info.value) {
-      error.value = { title: "委托不存在", detail: "链接可能已失效，请让邀请你的人重新生成。" };
+      error.value = { title: t("pages.g.token.grantNotFound"), detail: t("pages.g.token.linkPossiblyExpired") };
     }
   } catch (e: any) {
     const code = e?.data?.code || e?.statusCode;
     if (code === 404) {
-      error.value = { title: "委托不存在", detail: "链接可能已被删除，请让邀请你的人重新生成。" };
+      error.value = { title: t("pages.g.token.grantNotFound"), detail: t("pages.g.token.linkPossiblyDeleted") };
     } else if (code === 410) {
-      error.value = { title: "委托已失效", detail: "这份委托已过期或被撤销。" };
+      error.value = { title: t("pages.g.token.grantExpired"), detail: t("pages.g.token.grantExpiredOrRevoked") };
     } else if (code === 400) {
-      error.value = { title: "链接格式不正确", detail: "请检查链接是否被聊天软件截断。" };
+      error.value = { title: t("pages.g.token.invalidLinkFormat"), detail: t("pages.g.token.checkLinkTruncated") };
     } else {
-      error.value = { title: "读取失败", detail: e?.data?.msg || "请稍后重试。" };
+      error.value = { title: t("pages.g.token.loadFailed"), detail: e?.data?.msg || t("pages.g.token.retryLater") };
     }
   } finally {
     loading.value = false;
@@ -124,18 +126,18 @@ async function doAccept() {
       headers: authHeaders(),
       body: { token: token.value },
     });
-    ElMessage.success("已接受委托，现在可以在班级管理里看到这些班");
+    ElMessage.success(t("pages.g.token.grantAccepted"));
     navigateTo("/classes");
   } catch (e: any) {
     const code = e?.data?.code;
     if (code === 410) {
-      error.value = { title: "委托已失效", detail: "这份委托已过期或被撤销。" };
+      error.value = { title: t("pages.g.token.grantExpired"), detail: t("pages.g.token.grantExpiredOrRevoked") };
     } else if (code === 409) {
-      ElMessage.error(e?.data?.msg || "名额已满");
+      ElMessage.error(e?.data?.msg || t("pages.g.token.slotsFull"));
     } else if (code === 400) {
-      ElMessage.warning(e?.data?.msg || "无法接受这份委托");
+      ElMessage.warning(e?.data?.msg || t("pages.g.token.cannotAcceptGrant"));
     } else {
-      ElMessage.error(e?.data?.msg || "接受失败");
+      ElMessage.error(e?.data?.msg || t("pages.g.token.acceptFailed"));
     }
   } finally {
     accepting.value = false;

@@ -10,9 +10,9 @@
         </template>
 
         <el-steps :active="stepsActive" finish-status="success" class="mb-6" simple>
-          <el-step title="时间表" />
-          <el-step title="课程表" />
-          <el-step title="档案" />
+          <el-step :title="$t('components.home.quickstartupguide.timeLayout')" />
+          <el-step :title="$t('components.home.quickstartupguide.subjects')" />
+          <el-step :title="$t('components.home.quickstartupguide.archive')" />
           <el-step title="班级" />
           <el-step title="设备" />
         </el-steps>
@@ -42,67 +42,68 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n();
 const collapseActive = ref<string[]>([]);
 
 const guideSteps = [
   {
-    title: "创建时间表",
-    desc: "时间表定义了每天的作息时段（如早读、第一节、第二节等），是课表运行的骨架。",
+    title: t('components.home.quickstartupguide.createTimeLayout'),
+    desc: t('components.home.quickstartupguide.timeLayoutIntro'),
     tips: [
-      "进入时间表编辑页，点击「添加时段」新建一段作息",
-      "拖拽时段调整顺序，设置每段的开始和结束时间",
-      "可选：关联课程表后为每段配置默认科目",
-      "保存后记下时间表名称，创建档案时会用到",
+      t('components.home.quickstartupguide.timeLayoutStepAdd'),
+      t('components.home.quickstartupguide.timeLayoutStepReorder'),
+      t('components.home.quickstartupguide.timeLayoutStepSubjects'),
+      t('components.home.quickstartupguide.timeLayoutStepSave'),
     ],
-    action: "开始创建时间表",
+    action: t('components.home.quickstartupguide.startCreateTimeLayout'),
     link: "/timelayout",
   },
   {
-    title: "创建课程表",
-    desc: "课程表（科目库）定义了你学校有哪些课程，档案（课表）会引用这里的科目。",
+    title: t('components.home.quickstartupguide.createSubjects'),
+    desc: t('components.home.quickstartupguide.subjectsIntro'),
     tips: [
-      "新建课程表会自动预填 13 门标准科目（语数外等）",
-      "在列表中可以修改科目名称、简称、教师、是否为室外课",
-      "如需添加其他科目，点击「添加科目」即可",
-      "保存后记下课程表名称，创建档案时会用到",
+      t('components.home.quickstartupguide.subjectsStepPreset'),
+      t('components.home.quickstartupguide.subjectsStepEdit'),
+      t('components.home.quickstartupguide.subjectsStepAdd'),
+      t('components.home.quickstartupguide.subjectsStepSave'),
     ],
-    action: "开始创建课程表",
+    action: t('components.home.quickstartupguide.startCreateSubjects'),
     link: "/subjects",
   },
   {
-    title: "创建档案",
-    desc: "档案就是 ClassIsland 中的课表，它把时间表和课程表结合起来，按星期排课。",
+    title: t('components.home.quickstartupguide.createArchive'),
+    desc: t('components.home.quickstartupguide.archiveIntro'),
     tips: [
-      "新建档案后，先选择「时间表」和「课程表」",
-      "左侧点击科目名选中，再点右侧格子填入",
-      "每格对应一个时段，不同时段可以排不同课程",
-      "保存后档案就绪，可以关联到班级了",
+      t('components.home.quickstartupguide.archiveStepSelect'),
+      t('components.home.quickstartupguide.archiveStepFill'),
+      t('components.home.quickstartupguide.archiveStepSlots'),
+      t('components.home.quickstartupguide.archiveStepSave'),
     ],
-    action: "开始创建档案",
+    action: t('components.home.quickstartupguide.startCreateArchive'),
     link: "/classplan",
   },
   {
-    title: "创建班级并关联资源",
-    desc: "班级是资源下发的基本单位，每个班级可以关联独立的档案、时间表、策略。",
+    title: t('components.home.quickstartupguide.createClassAndLink'),
+    desc: t('components.home.quickstartupguide.classIntro'),
     tips: [
-      "新建班级，填写班级名称（如「高一(1)班」）",
-      "在下拉框中选择「档案」「时间表」「课程表」「策略」",
-      "如果前面都创建好了，这里应该都能选到",
-      "保存后班级就关联好了，可以生成下发配置",
+      t('components.home.quickstartupguide.classStepCreate'),
+      t('components.home.quickstartupguide.classStepLink'),
+      t('components.home.quickstartupguide.classStepHint'),
+      t('components.home.quickstartupguide.classStepSave'),
     ],
-    action: "开始创建班级",
+    action: t('components.home.quickstartupguide.startCreateClass'),
     link: "/classes",
   },
   {
-    title: "下发到设备",
-    desc: "最后一步：生成配置文件，放到 ClassIsland 设备上即可自动加载。",
+    title: t('components.home.quickstartupguide.dispatchToDevice'),
+    desc: t('components.home.quickstartupguide.dispatchIntro'),
     tips: [
-      "进入「班级列表」，点对应班级的「下发」按钮复制配置",
-      "或进入班级详情，在「部署下发」卡片复制/下载配置文件",
-      "将配置文件放到教室电脑的 ClassIsland 应用目录下",
-      "启动 ClassIsland，在设置中点击「加入管理」即可生效",
+      t('components.home.quickstartupguide.dispatchStepList'),
+      t('components.home.quickstartupguide.dispatchStepDetail'),
+      t('components.home.quickstartupguide.dispatchStepPlace'),
+      t('components.home.quickstartupguide.dispatchStepJoin'),
     ],
-    action: "去下发配置",
+    action: t('components.home.quickstartupguide.goDispatch'),
     link: "/classes",
   },
 ];

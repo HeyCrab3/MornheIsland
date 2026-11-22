@@ -1,11 +1,11 @@
 <template>
-  <ResourceEditor collection="policy" label="策略">
+  <ResourceEditor collection="policy" :label="$t('composables.useciresource.policy')">
     <template #default="{ doc, save, saving }">
       <div v-if="doc" v-loading="!doc" class="w-full">
         <el-row class="w-full">
           <el-col :span="10">
             <!-- 图形化开关 -->
-            <el-card header="可视化配置" class="mb-4">
+            <el-card :header="$t('pages.policy.id.visualConfig')" class="mb-4">
               <el-row :gutter="16">
                 <el-col :span="12" v-for="f in policyFields" :key="f.key">
                   <div
@@ -53,46 +53,48 @@
 <script setup lang="ts">
 definePageMeta({ title: "编辑策略", protected: true });
 
+const { t } = useI18n();
+
 const policyFields = [
   {
     key: "DisableProfileClassPlanEditing",
-    label: "禁止编辑课表",
-    desc: "禁用课表创建、删除、编辑和Excel导入",
+    label: t('pages.policy.id.disableClassplanEditing'),
+    desc: t('pages.policy.id.disableClassplanEditingHint'),
   },
   {
     key: "DisableProfileTimeLayoutEditing",
-    label: "禁止编辑时间表",
-    desc: "禁用时间表创建、删除、编辑和Excel导入",
+    label: t('pages.policy.id.disableTimeLayoutEditing'),
+    desc: t('pages.policy.id.disableTimeLayoutEditingHint'),
   },
   {
     key: "DisableProfileSubjectsEditing",
-    label: "禁止编辑科目",
-    desc: "禁用科目的创建、删除和编辑",
+    label: t('pages.policy.id.disableSubjectEditing'),
+    desc: t('pages.policy.id.disableSubjectEditingHint'),
   },
   {
     key: "DisableProfileEditing",
-    label: "禁止编辑档案",
-    desc: "禁用档案内所有内容的编辑（不影响主页面编辑，开启此选项后可以关闭剩下三个禁止编辑）",
+    label: t('pages.policy.id.disableArchiveEditing'),
+    desc: t('pages.policy.id.disableArchiveEditingHint'),
   },
   {
     key: "DisableSettingsEditing",
-    label: "禁止修改设置",
-    desc: "用户无法调整应用设置（包括主页面布局，不推荐开启）",
+    label: t('pages.policy.id.disableSettingsChanges'),
+    desc: t('pages.policy.id.disableSettingsChangesHint'),
   },
   {
     key: "DisableSplashCustomize",
-    label: "禁止自定义启动图",
-    desc: "清除已有的启动界面自定义设置",
+    label: t('pages.policy.id.disableCustomSplash'),
+    desc: t('pages.policy.id.clearCustomSplash'),
   },
   {
     key: "DisableDebugMenu",
-    label: "禁用调试菜单",
-    desc: "用户无法进入调试页面（就算曾启用过调试页面也无法再次进入）",
+    label: t('pages.policy.id.disableDebugMenu'),
+    desc: t('pages.policy.id.disableDebugMenuHint'),
   },
   {
     key: "AllowExitManagement",
-    label: "允许退出集控",
-    desc: "关闭后用户无法自行退出集控",
+    label: t('pages.policy.id.allowExitCentralControl'),
+    desc: t('pages.policy.id.allowExitCentralControlHint'),
   },
 ];
 
@@ -154,7 +156,7 @@ function doSave() {
     // fallback: 直接调 API
     saveViaApi(data);
   } catch {
-    ElMessage.error("JSON 格式错误");
+    ElMessage.error(t('components.resourceeditor.invalidJson'));
   }
 }
 
@@ -170,10 +172,10 @@ async function saveViaApi(data: any) {
       },
       body: { data },
     });
-    ElMessage.success("策略已保存，请重启CI以使更改生效");
+    ElMessage.success(t('pages.policy.id.policySavedRestartRequired'));
     syncJsonFromSwitches();
   } catch {
-    ElMessage.error("保存失败");
+    ElMessage.error(t('components.resourceeditor.saveFailed'));
   }
 }
 

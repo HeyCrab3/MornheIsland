@@ -19,7 +19,8 @@
 <script setup>
 import ServerErrorImage from "@/assets/images/error.gif";
 
-useHead({ title: "意外错误" });
+const { t } = useI18n();
+useHead({ title: t('error.unexpectedError') });
 const prop = defineProps(["error"]);
 const handleError = () => {
   clearError({ redirect: "/" });

@@ -8,7 +8,7 @@
         </p>
       </div>
       <el-button type="primary" @click="showCreate = true">
-        <el-icon class="mr-1"><Plus /></el-icon>新建班级
+        <el-icon class="mr-1"><Plus /></el-icon>{{ $t('pages.classes.index.createClass') }}
       </el-button>
     </div>
 
@@ -87,7 +87,7 @@
               :stroke-width="6"
             />
             <div class="mt-1.5 text-xs text-gray-400">
-              {{ cls.policyId ? "已关联策略" : "未关联策略（可选）" }}
+              {{ cls.policyId ? $t('pages.classes.index.policyLinked') : $t('pages.classes.index.policyNotLinkedOptional') }}
             </div>
           </div>
 
@@ -106,7 +106,7 @@
             </template>
             <template v-else>
               <el-tooltip
-                content="请先关联档案、时间表、课程表后再下发配置（策略可选）"
+                :content="$t('pages.classes.index.linkResourcesBeforePush')"
                 placement="top"
               >
                 <el-button size="small" disabled>
@@ -115,7 +115,7 @@
               </el-tooltip>
             </template>
             <el-popconfirm
-              title="确定删除该班级？此操作不可恢复！"
+              :title="$t('pages.classes.index.confirmDeleteClass')"
               @confirm="remove(cls._id)"
             >
               <template #reference>
@@ -129,24 +129,24 @@
       <el-empty
         v-else
         :image-size="100"
-        description="暂无班级，点击右上角「新建班级」开始"
+        :description="$t('pages.classes.index.noClassesHint')"
       />
     </div>
 
     <!-- 新建班级弹窗 -->
-    <el-dialog v-model="showCreate" title="新建班级" width="420px">
+    <el-dialog v-model="showCreate" :title="$t('pages.classes.index.createClass')" width="420px">
       <el-form :model="form" label-position="top">
-        <el-form-item label="班级标识（identity）" required>
-          <el-input v-model="form.identity" placeholder="如 1-101" />
+        <el-form-item :label="$t('pages.classes.index.classIdentity')" required>
+          <el-input v-model="form.identity" :placeholder="$t('pages.classes.index.classIdentityExample')" />
         </el-form-item>
-        <el-form-item label="班级名称" required>
-          <el-input v-model="form.name" placeholder="如 高一(1)班" />
+        <el-form-item :label="$t('pages.classes.index.className')" required>
+          <el-input v-model="form.name" :placeholder="$t('pages.classes.index.classNameExample')" />
         </el-form-item>
-        <el-form-item label="所属组织">
-          <el-input v-model="form.orgName" placeholder="如 XX中学" />
+        <el-form-item :label="$t('pages.classes.index.organization')">
+          <el-input v-model="form.orgName" :placeholder="$t('pages.classes.index.organizationExample')" />
         </el-form-item>
-        <el-form-item label="归属学校（可选）">
-          <el-select v-model="form.schoolId" placeholder="不选 = 个人模式" clearable class="w-full">
+        <el-form-item :label="$t('pages.classes.index.schoolOptional')">
+          <el-select v-model="form.schoolId" :placeholder="$t('pages.classes.index.noSchoolMeansPersonal')" clearable class="w-full">
             <el-option v-for="s in mySchools" :key="s.id" :label="s.name" :value="s.id" />
           </el-select>
           <div class="text-xs text-gray-400 mt-1">
@@ -166,7 +166,7 @@
     </el-dialog>
 
     <!-- 升级为学校维度 -->
-    <el-dialog v-model="showUpgrade" title="升级为学校维度聚合管理" width="560px">
+    <el-dialog v-model="showUpgrade" :title="$t('pages.classes.index.upgradeToSchoolManagement')" width="560px">
       <div v-if="upgradeTarget" class="space-y-3 text-sm">
         <div>
           <div class="text-xs text-gray-400 mb-1">将纳入以下 {{ upgradeTarget.classCount }} 个班</div>
@@ -214,8 +214,8 @@
         </div>
 
         <div>
-          <div class="text-xs text-gray-400 mb-1">学校名称</div>
-          <el-input v-model="upgradeName" placeholder="如 XX中学" />
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.schools.id.schoolName') }}</div>
+          <el-input v-model="upgradeName" :placeholder="$t('pages.classes.index.organizationExample')" />
         </div>
 
         <div class="text-xs text-gray-400 leading-relaxed">
@@ -240,7 +240,7 @@
             <el-radio-button value="grpc">集控服务器（gRPC）</el-radio-button>
           </el-radio-group>
           <div v-if="presetMode === 'grpc'">
-            <el-input v-model="grpcAddress" size="small" placeholder="如 http://your-host:20722">
+            <el-input v-model="grpcAddress" size="small" :placeholder="$t('pages.classes.index.hostUrlExample')">
               <template #prepend>gRPC 地址</template>
             </el-input>
             <div class="text-xs text-gray-400 mt-1">集控服务器模式支持实时通知 / 刷新数据 / 分发插件</div>
@@ -264,21 +264,21 @@
         <p>简单三步，即可让终端应用使用集控配置！</p>
         <el-steps direction="vertical" class="mt-4" style="height: 220px">
           <el-step
-            title="下载配置文件"
+            :title="$t('pages.classes.index.downloadConfigFile')"
             :description="`点击下方「下载配置文件」按钮，下载 ${currentActiveRow.name} 的集控配置文件`"
           />
           <el-step
-            title="安装到 ClassIsland"
+            :title="$t('pages.classes.index.installToClassIsland')"
             :description="`打开 ${currentActiveRow.name} 的 ClassIsland 应用设置，点击右上角三个点，选择「加入管理」，选中刚刚下载的配置文件，点击「确定」`"
           />
           <el-step
-            title="配置完成"
-            description="应用重启后如果看到档案等配置已经从集控拉取并应用即表明配置成功"
+            :title="$t('pages.classes.index.configComplete')"
+            :description="$t('pages.classes.index.configSuccessHint')"
           />
         </el-steps>
       </div>
       <template #footer>
-        <el-button type="primary" @click="doDownloadPreset">下载配置文件</el-button>
+        <el-button type="primary" @click="doDownloadPreset">{{ $t('pages.classes.index.downloadConfigFile') }}</el-button>
       </template>
     </ResponsiveDrawer>
   </div>
@@ -289,6 +289,8 @@ import { Plus, Download } from "@element-plus/icons-vue";
 import ResponsiveDrawer from "@/components/ui/ResponsiveDrawer.vue";
 
 definePageMeta({ title: "班级管理", protected: true });
+
+const { t } = useI18n();
 
 const { downloadPreset, defaultGrpcAddress, loadGrpcEndpoint, grpcEndpoint } = useManagementPreset();
 const {
@@ -363,7 +365,7 @@ async function fetchClasses() {
 
 async function create() {
   if (!form.identity || !form.name) {
-    ElMessage.warning("请填写班级标识和名称");
+    ElMessage.warning(t("pages.classes.index.enterClassIdentityAndName"));
     return;
   }
   creating.value = true;
@@ -374,7 +376,7 @@ async function create() {
       // schoolId 为空串时不传，后端按"不关联学校"处理
       body: { ...form, schoolId: form.schoolId || undefined },
     });
-    ElMessage.success("创建成功");
+    ElMessage.success(t("pages.classes.index.createdSuccessfully"));
     showCreate.value = false;
     form.identity = "";
     form.name = "";
@@ -450,13 +452,13 @@ async function doUpgrade() {
     if (e?.data?.data?.needInvite || e?.data?.code === 409) {
       ElMessageBox.alert(
         e?.data?.msg ||
-          "这所学校已经由其他账号创建。请让该校管理员在「学校 → 成员」里生成邀请链接，你加入后再挂班级。",
-        "需要邀请链接",
+          t("pages.classes.index.schoolCreatedByAnotherAccount"),
+        t("pages.classes.index.inviteLinkRequired"),
         { type: "warning", confirmButtonText: "知道了" },
       ).catch(() => {});
       return;
     }
-    ElMessage.error(e?.data?.msg || "升级失败");
+    ElMessage.error(e?.data?.msg || t("pages.classes.index.upgradeFailed"));
   } finally {
     upgrading.value = false;
   }
