@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    title="扫码发通知"
+    :title="$t('components.notifyqrdialog.scanToNotify')"
     width="420px"
     @update:model-value="(v: boolean) => emit('update:modelValue', v)"
   >
@@ -12,38 +12,39 @@
 
       <div v-if="url" class="qr-meta">
         <span :class="['qr-dot', online ? 'is-on' : 'is-off']"></span>
-        {{ online ? `${online} 台设备在线` : "当前没有设备在线" }}
-        <span class="text-gray-400">/ 共 {{ deviceCount }} 台</span>
+        {{ online ? `${online} 台设备在线` : $t('components.notifyqrdialog.noOnlineDevice') }}
+        <span class="text-gray-400">{{ $t('components.notifyqrdialog.extra.totalPrefix') }} {{ deviceCount }} {{ $t('components.notifyqrdialog.extra.totalUnit') }}</span>
       </div>
 
       <el-input v-if="url" :model-value="url" readonly size="small" class="mt-3">
         <template #append>
-          <el-button @click="copyUrl">复制</el-button>
+          <el-button @click="copyUrl">{{ $t('components.notifyqrdialog.extra.copy') }}</el-button>
         </template>
       </el-input>
 
       <el-alert type="warning" :closable="false" show-icon class="mt-3">
-        <template #title>二维码请勿外传</template>
-        拿到二维码的人不登录也能给本班大屏发通知。外传可能干扰正常教学秩序；
-        怀疑泄露了就点「重置二维码」，旧码立刻失效。
+        <template #title>{{ $t('components.notifyqrdialog.extra.qrDoNotShareTitle') }}</template>
+        {{ $t('components.notifyqrdialog.extra.qrDoNotShareBody') }}
       </el-alert>
 
       <el-alert v-if="!url && !loading" type="info" :closable="false" show-icon>
-        <template #title>还没有二维码</template>
-        生成后打印张贴在班牌上即可。
+        <template #title>{{ $t('components.notifyqrdialog.extra.noQrTitle') }}</template>
+        {{ $t('components.notifyqrdialog.extra.noQrBody') }}
       </el-alert>
     </div>
 
     <template #footer>
-      <el-button v-if="url" type="danger" plain @click="revoke">停用</el-button>
-      <el-button v-if="url" :loading="rotating" @click="rotate">重置二维码</el-button>
-      <el-button type="primary" @click="emit('update:modelValue', false)">关闭</el-button>
+      <el-button v-if="url" type="danger" plain @click="revoke">{{ $t('components.notifyqrdialog.disable') }}</el-button>
+      <el-button v-if="url" :loading="rotating" @click="rotate">{{ $t('components.notifyqrdialog.resetQr') }}</el-button>
+      <el-button type="primary" @click="emit('update:modelValue', false)">{{ $t('components.notifyqrdialog.extra.close') }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
 import QrcodeVue from "qrcode.vue";
+
+const { t } = useI18n();
 
 const props = defineProps<{ modelValue: boolean; classId: string; className?: string }>();
 const emit = defineEmits<{ "update:modelValue": [boolean] }>();
@@ -71,7 +72,7 @@ async function load() {
     });
     apply(res?.data);
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "获取二维码失败");
+    ElMessage.error(e?.data?.msg || t('components.notifyqrdialog.fetchQrFailed'));
   } finally {
     loading.value = false;
   }
@@ -88,17 +89,17 @@ watch(
 function copyUrl() {
   if (!url.value) return;
   navigator.clipboard.writeText(url.value).then(
-    () => ElMessage.success("已复制链接"),
-    () => ElMessage.error("复制失败"),
+    () => ElMessage.success(t('components.notifyqrdialog.linkCopied')),
+    () => ElMessage.error(t('components.cw2centralpanel.copyFailed')),
   );
 }
 
 async function rotate() {
   try {
     await ElMessageBox.confirm(
-      "重置后旧二维码立刻失效，已经贴出去的码就扫不了了。确定要重置吗？",
-      "重置二维码",
-      { type: "warning", confirmButtonText: "重置", cancelButtonText: "取消" },
+      t('components.notifyqrdialog.resetConfirmHint'),
+      t('components.notifyqrdialog.resetQr'),
+      { type: "warning", confirmButtonText: t('components.notifyqrdialog.reset'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
     return;
@@ -110,9 +111,9 @@ async function rotate() {
       headers: authHeaders(),
     });
     apply(res?.data);
-    ElMessage.success("已重置，请重新打印张贴");
+    ElMessage.success(t('components.notifyqrdialog.resetDone'));
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "重置失败");
+    ElMessage.error(e?.data?.msg || t('components.notifyqrdialog.resetFailed'));
   } finally {
     rotating.value = false;
   }
@@ -121,9 +122,9 @@ async function rotate() {
 async function revoke() {
   try {
     await ElMessageBox.confirm(
-      "停用后这个二维码变成无效页，需要时再重新生成。确定停用吗？",
-      "停用二维码",
-      { type: "warning", confirmButtonText: "停用", cancelButtonText: "取消" },
+      t('components.notifyqrdialog.disableConfirmHint'),
+      t('components.notifyqrdialog.disableQr'),
+      { type: "warning", confirmButtonText: t('components.notifyqrdialog.disable'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
     return;
@@ -136,9 +137,9 @@ async function revoke() {
     url.value = "";
     online.value = 0;
     deviceCount.value = 0;
-    ElMessage.success("已停用");
+    ElMessage.success(t('components.notifyqrdialog.disabled'));
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "停用失败");
+    ElMessage.error(e?.data?.msg || t('components.notifyqrdialog.disableFailed'));
   }
 }
 </script>

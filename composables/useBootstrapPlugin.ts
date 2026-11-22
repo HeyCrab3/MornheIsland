@@ -37,7 +37,7 @@ export function useBootstrapPlugin() {
       await navigator.clipboard.writeText(url.value);
       ElMessage.success(t('composables.usebootstrapplugin.bootstrapUrlCopied'));
     } catch {
-      ElMessage.error("复制失败");
+      ElMessage.error(t('components.cw2centralpanel.copyFailed'));
     }
   }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md">
-    <h1 class="text-2xl font-semibold mb-6">用户中心</h1>
+    <h1 class="text-2xl font-semibold mb-6">{{ $t('sidebar.items.profile') }}</h1>
 
     <el-card>
       <!-- 用户信息 -->
@@ -19,7 +19,7 @@
       <!-- 操作 -->
       <div class="space-y-3">
         <el-button class="w-full" @click="navigateTo('/security')">
-          <el-icon class="mr-1"><Key /></el-icon>账号安全（二步验证 / 登录记录）
+          <el-icon class="mr-1"><Key /></el-icon>{{ $t('pages.profile.extra.securityEntry') }}
         </el-button>
 
         <el-button class="w-full" @click="doLogout">
@@ -27,7 +27,7 @@
         </el-button>
 
         <el-button class="w-full" type="danger" plain @click="startDeleteAccount">
-          <el-icon class="mr-1"><WarningFilled /></el-icon>注销服务
+          <el-icon class="mr-1"><WarningFilled /></el-icon>{{ $t('pages.profile.extra.deleteService') }}
         </el-button>
       </div>
 
@@ -110,12 +110,12 @@ async function startDeleteAccount() {
     await ElMessageBox.confirm(
       t('pages.profile.deleteAccountDataLoss'),
       t('pages.profile.deleteAccount'),
-      { confirmButtonText: t('pages.profile.acknowledged'), cancelButtonText: "取消", type: "warning" },
+      { confirmButtonText: t('pages.profile.acknowledged'), cancelButtonText: t('reauth.cancel'), type: "warning" },
     );
     await ElMessageBox.confirm(
       t('pages.profile.deleteAccountChannelHint'),
       t('pages.profile.confirmAgain'),
-      { confirmButtonText: t('pages.profile.continueDelete'), cancelButtonText: "取消", type: "warning" },
+      { confirmButtonText: t('pages.profile.continueDelete'), cancelButtonText: t('reauth.cancel'), type: "warning" },
     );
     // 第三次：把账号名原样输一遍（服务端也会比对，前端先拦一道）
     const { value } = await ElMessageBox.prompt(
@@ -123,7 +123,7 @@ async function startDeleteAccount() {
       t('pages.profile.finalConfirm'),
       {
         confirmButtonText: t('pages.profile.confirmDelete'),
-        cancelButtonText: "取消",
+        cancelButtonText: t('reauth.cancel'),
         type: "error",
         inputPlaceholder: userStore.userName || "",
       },

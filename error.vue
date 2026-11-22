@@ -1,16 +1,16 @@
 <template>
   <el-result
     class="translate-y-[50%]"
-    :title="`页面发生意外错误 ${prop.error?.message || '未知错误'}`"
-    :sub-title="'请尝试刷新页面，或点击下方按钮返回首页。'"
+    :title="`${$t('error.extra.pageErrorPrefix')} ${prop.error?.message || $t('error.extra.unknownError')}`"
+    :sub-title="$t('error.extra.errorHint')"
   >
     <template #icon>
       <img :src="ServerErrorImage" alt="Error Image"/>
     </template>
     <template #extra>
       <el-space>
-        <el-button type="primary" @click="handleError">带我回家！</el-button>
-        <el-button @click="refresh">刷新页面</el-button>
+        <el-button type="primary" @click="handleError">{{ $t('error.extra.takeMeHome') }}</el-button>
+        <el-button @click="refresh">{{ $t('error.extra.refreshPage') }}</el-button>
       </el-space>
     </template>
   </el-result>

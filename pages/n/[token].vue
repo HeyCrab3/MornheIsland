@@ -6,11 +6,11 @@
         <div v-if="className" class="mnp-sub">{{ className }}</div>
       </div>
 
-      <div v-if="state === 'loading'" class="mnp-center">正在读取…</div>
+      <div v-if="state === 'loading'" class="mnp-center">{{ $t('pages.n.token.extra.loading') }}</div>
 
       <div v-else-if="state === 'invalid'" class="mnp-center">
-        <div class="mnp-invalid">这个二维码已失效</div>
-        <div class="mnp-hint">可能被班级管理员重置了，请找管理员要新的二维码。</div>
+        <div class="mnp-invalid">{{ $t('pages.n.token.extra.qrInvalid') }}</div>
+        <div class="mnp-hint">{{ $t('pages.n.token.extra.qrInvalidHint') }}</div>
       </div>
 
       <template v-else>
@@ -30,13 +30,13 @@
         />
 
         <div class="mnp-options">
-          <el-checkbox v-model="isEmergency">紧急</el-checkbox>
-          <el-checkbox v-model="isTopmost">置顶显示</el-checkbox>
-          <el-checkbox v-model="isSoundEnabled">提示音</el-checkbox>
+          <el-checkbox v-model="isEmergency">{{ $t('pages.n.token.extra.emergency') }}</el-checkbox>
+          <el-checkbox v-model="isTopmost">{{ $t('pages.n.token.extra.topmost') }}</el-checkbox>
+          <el-checkbox v-model="isSoundEnabled">{{ $t('pages.n.token.extra.sound') }}</el-checkbox>
         </div>
 
         <div class="mnp-slider">
-          <span class="mnp-slider-label">显示时长</span>
+          <span class="mnp-slider-label">{{ $t('pages.n.token.extra.durationLabel') }}</span>
           <el-slider v-model="durationSeconds" :min="0" :max="120" :step="10" class="mnp-slider-ctl" />
           <span class="mnp-slider-val">{{ durationSeconds ? `${durationSeconds} 秒` : $t('pages.n.token.doNotAutoClose') }}</span>
         </div>
@@ -49,11 +49,11 @@
           :disabled="!online || !message.trim()"
           @click="send"
         >
-          发送通知
+          {{ $t('pages.n.token.extra.sendNotification') }}
         </el-button>
 
         <div class="mnp-warn">
-          ⚠️ 二维码请勿外传。转发出去后任何人都能向本班大屏发通知，可能干扰正常教学秩序。
+          {{ $t('pages.n.token.extra.qrWarning') }}
         </div>
       </template>
     </div>

@@ -14,6 +14,8 @@
 export type PresetMode = "serverless" | "grpc";
 
 export function useManagementPreset() {
+  const { t } = useI18n();
+
   const apiOrigin = computed(() => {
     if (typeof window !== "undefined") return window.location.origin;
     return "https://your-server";
@@ -96,7 +98,7 @@ export function useManagementPreset() {
       await navigator.clipboard.writeText(buildPreset(cls, mode, grpcAddress));
       ElMessage.success(`已复制 ${cls?.name || cls?.identity} 的配置文件（${mode === "grpc" ? "集控服务器" : "静态配置"}模式）`);
     } catch {
-      ElMessage.error("复制失败");
+      ElMessage.error(t('components.cw2centralpanel.copyFailed'));
     }
   }
 

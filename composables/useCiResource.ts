@@ -38,12 +38,12 @@ export function useCiResource(collection: string, label: string) {
         method: "DELETE",
         headers: authHeaders(),
       });
-      ElMessage.success(`${label}已删除`);
+      ElMessage.success(`${label}${t('components.resourceeditor.deleted')}`);
       await fetchList();
     } catch (e: any) {
       if (e?.response?.status === 409) {
         const msg = e?.response?._data?.msg || t('composables.useciresource.resourceInUseCannotDelete');
-        ElMessageBox.alert(msg, "无法删除", { type: "warning", confirmButtonText: t('composables.useciresource.gotIt') });
+        ElMessageBox.alert(msg, t('components.resourceeditor.cannotDelete'), { type: "warning", confirmButtonText: t('composables.useciresource.gotIt') });
       } else {
         ElMessage.error(t('composables.useciresource.deleteFailed'));
       }
@@ -58,8 +58,8 @@ export function useCiResource(collection: string, label: string) {
     let input: string;
     try {
       const res = await ElMessageBox.prompt(`给「${currentName}」起个新名字`, `重命名${label}`, {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+        confirmButtonText: t('components.resourceeditor.confirm'),
+        cancelButtonText: t('reauth.cancel'),
         inputValue: currentName,
         inputValidator: (v: string) => {
           const val = String(v ?? "").trim();

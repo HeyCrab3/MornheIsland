@@ -2,52 +2,51 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">档案体检</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.health') }}</h1>
         <p class="text-sm text-gray-500">
-          检查每个班级的「班级 → 课表 → 时间表 → 科目」引用链是否自洽，把界面上看不出来的问题暴露出来。
+          {{ $t('pages.health.extra.pageDesc') }}
         </p>
       </div>
       <div class="flex items-center gap-2">
         <el-button :loading="fixingAll" @click="fixAllNullGuid">{{ $t('pages.health.batchFixExpiredClassplans') }}</el-button>
-        <el-button :loading="loading" @click="load">重新检查</el-button>
+        <el-button :loading="loading" @click="load">{{ $t('pages.health.extra.recheck') }}</el-button>
       </div>
     </div>
 
     <el-alert type="warning" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>课表里的 null Guid 会让客户端直接崩</template>
-      空课时如果存成 <code>"SubjectId": null</code>，ClassIsland 反序列化时会抛异常
-      （它的 <code>SubjectId</code> 是非空 Guid，转换器只容忍 <code>""</code>）。
-      正确的空值应该是 <code>00000000-0000-0000-0000-000000000000</code>。
-      下面按班级体检能发现并修复；没有挂到班级上的孤儿课表用右上角「批量修复过期课表」处理。
+      <template #title>{{ $t('pages.health.extra.nullGuidTitle') }}</template>
+      {{ $t('pages.health.extra.nullGuidBody1') }} <code>"SubjectId": null</code>{{ $t('pages.health.extra.nullGuidBody2') }}
+      （{{ $t('pages.health.extra.nullGuidBody3') }} <code>SubjectId</code>{{ $t('pages.health.extra.nullGuidBody4') }} <code>""</code>{{ $t('pages.health.extra.nullGuidBody5') }}
+      {{ $t('pages.health.extra.nullGuidBody6') }} <code>00000000-0000-0000-0000-000000000000</code>{{ $t('pages.health.extra.nullGuidBody7') }}
+      {{ $t('pages.health.extra.nullGuidBody8') }}
     </el-alert>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>为什么需要体检</template>
-      档案库里显示{{ $t('pages.health.linked') }}的，看的是班级自己的字段；而客户端真正读的是<b>课表资源里记录的那一份</b>。
-      两者指向不同资源时，界面一切正常，但 ClassIsland 会报「未配置时间表」或者下发一份空白时间表。
-      这类问题只能靠比对引用链发现。
+      <template #title>{{ $t('pages.health.extra.whyCheckTitle') }}</template>
+      {{ $t('pages.health.extra.whyCheckBody1') }}{{ $t('pages.health.linked') }}{{ $t('pages.health.extra.whyCheckAfterLinked') }}<b>{{ $t('pages.health.extra.whyCheckBodyBold') }}</b>。
+      {{ $t('pages.health.extra.whyCheckBody2') }}
+      {{ $t('pages.health.extra.whyCheckBody3') }}
     </el-alert>
 
     <el-alert v-if="schoolName" type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>正在检查学校「{{ schoolName }}」的全部班级</template>
-      这里能看到同校其他账号的班级，但<b>只有自己创建的班</b>才给「修复」按钮 ——
-      别人的班只能提示问题，修复要由那位同学的账号来做。
+      <template #title>{{ $t('pages.health.extra.schoolCheckTitlePrefix') }}{{ schoolName }}{{ $t('pages.health.extra.schoolCheckTitleSuffix') }}</template>
+      {{ $t('pages.health.extra.schoolCheckBody1') }}<b>{{ $t('pages.health.extra.schoolCheckBodyBold') }}</b>{{ $t('pages.health.extra.schoolCheckBody2') }}
     </el-alert>
 
     <div v-if="summary" class="flex flex-wrap gap-3 mb-4">
       <div class="stat-card">
         <div class="stat-num">{{ summary.classCount }}</div>
-        <div class="stat-label">班级总数</div>
+        <div class="stat-label">{{ $t('dashboard.cards.classCount') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" :class="summary.issueClassCount ? 'text-amber-500' : ''">
           {{ summary.issueClassCount }}
         </div>
-        <div class="stat-label">有问题</div>
+        <div class="stat-label">{{ $t('pages.health.extra.issueClasses') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" :class="summary.errorCount ? 'text-red-500' : ''">{{ summary.errorCount }}</div>
-        <div class="stat-label">错误</div>
+        <div class="stat-label">{{ $t('pages.health.extra.errors') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" :class="summary.warnCount ? 'text-amber-500' : ''">{{ summary.warnCount }}</div>
@@ -57,12 +56,12 @@
 
     <el-card v-loading="loading" class="max-w-4xl">
       <template #header>
-        <span class="font-medium">检查结果</span>
+        <span class="font-medium">{{ $t('pages.health.extra.checkResult') }}</span>
       </template>
 
       <el-empty
         v-if="!loading && !rows.length"
-        :description="failed ? '检查失败，请重试' : '全部班级体检通过，引用链没有问题'"
+        :description="failed ? $t('pages.health.extra.checkFailedRetry') : $t('pages.health.extra.allClassesPassed')"
         :image-size="90"
       />
 
@@ -73,7 +72,7 @@
               {{ row.className || $t('pages.health.unnamedClass') }}
               <span v-if="row.identity" class="text-xs text-gray-400 ml-1">#{{ row.identity }}</span>
               <el-tag v-if="row.mine === false" size="small" type="info" effect="plain" class="ml-1">
-                别人的班
+                {{ $t('pages.health.extra.othersClass') }}
               </el-tag>
             </div>
             <ul class="mt-2 space-y-1.5">
@@ -84,7 +83,7 @@
                   effect="plain"
                   class="shrink-0 mt-0.5"
                 >
-                  {{ it.level === "error" ? "错误" : $t('pages.health.warning') }}
+                  {{ it.level === "error" ? $t('pages.health.extra.errors') : $t('pages.health.warning') }}
                 </el-tag>
                 <span class="leading-relaxed">{{ it.message }}</span>
               </li>
@@ -98,17 +97,17 @@
             :loading="fixing === row.classId"
             @click="fix(row)"
           >
-            修复
+            {{ $t('pages.health.extra.fix') }}
           </el-button>
         </div>
       </div>
     </el-card>
 
     <div class="max-w-4xl mt-3 text-xs text-gray-400 leading-relaxed">
-      自动修复只会把两边统一到<b>真正有内容的那一份</b>（空壳永远不会被选成目标），
-      并且同时改班级字段和课表内部的引用，改完再体检一次就干净了。
-      时间表本身是空壳、科目被删、课时数对不上这类属于<b>数据内容</b>问题，需要回到档案库重做，
-      自动改只会把错的内容下发得更整齐。
+      {{ $t('pages.health.extra.autoFix1') }}<b>{{ $t('pages.health.extra.autoFixBold1') }}</b>{{ $t('pages.health.extra.autoFix2') }}
+      {{ $t('pages.health.extra.autoFix3') }}
+      {{ $t('pages.health.extra.autoFix4') }}<b>{{ $t('pages.health.extra.autoFixBold2') }}</b>{{ $t('pages.health.extra.autoFix5') }}
+      {{ $t('pages.health.extra.autoFix6') }}
     </div>
   </div>
 </template>
@@ -138,7 +137,7 @@ async function fixAllNullGuid() {
       t('pages.health.nullGuidFixHint') +
         t('pages.health.nullGuidFixConfirm'),
       t('pages.health.batchFixExpiredClassplans'),
-      { type: "warning", confirmButtonText: t('pages.health.startFix'), cancelButtonText: "取消" },
+      { type: "warning", confirmButtonText: t('pages.health.startFix'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
     return;

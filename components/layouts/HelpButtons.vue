@@ -14,7 +14,7 @@
             "
           >
             <el-icon class="mr-2"><Star /></el-icon>
-            给我们来颗 Star
+            {{ $t('components.layouts.helpbuttons.extra.starUs') }}
           </el-button>
           <el-button
             round
@@ -38,7 +38,7 @@
             style="margin-left: 0"
           >
             <el-icon class="mr-2"><ChatDotRound /></el-icon>
-            QQ 群
+            {{ $t('components.layouts.helpbuttons.extra.qqGroup') }}
           </el-button>
           <el-button
             @click="
@@ -52,7 +52,7 @@
             style="margin-left: 0"
           >
             <el-icon class="mr-2"><Help /></el-icon>
-            帮助中心
+            {{ $t('components.layouts.helpbuttons.extra.helpCenter') }}
           </el-button>
           <el-button
             @click="openExternalLink('https://1087.3cx.cloud/crab')"
@@ -62,7 +62,7 @@
             style="margin-left: 0"
           >
             <el-icon class="mr-2"><Service /></el-icon>
-            客户支持
+            {{ $t('components.layouts.helpbuttons.extra.customerSupport') }}
           </el-button>
         </div>
       </div>
@@ -79,12 +79,12 @@
       class="mb-2"
     />
     <el-alert v-if="error" type="error" show-icon :title='`获取设备指纹信息失败：${error}`' class="mb-2"/>
-    <p class="my-2">访客 ID: {{data?.visitor_id}}</p>
-    <p class="my-2">会话 ID: {{data?.event_id}}</p>
-    <p class="my-2">用户代理: {{diagnosedData.userAgent}}</p>
-    <p class="my-2">平台: {{diagnosedData.platform}}</p>
-    <p class="my-2">用户 ID: {{diagnosedData.userId}}</p>
-    <p class="my-2">时间: {{diagnosedData.time}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.visitorId') }} {{data?.visitor_id}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.sessionId') }} {{data?.event_id}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.userAgent') }} {{diagnosedData.userAgent}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.platform') }} {{diagnosedData.platform}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.userId') }} {{diagnosedData.userId}}</p>
+    <p class="my-2">{{ $t('components.layouts.helpbuttons.extra.time') }} {{diagnosedData.time}}</p>
   </el-dialog>
 </template>
 

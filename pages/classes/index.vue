@@ -2,9 +2,9 @@
   <div>
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">班级管理</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.classes') }}</h1>
         <p class="text-sm text-gray-500">
-          管理接入集控的班级，配置资源并下发到设备
+          {{ $t('pages.classes.index.extra.subtitle') }}
         </p>
       </div>
       <el-button type="primary" @click="showCreate = true">
@@ -32,7 +32,7 @@
         </span>
       </div>
       <div class="mt-2">
-        <el-button size="small" type="primary" @click="openUpgrade(c)">查看并升级</el-button>
+        <el-button size="small" type="primary" @click="openUpgrade(c)">{{ $t('pages.classes.index.extra.reviewAndUpgrade') }}</el-button>
       </div>
     </el-alert>
 
@@ -78,7 +78,7 @@
             <div
               class="flex items-center justify-between text-xs text-gray-400 mb-1.5"
             >
-              <span>必填资源</span>
+              <span>{{ $t('pages.classes.id.requiredResources') }}</span>
               <span>{{ requiredLinked(cls) }} / {{ REQUIRED_KEYS.length }}</span>
             </div>
             <el-progress
@@ -97,11 +97,11 @@
               type="primary"
               @click="navigateTo(`/classes/${cls._id}`)"
             >
-              管理
+              {{ $t('pages.classes.index.extra.manage') }}
             </el-button>
             <template v-if="canDeploy(cls)">
               <el-button size="small" @click="openPreset(cls)">
-                <el-icon class="mr-0.5"><Download /></el-icon>部署配置
+                <el-icon class="mr-0.5"><Download /></el-icon>{{ $t('pages.classes.index.extra.deployConfig') }}
               </el-button>
             </template>
             <template v-else>
@@ -110,7 +110,7 @@
                 placement="top"
               >
                 <el-button size="small" disabled>
-                  <el-icon class="mr-0.5"><Download /></el-icon>部署配置
+                  <el-icon class="mr-0.5"><Download /></el-icon>{{ $t('pages.classes.index.extra.deployConfig') }}
                 </el-button>
               </el-tooltip>
             </template>
@@ -119,7 +119,7 @@
               @confirm="remove(cls._id)"
             >
               <template #reference>
-                <el-button size="small" text type="danger">删除</el-button>
+                <el-button size="small" text type="danger">{{ $t('components.resourceeditor.delete') }}</el-button>
               </template>
             </el-popconfirm>
           </div>
@@ -150,17 +150,17 @@
             <el-option v-for="s in mySchools" :key="s.id" :label="s.name" :value="s.id" />
           </el-select>
           <div class="text-xs text-gray-400 mt-1">
-            选了之后这个班就能用学校的共享时间表/课程表/策略，设备也会聚到学校里。
+            {{ $t('pages.classes.index.extra.schoolLinkHint') }}
             <span v-if="!mySchools.length">
-              你还没有加入任何学校 —— 可以先到「学校」页创建一个。
+              {{ $t('pages.classes.index.extra.noSchoolHint') }}
             </span>
           </div>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreate = false">取消</el-button>
+        <el-button @click="showCreate = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="creating" @click="create"
-          >确定</el-button
+          >{{ $t('components.resourceeditor.confirm') }}</el-button
         >
       </template>
     </el-dialog>
@@ -191,7 +191,7 @@
               <span class="text-gray-400 shrink-0">{{ r.usedByCount }} 个班在用</span>
             </div>
           </div>
-          <div v-else class="text-xs text-gray-400">这几个班没有共享同一份资源。</div>
+          <div v-else class="text-xs text-gray-400">{{ $t('pages.classes.index.extra.noSharedResources') }}</div>
         </div>
 
         <div>
@@ -206,11 +206,11 @@
             >
               <span class="truncate">{{ d.className || d.identity || d.cuid }}</span>
               <el-tag size="small" :type="d.online ? 'success' : 'info'" effect="plain">
-                {{ d.online ? "在线" : "离线" }}
+                {{ d.online ? $t('dashboard.online') : $t('dashboard.offline') }}
               </el-tag>
             </div>
           </div>
-          <div v-else class="text-xs text-gray-400">这几个班还没有关联设备。</div>
+          <div v-else class="text-xs text-gray-400">{{ $t('pages.classes.index.extra.noLinkedDevices') }}</div>
         </div>
 
         <div>
@@ -219,13 +219,12 @@
         </div>
 
         <div class="text-xs text-gray-400 leading-relaxed">
-          只处理你勾选的这几个班，不会动其他班级，也不改动任何设备数据。
-          升级后各班的课表仍可单独编辑。
+          {{ $t('pages.classes.index.extra.upgradeScopeHint') }}
         </div>
       </div>
       <template #footer>
-        <el-button @click="showUpgrade = false">取消</el-button>
-        <el-button type="primary" :loading="upgrading" @click="doUpgrade">确认升级</el-button>
+        <el-button @click="showUpgrade = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="upgrading" @click="doUpgrade">{{ $t('pages.classes.index.extra.confirmUpgrade') }}</el-button>
       </template>
     </el-dialog>
 
@@ -234,34 +233,34 @@
       <div class="py-2">
         <!-- 加入模式 -->
         <div class="mb-4">
-          <div class="text-sm font-medium mb-2">加入模式</div>
+          <div class="text-sm font-medium mb-2">{{ $t('pages.classes.index.extra.joinMode') }}</div>
           <el-radio-group v-model="presetMode" class="mb-3">
-            <el-radio-button value="serverless">静态配置</el-radio-button>
-            <el-radio-button value="grpc">集控服务器（gRPC）</el-radio-button>
+            <el-radio-button value="serverless">{{ $t('pages.classes.index.extra.staticConfig') }}</el-radio-button>
+            <el-radio-button value="grpc">{{ $t('pages.classes.index.extra.grpcServer') }}</el-radio-button>
           </el-radio-group>
           <div v-if="presetMode === 'grpc'">
             <el-input v-model="grpcAddress" size="small" :placeholder="$t('pages.classes.index.hostUrlExample')">
-              <template #prepend>gRPC 地址</template>
+              <template #prepend>{{ $t('pages.classes.index.extra.grpcAddress') }}</template>
             </el-input>
-            <div class="text-xs text-gray-400 mt-1">集控服务器模式支持实时通知 / 刷新数据 / 分发插件</div>
+            <div class="text-xs text-gray-400 mt-1">{{ $t('pages.classes.index.extra.grpcModeHint') }}</div>
             <GrpcProxyNotice :address="grpcAddress" />
           </div>
         </div>
 
         <!-- 插件分发的前提：先手动装一次引导插件 -->
         <el-alert v-if="bootstrapUrl && presetMode === 'grpc'" type="info" :closable="false" class="my-4">
-          <template #title>需要用平台分发插件？先给机器装引导插件</template>
+          <template #title>{{ $t('pages.classes.index.extra.bootstrapTitle') }}</template>
           <div class="text-xs leading-relaxed">
-            ClassIsland 不支持由服务端安装插件，每台机器要先手动装一次引导插件，装好后它才收得到分发的插件。
+            {{ $t('pages.classes.index.extra.bootstrapHint') }}
             <div class="flex items-center gap-2 mt-2 flex-wrap">
               <el-input :model-value="bootstrapUrl" size="small" readonly class="max-w-md" />
-              <el-button size="small" @click="copyBootstrapUrl">复制</el-button>
-              <el-button size="small" type="primary" plain @click="openBootstrapUrl">下载</el-button>
+              <el-button size="small" @click="copyBootstrapUrl">{{ $t('pages.classes.index.extra.copy') }}</el-button>
+              <el-button size="small" type="primary" plain @click="openBootstrapUrl">{{ $t('pages.classes.index.extra.download') }}</el-button>
             </div>
           </div>
         </el-alert>
 
-        <p>简单三步，即可让终端应用使用集控配置！</p>
+        <p>{{ $t('pages.classes.index.extra.threeStepsHint') }}</p>
         <el-steps direction="vertical" class="mt-4" style="height: 220px">
           <el-step
             :title="$t('pages.classes.index.downloadConfigFile')"
@@ -348,7 +347,7 @@ async function openPreset(cls: any) {
 
 function doDownloadPreset() {
   downloadPreset(currentActiveRow.value, presetMode.value, grpcAddress.value);
-  ElMessage.success("已开始下载");
+  ElMessage.success(t("pages.backup.downloadStarted"));
 }
 
 async function fetchClasses() {
@@ -384,7 +383,7 @@ async function create() {
     form.schoolId = "";
     await fetchClasses();
   } catch {
-    ElMessage.error("创建失败");
+    ElMessage.error(t("components.resourcelist.createFailed"));
   } finally {
     creating.value = false;
   }
@@ -396,10 +395,10 @@ async function remove(id: string) {
       method: "DELETE",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-    ElMessage.success("已删除");
+    ElMessage.success(t("components.resourceeditor.deleted"));
     await fetchClasses();
   } catch {
-    ElMessage.error("删除失败");
+    ElMessage.error(t("composables.useciresource.deleteFailed"));
   }
 }
 
@@ -454,7 +453,7 @@ async function doUpgrade() {
         e?.data?.msg ||
           t("pages.classes.index.schoolCreatedByAnotherAccount"),
         t("pages.classes.index.inviteLinkRequired"),
-        { type: "warning", confirmButtonText: "知道了" },
+        { type: "warning", confirmButtonText: t("composables.useciresource.gotIt") },
       ).catch(() => {});
       return;
     }

@@ -1,7 +1,7 @@
 <template>
-  <h1 class="text-xl font-semibold">委托模式登录</h1>
+  <h1 class="text-xl font-semibold">{{ $t('pages.d.extra.delegateModeLogin') }}</h1>
   <p class="text-sm text-gray-500 my-1 mb-4">
-    别人把班级的运维权委托给了你？输入授权码即可临时登录，免注册。
+    {{ $t('pages.d.extra.delegateLoginIntro') }}
   </p>
 
   <el-form label-position="top" @submit.prevent>
@@ -21,8 +21,7 @@
     </el-form-item>
 
     <div class="text-xs text-gray-500 leading-relaxed -mt-1 mb-3">
-      填真实名字（例如「张三」）。委托期间你做的每一处修改都会记在这个名字下，
-      这也是委托人信任你的前提。
+      {{ $t('pages.d.extra.realNameHint') }}
     </div>
 
     <el-alert
@@ -40,14 +39,14 @@
       :loading="loading"
       @click="doLogin"
     >
-      进入
+      {{ $t('pages.d.extra.enter') }}
     </el-button>
   </el-form>
 
   <p class="text-center text-xs text-gray-400 mt-4">
-    没有代登录码？
+    {{ $t('pages.d.extra.noDelegateCode') }}
     <NuxtLink to="/login" class="text-blue-500 hover:underline"
-      >用账号登录</NuxtLink
+      >{{ $t('pages.d.extra.loginWithAccount') }}</NuxtLink
     >
   </p>
 </template>
@@ -88,7 +87,7 @@ async function doLogin() {
         {
           type: "warning",
           confirmButtonText: t("pages.d.continue"),
-          cancelButtonText: "取消",
+          cancelButtonText: t("reauth.cancel"),
         },
       );
     } catch {
@@ -121,7 +120,7 @@ async function doLogin() {
     else if (status === 429) errorMsg.value = t("pages.d.tooManyAttempts");
     else if (status === 409)
       errorMsg.value = e?.data?.msg || t("pages.d.delegateSlotsFull");
-    else errorMsg.value = e?.data?.msg || "登录失败，请稍后再试";
+    else errorMsg.value = e?.data?.msg || t("login.errors.loginFailed");
   } finally {
     loading.value = false;
   }

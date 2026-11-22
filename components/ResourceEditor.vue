@@ -12,7 +12,7 @@
             <el-tag v-if="doc" size="small" effect="plain" round>v{{ doc.version }}</el-tag>
           </div>
           <div class="text-xs text-gray-400 mt-0.5" v-if="doc">
-            创建于 {{ fmt(doc.createdAt) }} · 更新于 {{ fmt(doc.updatedAt) }}
+            {{ $t('components.resourceeditor.extra.createdAt') }} {{ fmt(doc.createdAt) }} · {{ $t('components.resourceeditor.extra.updatedAt') }} {{ fmt(doc.updatedAt) }}
           </div>
         </div>
       </div>
@@ -20,11 +20,11 @@
         <el-button text><el-icon><More /></el-icon></el-button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">关联资源管理</el-dropdown-item>
-            <el-dropdown-item @click="showLinkedClasses = true">关联班级管理</el-dropdown-item>
+            <el-dropdown-item v-if="isClassplan" @click="showLinkedResources = true">{{ $t('components.resourceeditor.extra.linkedResourcesManage') }}</el-dropdown-item>
+            <el-dropdown-item @click="showLinkedClasses = true">{{ $t('components.resourceeditor.extra.linkedClassesManage') }}</el-dropdown-item>
             <el-dropdown-item @click="showHistory = true">{{ $t('components.resourceeditor.historyVersions') }}</el-dropdown-item>
             <el-dropdown-item @click="openSnapshots">{{ $t('components.resourceeditor.dataSnapshot') }}</el-dropdown-item>
-            <el-dropdown-item divided @click="doCopy">复制</el-dropdown-item>
+            <el-dropdown-item divided @click="doCopy">{{ $t('components.resourceeditor.extra.copy') }}</el-dropdown-item>
             <el-dropdown-item @click="doDelete" :disabled="viewOnly">
               <span :class="viewOnly ? 'text-gray-400' : 'text-red-500'">{{ $t('components.resourceeditor.delete') }}</span>
             </el-dropdown-item>
@@ -35,7 +35,7 @@
 
     <!-- 被引用 -->
     <div v-if="doc?.usedBy?.length" class="mb-5 flex flex-wrap items-center gap-1.5 text-sm text-gray-500">
-      <span>被 {{ doc.usedBy.length }} 个班级使用：</span>
+      <span>{{ $t('components.resourceeditor.extra.usedByA') }} {{ doc.usedBy.length }} {{ $t('components.resourceeditor.extra.usedByB') }}</span>
       <el-tag v-for="c in doc.usedBy" :key="c._id" size="small" type="info" effect="plain">
         {{ c.name || c.identity }}
       </el-tag>
@@ -61,14 +61,14 @@
     <slot v-if="$slots.default" :doc="doc" :save="doSave" :saving="saving" :viewOnly="viewOnly" />
     <template v-else>
       <div class="flex justify-end mb-3">
-        <el-button type="primary" :loading="saving" :disabled="viewOnly" @click="doSave()">保存</el-button>
+        <el-button type="primary" :loading="saving" :disabled="viewOnly" @click="doSave()">{{ $t('pages.subaccounts.save') }}</el-button>
       </div>
       <el-input v-model="jsonText" type="textarea" :rows="18" :placeholder="$t('components.resourceeditor.pasteJson')" :disabled="viewOnly" />
     </template>
 
     <!-- 历史版本（桌面 Dialog / 移动底部抽屉） -->
     <ResponsiveDrawer v-model:open="showHistory" :title="$t('components.resourceeditor.historyVersions')">
-      <div v-if="historyList.length === 0" class="py-4 text-sm text-gray-400 text-center">暂无历史版本</div>
+      <div v-if="historyList.length === 0" class="py-4 text-sm text-gray-400 text-center">{{ $t('components.resourceeditor.extra.noHistory') }}</div>
       <div
         v-for="h in historyList"
         :key="h.version"
@@ -90,10 +90,10 @@
     <!-- 数据快照（修改前 / 删除前 / 导入覆盖前 的原始数据） -->
     <ResponsiveDrawer v-model:open="showSnapshots" :title="$t('components.resourceeditor.dataSnapshot')">
       <div class="text-xs text-gray-400 mb-3 leading-relaxed">
-        每次修改、删除、导入覆盖、批量修复之前，系统都会自动存一份当时的完整数据。
-        历史版本按「版本号」记；这里按「动作」记，两者互为冗余。
+        {{ $t('components.resourceeditor.extra.snapshotHintA') }}
+        {{ $t('components.resourceeditor.extra.snapshotHintB') }}
       </div>
-      <div v-if="snapshotList.length === 0" class="py-4 text-sm text-gray-400 text-center">暂无快照</div>
+      <div v-if="snapshotList.length === 0" class="py-4 text-sm text-gray-400 text-center">{{ $t('components.resourceeditor.extra.noSnapshots') }}</div>
       <div
         v-for="s in snapshotList"
         :key="s._id"
@@ -126,7 +126,7 @@
             <span class="text-xs text-gray-400 ml-auto">{{ tp.start }} - {{ tp.end }}</span>
           </div>
         </div>
-        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无时段</div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">{{ $t('components.resourceeditor.extra.noPeriods') }}</div>
       </div>
 
       <!-- 科目 -->
@@ -142,7 +142,7 @@
             <el-tag v-if="s.isOutDoor" size="small" type="warning" class="ml-auto">{{ $t('components.subjectseditor.outdoor') }}</el-tag>
           </div>
         </div>
-        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无科目</div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">{{ $t('components.resourceeditor.extra.noSubjects') }}</div>
       </div>
 
       <!-- 课表：星期 × 节次 网格 -->
@@ -154,7 +154,7 @@
               <table class="border-collapse w-full mb-3 text-xs">
                 <thead>
                   <tr>
-                    <th class="border p-1.5 bg-gray-50 dark:bg-gray-700 font-medium">节次</th>
+                    <th class="border p-1.5 bg-gray-50 dark:bg-gray-700 font-medium">{{ $t('components.resourceeditor.extra.periodColumn') }}</th>
                     <th v-for="d in previewActiveDays" :key="d.value" class="border p-1.5 bg-gray-50 dark:bg-gray-700 font-medium">{{ d.label }}</th>
                   </tr>
                 </thead>
@@ -173,15 +173,15 @@
             </template>
           </div>
         </div>
-        <div v-else class="text-gray-400 text-sm py-6 text-center">暂无课表数据</div>
+        <div v-else class="text-gray-400 text-sm py-6 text-center">{{ $t('components.resourceeditor.extra.noPlanData') }}</div>
       </div>
 
       <!-- 设置 / 策略：JSON 配置 -->
       <pre v-else class="bg-gray-50 dark:bg-neutral-700 p-4 rounded text-xs overflow-auto max-h-[45vh]">{{ previewJson }}</pre>
 
       <template #footer>
-        <el-button @click="previewVisible = false">关闭</el-button>
-        <el-button type="primary" @click="doRestore(previewVersion); previewVisible = false">恢复此版本</el-button>
+        <el-button @click="previewVisible = false">{{ $t('components.resourceeditor.extra.close') }}</el-button>
+        <el-button type="primary" @click="doRestore(previewVersion); previewVisible = false">{{ $t('components.resourceeditor.extra.restoreThisVersion') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
@@ -189,14 +189,14 @@
     <ResponsiveDrawer v-model:open="showLinkedResources" :title="$t('components.resourceeditor.linkedResources')">
       <div class="text-sm space-y-3 py-2">
         <div class="flex items-center justify-between">
-          <span>时间表：</span>
+          <span>{{ $t('components.classplaneditor.extra.timeLayoutLabel') }}</span>
           <span v-if="linkedRes?.timelayout">{{ linkedRes.timelayout.name }}</span>
-          <span v-else class="text-gray-400">未关联</span>
+          <span v-else class="text-gray-400">{{ $t('components.resourceeditor.extra.notLinked') }}</span>
         </div>
         <div class="flex items-center justify-between">
-          <span>课程表：</span>
+          <span>{{ $t('components.classplaneditor.extra.subjectsLabel') }}</span>
           <span v-if="linkedRes?.subjects">{{ linkedRes.subjects.name }}</span>
-          <span v-else class="text-gray-400">未关联</span>
+          <span v-else class="text-gray-400">{{ $t('components.resourceeditor.extra.notLinked') }}</span>
         </div>
       </div>
     </ResponsiveDrawer>
@@ -210,10 +210,10 @@
           class="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0"
         >
           <span class="text-sm">{{ c.name || c.identity }}</span>
-          <el-button size="small" text type="primary" @click="navigateTo(`/classes/${c._id}`)">管理</el-button>
+          <el-button size="small" text type="primary" @click="navigateTo(`/classes/${c._id}`)">{{ $t('components.resourceeditor.extra.manage') }}</el-button>
         </div>
       </div>
-      <div v-else class="text-center text-gray-400 py-6">未被任何班级引用</div>
+      <div v-else class="text-center text-gray-400 py-6">{{ $t('components.resourceeditor.extra.notUsedByClass') }}</div>
     </ResponsiveDrawer>
 
     <!-- 通用确认框 -->
@@ -224,7 +224,7 @@
           <AlertDialogDescription>{{ confirmState.description }}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogCancel>{{ $t('reauth.cancel') }}</AlertDialogCancel>
           <AlertDialogAction
             :class="confirmState.danger ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''"
             @click="runConfirm"
@@ -447,19 +447,19 @@ const previewSubjects = computed(() => {
 });
 
 const DAYS = [
-  { value: "Monday", label: "周一", weekDay: 1 },
-  { value: "Tuesday", label: "周二", weekDay: 2 },
-  { value: "Wednesday", label: "周三", weekDay: 3 },
-  { value: "Thursday", label: "周四", weekDay: 4 },
-  { value: "Friday", label: "周五", weekDay: 5 },
-  { value: "Saturday", label: "周六", weekDay: 6 },
-  { value: "Sunday", label: "周日", weekDay: 0 },
+  { value: "Monday", label: t('components.classplaneditor.monday'), weekDay: 1 },
+  { value: "Tuesday", label: t('components.classplaneditor.tuesday'), weekDay: 2 },
+  { value: "Wednesday", label: t('components.classplaneditor.wednesday'), weekDay: 3 },
+  { value: "Thursday", label: t('components.classplaneditor.thursday'), weekDay: 4 },
+  { value: "Friday", label: t('components.classplaneditor.friday'), weekDay: 5 },
+  { value: "Saturday", label: t('components.classplaneditor.saturday'), weekDay: 6 },
+  { value: "Sunday", label: t('components.classplaneditor.sunday'), weekDay: 0 },
 ];
 
 const WEEK_TABS = [
-  { value: 0, label: "每周" },
-  { value: 1, label: "单周" },
-  { value: 2, label: "双周" },
+  { value: 0, label: t('components.classplaneditor.everyWeek') },
+  { value: 1, label: t('components.classplaneditor.oddWeek') },
+  { value: 2, label: t('components.classplaneditor.evenWeek') },
 ];
 
 const previewTimePoints = ref<any[]>([]);
@@ -602,7 +602,7 @@ async function doCopy() {
     ElMessage.success(t('components.resourceeditor.copied'));
     navigateTo(`/${props.collection}/${res.data._id}`);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "复制失败");
+    ElMessage.error(e?.response?._data?.msg || t('components.cw2centralpanel.copyFailed'));
   }
 }
 

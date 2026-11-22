@@ -36,14 +36,14 @@
                 @input="onJsonChange"
               />
               <div class="text-xs text-gray-400 mt-1">
-                修改 JSON 后开关自动同步，保存时以 JSON 内容为准
+                {{ $t('pages.policy.id.extra.jsonSyncHint') }}
               </div>
             </el-card>
           </el-col>
         </el-row>
 
         <el-button type="primary" :loading="saving" @click="doSave"
-          >保存策略</el-button
+          >{{ $t('pages.policy.id.extra.savePolicy') }}</el-button
         >
       </div>
     </template>

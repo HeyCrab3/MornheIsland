@@ -32,7 +32,7 @@
         </div>
         <div v-if="subject" class="border-t mt-1 pt-1">
           <div class="px-3 py-1.5 text-sm text-red-400 rounded cursor-pointer hover:bg-red-50" @click="selectSubject('')">
-            清除
+            {{ $t('components.celldropzone.extra.clear') }}
           </div>
         </div>
       </div>

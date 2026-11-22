@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">学校（机构）</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('pages.schools.index.extra.pageTitle') }}</h1>
         <p class="text-sm text-gray-500">
           同一所学校的班级聚在一起：共享时间表/课程表/设置/策略，设备和通知也能在校内统一处理。
         </p>
@@ -11,12 +11,12 @@
         <el-button type="primary" @click="createVisible = true">
           <el-icon class="mr-1"><Plus /></el-icon>{{ $t('pages.schools.index.createSchool') }}
         </el-button>
-        <el-button :loading="loading" @click="load">刷新</el-button>
+        <el-button :loading="loading" @click="load">{{ $t('pages.schools.index.extra.refresh') }}</el-button>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>学校是怎么来的</template>
+      <template #title>{{ $t('pages.schools.index.extra.howSchoolsWork') }}</template>
       两条路：① 上面直接<b>创建学校</b>（只有 1 个班、或想先建好再挂班都行）；
       ② 在「班级管理」里同机构有 <b>2 个及以上班级</b> 时会出现「建议升级为学校维度聚合管理」的提示，点一下建校并把共享资源带进来。
       <br />
@@ -57,7 +57,7 @@
 
       <el-empty v-else :image-size="100" :description="$t('pages.schools.index.noSchools')">
         <el-button type="primary" @click="createVisible = true">{{ $t('pages.schools.index.createSchool') }}</el-button>
-        <el-button @click="navigateTo('/classes')">去班级管理</el-button>
+        <el-button @click="navigateTo('/classes')">{{ $t('pages.schools.index.extra.goToClasses') }}</el-button>
       </el-empty>
     </div>
 
@@ -78,9 +78,9 @@
         如果这个名字已经被其他账号建过，会让你走邀请链接加入，不会把两所学校合并。
       </div>
       <template #footer>
-        <el-button @click="createVisible = false">取消</el-button>
+        <el-button @click="createVisible = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="creating" :disabled="!createName.trim()" @click="doCreate">
-          创建
+          {{ $t('pages.subaccounts.create') }}
         </el-button>
       </template>
     </el-dialog>
@@ -128,10 +128,10 @@ async function doCreate() {
       return;
     }
     if (d?.data?.needInvite) {
-      ElMessageBox.alert(d.msg, t("pages.schools.index.schoolAlreadyExists"), { type: "warning", confirmButtonText: "知道了" }).catch(() => {});
+      ElMessageBox.alert(d.msg, t("pages.schools.index.schoolAlreadyExists"), { type: "warning", confirmButtonText: t("composables.useciresource.gotIt") }).catch(() => {});
       return;
     }
-    ElMessage.error(d?.msg || "创建失败");
+    ElMessage.error(d?.msg || t("components.resourcelist.createFailed"));
   } finally {
     creating.value = false;
   }

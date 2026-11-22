@@ -10,13 +10,13 @@
       </div>
       <div class="ml-auto flex items-center gap-2">
         <el-button size="small" @click="copyClassId">
-          <el-icon class="mr-1"><CopyDocument /></el-icon>复制班级 ID
+          <el-icon class="mr-1"><CopyDocument /></el-icon>{{ $t('pages.classes.id.extra.copyClassId') }}
         </el-button>
         <el-button size="small" type="primary" plain @click="openBoard">
-          <el-icon class="mr-1"><Picture /></el-icon>查看看板
+          <el-icon class="mr-1"><Picture /></el-icon>{{ $t('dashboard.viewBoard') }}
         </el-button>
         <el-button size="small" @click="openQr">
-          <el-icon class="mr-1"><Cellphone /></el-icon>发通知二维码
+          <el-icon class="mr-1"><Cellphone /></el-icon>{{ $t('pages.classes.id.extra.qrNotify') }}
         </el-button>
       </div>
     </div>
@@ -32,12 +32,12 @@
           <el-col :xs="24" :sm="12">
             <el-form-item :label="$t('pages.classes.id.classIdentity')">
               <el-input v-model="form.identity" disabled />
-              <span class="text-xs text-gray-400">创建后不可修改</span>
+              <span class="text-xs text-gray-400">{{ $t('pages.classes.id.extra.identityImmutable') }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
-        <el-divider content-position="left">关联资源</el-divider>
+        <el-divider content-position="left">{{ $t('components.resourceeditor.linkedResources') }}</el-divider>
 
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12" v-for="sel in selectFields" :key="sel.key">
@@ -45,7 +45,7 @@
               <el-select
                 v-model="form[sel.key]"
                 clearable
-                :placeholder="sel.required ? '请选择' : '不关联（可选）'"
+                :placeholder="sel.required ? $t('pages.classes.id.extra.pleaseSelect') : $t('pages.classes.id.extra.notLinkedOptional')"
                 class="w-full"
               >
                 <el-option
@@ -55,29 +55,29 @@
                   :value="r._id"
                 />
               </el-select>
-              <span v-if="!sel.required" class="text-xs text-gray-400">可选，空着就不下发该资源</span>
+              <span v-if="!sel.required" class="text-xs text-gray-400">{{ $t('pages.classes.id.extra.optionalUnlinkedHint') }}</span>
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-divider />
-        <el-button type="primary" :loading="saving" @click="doSave">保存</el-button>
+        <el-button type="primary" :loading="saving" @click="doSave">{{ $t('pages.subaccounts.save') }}</el-button>
       </el-form>
     </el-card>
 
     <!-- 部署下发 -->
     <el-card class="max-w-2xl mt-4" v-if="canDeploy">
       <template #header>
-        <span class="font-medium">部署下发</span>
+        <span class="font-medium">{{ $t('pages.classes.id.extra.deploy') }}</span>
       </template>
 
       <el-alert type="info" :closable="false" show-icon class="mb-4">
-        <template #title>部署步骤</template>
+        <template #title>{{ $t('pages.classes.id.extra.deploySteps') }}</template>
         <ol class="m-0 pl-4 text-sm">
-          <li>先保存上方的班级名称与关联资源</li>
-          <li>复制或下载下方配置文件，保存为 <code>ManagementPreset.json</code></li>
-          <li>将该文件放到教室电脑的 ClassIsland 应用目录下</li>
-          <li>启动 ClassIsland → 设置 → 加入管理，即可自动拉取配置</li>
+          <li>{{ $t('pages.classes.id.extra.stepSave') }}</li>
+          <li>{{ $t('pages.classes.id.extra.stepCopy') }} <code>ManagementPreset.json</code></li>
+          <li>{{ $t('pages.classes.id.extra.stepPlace') }}</li>
+          <li>{{ $t('pages.classes.id.extra.stepJoin') }}</li>
           <li v-if="bootstrapUrl">
             如需平台分发插件，先在该机器上安装<a :href="bootstrapUrl" target="_blank" class="underline">引导插件</a>（ClassIsland
             不支持由服务端安装插件，每台机器需手动装一次）
@@ -87,29 +87,29 @@
 
       <!-- 加入模式 -->
       <div class="mb-4">
-        <div class="text-sm font-medium mb-2">加入模式</div>
+        <div class="text-sm font-medium mb-2">{{ $t('pages.classes.id.extra.joinMode') }}</div>
         <el-radio-group v-model="presetMode" class="mb-3">
-          <el-radio-button value="serverless">静态配置</el-radio-button>
-          <el-radio-button value="grpc">集控服务器（gRPC）</el-radio-button>
+          <el-radio-button value="serverless">{{ $t('pages.classes.id.extra.staticConfig') }}</el-radio-button>
+          <el-radio-button value="grpc">{{ $t('pages.classes.id.extra.grpcServer') }}</el-radio-button>
         </el-radio-group>
         <el-tooltip placement="top">
           <template #content>
-            <p>静态配置模式下，应用每次启动拉取配置，不能实时同步集控端更改，适合只使用平台管理课程表、时间表等基础功能的用户。</p>
-            <p>集控服务器（gRPC）模式下，客户端与集控服务器保持长连接，支持实时下发通知、刷新数据和分发插件，适合需要更高扩展能力或大规模批量部署的用户。</p>
+            <p>{{ $t('pages.classes.id.extra.staticModeDesc') }}</p>
+            <p>{{ $t('pages.classes.id.extra.grpcTooltipDesc') }}</p>
           </template>
           <el-text style="margin-left: 15px" class="inline cursor-pointer select-none relative top-1">
-            <el-icon><QuestionFilled/></el-icon> 模式之间有什么区别？
+            <el-icon><QuestionFilled/></el-icon> {{ $t('pages.classes.id.extra.modeDifference') }}
           </el-text>
         </el-tooltip>
         <div v-if="presetMode === 'serverless'" class="text-xs text-gray-500">
-          客户端轮询静态清单拉取配置；改动后需等客户端下次检查才生效（有延迟）。
+          {{ $t('pages.classes.id.extra.staticModeHint') }}
         </div>
         <div v-else>
           <div class="text-xs text-gray-500 mb-2">
-            客户端与集控服务器保持 gRPC 长连接，支持实时下发通知 / 刷新数据 / 分发插件。
+            {{ $t('pages.classes.id.extra.grpcLiveHint') }}
           </div>
           <el-input v-model="grpcAddress" size="small" :placeholder="$t('pages.classes.index.hostUrlExample')">
-            <template #prepend>gRPC 地址</template>
+            <template #prepend>{{ $t('pages.classes.index.extra.grpcAddress') }}</template>
           </el-input>
           <div class="text-xs text-gray-500 mt-2 leading-relaxed">
             客户端会<b>直连</b>这个地址建长连接，它不走 443、也不经过 /api 代理。
@@ -134,23 +134,23 @@
 
       <div class="flex gap-2">
         <el-button type="primary" @click="copyPreset">
-          <el-icon class="mr-1"><CopyDocument /></el-icon>复制配置
+          <el-icon class="mr-1"><CopyDocument /></el-icon>{{ $t('pages.classes.id.extra.copyConfig') }}
         </el-button>
         <el-button @click="downloadPreset">
-          <el-icon class="mr-1"><Download /></el-icon>下载配置文件
+          <el-icon class="mr-1"><Download /></el-icon>{{ $t('pages.classes.index.downloadConfigFile') }}
         </el-button>
       </div>
     </el-card>
     <el-card v-else class="max-w-2xl mt-4">
       <template #header>
-        <span class="font-medium">部署下发</span>
+        <span class="font-medium">{{ $t('pages.classes.id.extra.deploy') }}</span>
       </template>
 
       <el-alert type="warning" :closable="false" show-icon>
         <template #title>
           请先关联{{ missingRequired.map((s) => s.label).join("、") || $t('pages.classes.id.requiredResources') }}后再下发配置
         </template>
-        档案、时间表、课程表是必填项；策略可选，不关联就不会下发策略。
+        {{ $t('pages.classes.id.extra.requiredFieldsNote') }}
       </el-alert>
     </el-card>
 
@@ -163,6 +163,8 @@
 import { ArrowLeft, CopyDocument, Download, Picture, QuestionFilled, Cellphone } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "班级详情", protected: true });
+
+const { t } = useI18n();
 
 const { buildPreset, copyPreset: doCopyPreset, downloadPreset: doDownloadPreset, defaultGrpcAddress, loadGrpcEndpoint, grpcEndpoint } = useManagementPreset();
 const {
@@ -177,7 +179,7 @@ const id = route.params.id as string;
 function copyClassId() {
   navigator.clipboard.writeText(id).then(
     () => ElMessage.success(`已复制班级 ID：${id}`),
-    () => ElMessage.error("复制失败"),
+    () => ElMessage.error(t("components.cw2centralpanel.copyFailed")),
   );
 }
 
@@ -212,10 +214,10 @@ const cls = ref<any>({
  * required 决定「部署下发」的门槛，也是表单上的必填标记；策略可选。
  */
 const selectFields = [
-  { key: "classplanId", label: "档案", type: "classplan", listKey: "classplans", required: true },
-  { key: "timelayoutId", label: "时间表", type: "timelayout", listKey: "timelayouts", required: true },
-  { key: "subjectsId", label: "课程表", type: "subjects", listKey: "subjects", required: true },
-  { key: "policyId", label: "策略", type: "policy", listKey: "policies", required: false },
+  { key: "classplanId", label: t("components.home.quickstartupguide.archive"), type: "classplan", listKey: "classplans", required: true },
+  { key: "timelayoutId", label: t("components.home.quickstartupguide.timeLayout"), type: "timelayout", listKey: "timelayouts", required: true },
+  { key: "subjectsId", label: t("components.home.quickstartupguide.subjects"), type: "subjects", listKey: "subjects", required: true },
+  { key: "policyId", label: t("composables.useciresource.policy"), type: "policy", listKey: "policies", required: false },
 ] as const;
 
 const form = reactive<Record<string, string>>({
@@ -287,9 +289,9 @@ async function doSave() {
         policyId: form.policyId || undefined,
       },
     });
-    ElMessage.success("已保存");
+    ElMessage.success(t("components.resourceeditor.saved"));
   } catch (e: any) {
-    ElMessage.error("保存失败");
+    ElMessage.error(t("components.resourceeditor.saveFailed"));
   } finally {
     saving.value = false;
   }

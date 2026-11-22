@@ -2,7 +2,7 @@
   <div class="p-4 md:p-6 max-w-5xl mx-auto">
     <header class="mb-4 flex items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-semibold">委托管理</h1>
+        <h1 class="text-xl font-semibold">{{ $t('pages.grants.extra.pageTitle') }}</h1>
         <p class="text-sm text-gray-500 mt-1">
           把某个班的运维权临时交给别人：指定<b>能做哪些事</b>、<b>到什么时候为止</b>、<b>最多几个人</b>。
           对方用他自己的账号接受，所以每一步都追得到人；随时可以撤销，撤销即刻生效。
@@ -30,11 +30,11 @@
               <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="font-medium">{{ g.classes.map((c: any) => c.name || c.identity).join('、') }}</span>
-                  <el-tag v-if="g.active" type="success" size="small">有效</el-tag>
-                  <el-tag v-else-if="g.revokedAt" type="info" size="small">已撤销</el-tag>
-                  <el-tag v-else type="warning" size="small">已过期</el-tag>
+                  <el-tag v-if="g.active" type="success" size="small">{{ $t('pages.grants.extra.active') }}</el-tag>
+                  <el-tag v-else-if="g.revokedAt" type="info" size="small">{{ $t('components.cw2centralpanel.revoked') }}</el-tag>
+                  <el-tag v-else type="warning" size="small">{{ $t('pages.schools.id.expired') }}</el-tag>
                   <el-tag v-if="g.allowSharedEdit" type="danger" size="small">{{ $t('pages.grants.allowEditSharedResources') }}</el-tag>
-                  <el-tag v-if="g.delegateEnabled" type="warning" size="small">已开代登录码</el-tag>
+                  <el-tag v-if="g.delegateEnabled" type="warning" size="small">{{ $t('pages.grants.extra.delegateCodeEnabled') }}</el-tag>
                 </div>
                 <div class="mt-2 flex flex-wrap gap-1">
                   <el-tag v-for="c in g.capLabels" :key="c" size="small" effect="plain">{{ c }}</el-tag>
@@ -44,14 +44,14 @@
                   <span v-if="g.note"> · 备注：{{ g.note }}</span>
                 </div>
                 <div v-if="g.members?.length" class="mt-2 text-xs text-gray-500">
-                  已接受：
+                  {{ $t('pages.grants.extra.acceptedLabel') }}
                   <span v-for="m in g.members" :key="m.userId" class="mr-2">
                     {{ m.userName || m.userId }}（{{ fmt(m.acceptedAt) }}）
                   </span>
                 </div>
               </div>
               <div class="flex gap-2 shrink-0 flex-wrap">
-                <el-button size="small" @click="copyLink(g.token)">复制链接</el-button>
+                <el-button size="small" @click="copyLink(g.token)">{{ $t('pages.grants.extra.copyLink') }}</el-button>
                 <el-button
                   v-if="g.active && !g.delegateEnabled"
                   size="small"
@@ -90,7 +90,7 @@
                 <div class="mt-2 text-xs text-gray-500">到期 {{ fmt(g.expiresAt) }}</div>
               </div>
               <div class="flex gap-2 shrink-0">
-                <el-button size="small" type="primary" @click="navigateTo('/classes')">进入班级</el-button>
+                <el-button size="small" type="primary" @click="navigateTo('/classes')">{{ $t('pages.grants.extra.enterClasses') }}</el-button>
                 <el-button size="small" type="danger" plain @click="doLeave(g)">{{ $t('pages.grants.quitGrant') }}</el-button>
               </div>
             </div>
@@ -109,7 +109,7 @@
         <el-form-item :label="$t('pages.grants.allowedActions')">
           <el-checkbox-group v-model="form.caps" class="flex flex-col gap-1">
             <el-checkbox v-for="c in caps" :key="c.key" :label="c.key" :disabled="c.key === 'view'">
-              {{ c.label }}<span v-if="c.key === 'view'" class="text-xs text-gray-400">（必选）</span>
+              {{ c.label }}<span v-if="c.key === 'view'" class="text-xs text-gray-400">{{ $t('pages.grants.extra.mandatory') }}</span>
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
@@ -125,12 +125,12 @@
         </el-form-item>
         <el-form-item :label="$t('pages.grants.availableSlots')">
           <el-input-number v-model="form.maxUses" :min="0" :max="50" />
-          <span class="ml-2 text-xs text-gray-500">0 表示不限</span>
+          <span class="ml-2 text-xs text-gray-500">{{ $t('pages.grants.extra.zeroMeansUnlimited') }}</span>
         </el-form-item>
         <el-form-item :label="$t('pages.grants.allowEditSharedResources')">
           <el-switch v-model="form.allowSharedEdit" />
           <div class="text-xs text-gray-500 mt-1 leading-relaxed">
-            默认关闭：如果某个课表/时间表还被委托范围外的班在用，对方就不能改它（避免一改影响一片）。
+            {{ $t('pages.grants.extra.sharedEditWarning') }}
           </div>
         </el-form-item>
         <el-form-item :label="$t('pages.grants.note')">
@@ -138,8 +138,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreate = false">取消</el-button>
-        <el-button type="primary" :loading="creating" @click="() => doCreate()">生成链接</el-button>
+        <el-button @click="showCreate = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="creating" @click="() => doCreate()">{{ $t('pages.grants.extra.generateLink') }}</el-button>
       </template>
     </el-dialog>
 
@@ -149,14 +149,14 @@
       </p>
       <el-input v-model="createdLink" readonly>
         <template #append>
-          <el-button @click="copyLink(createdToken)">复制</el-button>
+          <el-button @click="copyLink(createdToken)">{{ $t('pages.grants.extra.copy') }}</el-button>
         </template>
       </el-input>
       <p class="text-xs text-gray-500 mt-2">
-        链接请勿外传。撤销委托或到期后，链接立即失效。
+        {{ $t('pages.grants.extra.doNotShareLink') }}
       </p>
       <template #footer>
-        <el-button type="primary" @click="showLink = false">知道了</el-button>
+        <el-button type="primary" @click="showLink = false">{{ $t('composables.useciresource.gotIt') }}</el-button>
       </template>
     </el-dialog>
 
@@ -178,9 +178,9 @@
         :description="$t('pages.grants.delegateCodeHint')"
       />
       <template #footer>
-        <el-button @click="copyText(delegateLink)">复制链接</el-button>
-        <el-button @click="copyText(delegateCode)">复制码</el-button>
-        <el-button type="primary" @click="showDelegate = false">知道了</el-button>
+        <el-button @click="copyText(delegateLink)">{{ $t('pages.grants.extra.copyLink') }}</el-button>
+        <el-button @click="copyText(delegateCode)">{{ $t('pages.grants.extra.copyCode') }}</el-button>
+        <el-button type="primary" @click="showDelegate = false">{{ $t('composables.useciresource.gotIt') }}</el-button>
       </template>
     </el-dialog>
 
@@ -233,7 +233,7 @@ function fmt(v: any) {
 async function reauthViaMfa(): Promise<boolean> {
   const ok = await reauthRef.value?.ask(
     t("pages.grants.grantNeedsVerification"),
-    "需要重新验证",
+    t("reauth.title"),
   );
   return ok === true;
 }
@@ -296,7 +296,7 @@ async function doCreate(retried = false) {
       creating.value = false;
       return doCreate(true);
     }
-    ElMessage.error(e?.data?.msg || "创建失败");
+    ElMessage.error(e?.data?.msg || t("components.resourcelist.createFailed"));
   } finally {
     creating.value = false;
   }
@@ -315,7 +315,7 @@ async function copyLink(token: string) {
 async function copyText(text: string) {
   try {
     await navigator.clipboard.writeText(text);
-    ElMessage.success("已复制");
+    ElMessage.success(t("components.resourceeditor.copied"));
   } catch {
     ElMessageBox.alert(text, t("pages.grants.copyContentBelow"));
   }
@@ -344,7 +344,7 @@ async function offDelegateCode(g: any) {
     await ElMessageBox.confirm(
       t("pages.grants.disableCodeHint"),
       t("pages.grants.disableDelegateCode"),
-      { type: "warning", confirmButtonText: "停用", cancelButtonText: "取消" },
+      { type: "warning", confirmButtonText: t("components.notifyqrdialog.disable"), cancelButtonText: t("reauth.cancel") },
     );
   } catch {
     return;
@@ -354,10 +354,10 @@ async function offDelegateCode(g: any) {
       method: "DELETE",
       headers: authHeaders(),
     });
-    ElMessage.success("已停用");
+    ElMessage.success(t("components.notifyqrdialog.disabled"));
     await fetchAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "停用失败");
+    ElMessage.error(e?.data?.msg || t("components.notifyqrdialog.disableFailed"));
   }
 }
 
@@ -365,7 +365,7 @@ async function doRevoke(g: any) {  try {
     await ElMessageBox.confirm(
       t("pages.grants.revokeGrantHint"),
       t("pages.grants.revokeGrant"),
-      { type: "warning", confirmButtonText: t("pages.grants.revoke"), cancelButtonText: "取消" },
+      { type: "warning", confirmButtonText: t("pages.grants.revoke"), cancelButtonText: t("reauth.cancel") },
     );
   } catch {
     return;
@@ -375,10 +375,10 @@ async function doRevoke(g: any) {  try {
       method: "POST",
       headers: authHeaders(),
     });
-    ElMessage.success("已撤销");
+    ElMessage.success(t("components.cw2centralpanel.revoked"));
     await fetchAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "撤销失败");
+    ElMessage.error(e?.data?.msg || t("components.cw2centralpanel.revokeFailed"));
   }
 }
 
@@ -387,7 +387,7 @@ async function doLeave(g: any) {
     await ElMessageBox.confirm(t("pages.grants.quitGrantHint"), t("pages.grants.quitGrant"), {
       type: "warning",
       confirmButtonText: t("pages.grants.quit"),
-      cancelButtonText: "取消",
+      cancelButtonText: t("reauth.cancel"),
     });
   } catch {
     return;
@@ -400,7 +400,7 @@ async function doLeave(g: any) {
     ElMessage.success(t("pages.grants.quitSucceeded"));
     await fetchAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "操作失败");
+    ElMessage.error(e?.data?.msg || t("pages.devices.operationFailed"));
   }
 }
 

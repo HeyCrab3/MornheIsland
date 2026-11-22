@@ -1,43 +1,43 @@
 <template>
   <div class="min-h-[70vh] flex items-start justify-center py-10 px-4">
     <div class="w-full max-w-xl rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
-      <div v-if="loading" class="py-10 text-center text-gray-400">正在读取委托信息…</div>
+      <div v-if="loading" class="py-10 text-center text-gray-400">{{ $t('pages.g.token.extra.loadingInfo') }}</div>
 
       <template v-else-if="error">
         <el-result icon="warning" :title="error.title" :sub-title="error.detail">
           <template #extra>
-            <el-button type="primary" @click="navigateTo('/classes')">返回班级管理</el-button>
+            <el-button type="primary" @click="navigateTo('/classes')">{{ $t('pages.g.token.extra.backToClasses') }}</el-button>
           </template>
         </el-result>
       </template>
 
       <template v-else-if="info">
-        <h2 class="text-lg font-semibold mb-1">班级运维委托</h2>
+        <h2 class="text-lg font-semibold mb-1">{{ $t('pages.g.token.extra.classGrantTitle') }}</h2>
         <p class="text-sm text-gray-500 mb-4">
-          <b>{{ info.ownerName || $t('pages.g.token.someUser') }}</b> 邀请你协助管理下面的班级。
+          <b>{{ info.ownerName || $t('pages.g.token.someUser') }}</b> {{ $t('pages.g.token.extra.inviteHint') }}
         </p>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3 mb-4">
-          <div class="text-xs text-gray-500 mb-1">委托的班级</div>
+          <div class="text-xs text-gray-500 mb-1">{{ $t('pages.g.token.extra.grantedClasses') }}</div>
           <div class="flex flex-wrap gap-1">
             <el-tag v-for="c in info.classes" :key="c._id">{{ c.name || c.identity }}</el-tag>
           </div>
         </div>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3 mb-4">
-          <div class="text-xs text-gray-500 mb-1">你可以做的事</div>
+          <div class="text-xs text-gray-500 mb-1">{{ $t('pages.g.token.extra.allowedActions') }}</div>
           <ul class="text-sm space-y-0.5">
             <li v-for="c in info.capLabels" :key="c">· {{ c }}</li>
           </ul>
         </div>
 
         <div class="text-xs text-gray-500 mb-4">
-          有效至 {{ fmt(info.expiresAt) }} · 已接受 {{ info.usedCount }}/{{ info.maxUses || $t('pages.g.token.unlimited') }} 人
-          <span v-if="info.note"> · 备注：{{ info.note }}</span>
+          {{ $t('pages.g.token.extra.validUntil') }} {{ fmt(info.expiresAt) }} · {{ $t('pages.g.token.extra.acceptedCount') }} {{ info.usedCount }}/{{ info.maxUses || $t('pages.g.token.unlimited') }} {{ $t('pages.g.token.extra.personUnit') }}
+          <span v-if="info.note"> · {{ $t('pages.g.token.extra.noteLabel') }}{{ info.note }}</span>
         </div>
 
         <div v-if="info.isMine" class="text-sm text-amber-600 mb-3">
-          这是你自己发出的委托，把链接发给需要的人即可。
+          {{ $t('pages.g.token.extra.ownGrantHint') }}
         </div>
 
         <el-alert
@@ -50,7 +50,7 @@
         />
 
         <div class="flex gap-2 justify-end">
-          <el-button @click="navigateTo('/classes')">暂不接受</el-button>
+          <el-button @click="navigateTo('/classes')">{{ $t('pages.g.token.extra.notNow') }}</el-button>
           <el-button
             v-if="!info.isMine"
             type="primary"

@@ -1,5 +1,5 @@
 <template>
-  <ResourceEditor collection="timelayout" label="时间表">
+  <ResourceEditor collection="timelayout" :label="$t('components.home.quickstartupguide.timeLayout')">
     <template #default="{ doc, save, viewOnly }">
       <TimeLayoutEditor v-if="doc" :model-value="doc.data" :name="doc.name" :view-only="viewOnly" @save="save" />
     </template>

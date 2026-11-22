@@ -2,19 +2,19 @@
   <div>
     <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">设备追踪</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.devices') }}</h1>
         <p class="text-sm text-gray-500">
-          集控（gRPC）与静态配置两种接入方式并存，用右侧切换查看
+          {{ $t('pages.devices.extra.pageDesc') }}
         </p>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <el-radio-group v-model="mode">
-          <el-radio-button value="all">全部</el-radio-button>
-          <el-radio-button value="grpc">集控</el-radio-button>
-          <el-radio-button value="static">静态</el-radio-button>
+          <el-radio-button value="all">{{ $t('pages.devices.extra.all') }}</el-radio-button>
+          <el-radio-button value="grpc">{{ $t('dashboard.grpc') }}</el-radio-button>
+          <el-radio-button value="static">{{ $t('dashboard.static') }}</el-radio-button>
         </el-radio-group>
         <el-button :loading="loading" @click="fetchAll">
-          <el-icon class="mr-1"><Refresh /></el-icon>刷新
+          <el-icon class="mr-1"><Refresh /></el-icon>{{ $t('pages.devices.extra.refresh') }}
         </el-button>
       </div>
     </div>
@@ -23,25 +23,25 @@
     <el-row :gutter="16" class="mb-2">
       <el-col :xs="12" :sm="6">
         <el-card shadow="hover" class="stat-card mb-4">
-          <div class="text-xs text-gray-400 mb-1">设备总数</div>
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.devices.extra.totalDevices') }}</div>
           <div class="text-2xl font-bold">{{ summary.total }}</div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
         <el-card shadow="hover" class="stat-card mb-4">
-          <div class="text-xs text-gray-400 mb-1">集控在线</div>
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.devices.extra.grpcOnline') }}</div>
           <div class="text-2xl font-bold" style="color: #34d399">{{ summary.grpcOnline }}</div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
         <el-card shadow="hover" class="stat-card mb-4">
-          <div class="text-xs text-gray-400 mb-1">静态设备</div>
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.devices.extra.staticDevices') }}</div>
           <div class="text-2xl font-bold text-gray-500">{{ summary.static }}</div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
         <el-card shadow="hover" class="stat-card mb-4">
-          <div class="text-xs text-gray-400 mb-1">覆盖班级</div>
+          <div class="text-xs text-gray-400 mb-1">{{ $t('pages.devices.extra.coveredClasses') }}</div>
           <div class="text-2xl font-bold">{{ classCount }}</div>
         </el-card>
       </el-col>
@@ -50,7 +50,7 @@
     <div v-loading="loading" class="min-h-40">
       <template v-if="visibleGrpc.length">
         <div v-if="mode === 'all'" class="text-xs text-gray-400 mb-2">
-          集控（gRPC）· {{ visibleGrpc.length }} 台，可下发实时指令
+          {{ $t('dashboard.grpc') }}（gRPC）· {{ visibleGrpc.length }} {{ $t('pages.devices.extra.unit') }}，{{ $t('pages.devices.extra.grpcHint') }}
         </div>
 
         <!-- 批量操作条 -->
@@ -61,19 +61,19 @@
             :disabled="!onlineCuids.length"
             @change="toggleSelectAll"
           >
-            全选在线（{{ onlineCuids.length }} 台）
+            {{ $t('pages.devices.extra.selectAllOnline') }}（{{ onlineCuids.length }} {{ $t('pages.devices.extra.unit') }}）
           </el-checkbox>
-          <span class="text-xs text-gray-400">已选 {{ selectedCuids.length }} 台</span>
+          <span class="text-xs text-gray-400">{{ $t('pages.devices.extra.selectedCount') }} {{ selectedCuids.length }} {{ $t('pages.devices.extra.unit') }}</span>
           <el-button
             size="small"
             type="primary"
             :disabled="!selectedCuids.length"
             @click="openNotifyBatch"
           >
-            批量推送通知
+            {{ $t('pages.schools.id.batchPushNotification') }}
           </el-button>
           <el-button size="small" text :disabled="!selectedCuids.length" @click="selectedCuids = []">
-            清空选择
+            {{ $t('pages.devices.extra.clearSelection') }}
           </el-button>
         </div>
 
@@ -104,37 +104,37 @@
                     placement="top"
                     :content="$t('pages.devices.classIdentityMismatch')"
                   >
-                    <el-tag size="small" type="warning" effect="plain" class="shrink-0">归属待确认</el-tag>
+                    <el-tag size="small" type="warning" effect="plain" class="shrink-0">{{ $t('pages.devices.extra.pendingOwnership') }}</el-tag>
                   </el-tooltip>
                 </div>
                 <div class="text-xs text-gray-400 font-mono truncate">{{ d.cuid }}</div>
               </div>
-              <span class="status-dot" :class="{ online: d.online }" :title="d.online ? '在线' : '离线'" />
+              <span class="status-dot" :class="{ online: d.online }" :title="d.online ? $t('dashboard.online') : $t('dashboard.offline')" />
             </div>
 
             <div class="mt-3 space-y-1 text-xs text-gray-500">
               <div class="flex justify-between gap-2">
-                <span>班级标识</span><span class="font-mono">{{ d.identity || '—' }}</span>
+                <span>{{ $t('pages.devices.extra.classIdentity') }}</span><span class="font-mono">{{ d.identity || '—' }}</span>
               </div>
               <div class="flex justify-between gap-2">
                 <span>MAC</span><span class="font-mono truncate">{{ d.mac || '—' }}</span>
               </div>
               <div class="flex justify-between gap-2">
-                <span>最后活跃</span><span>{{ formatTime(d.lastSeen) }}</span>
+                <span>{{ $t('pages.devices.extra.lastSeen') }}</span><span>{{ formatTime(d.lastSeen) }}</span>
               </div>
               <div class="flex justify-between gap-2 items-center">
-                <span>已装插件</span>
+                <span>{{ $t('pages.devices.extra.pluginsInstalled') }}</span>
                 <span
                   v-if="d.plugins?.length"
                   class="cursor-pointer underline decoration-dotted"
                   @click="togglePlugins(d.cuid)"
                 >
-                  {{ d.plugins.length }} 个 {{ expandedPlugins === d.cuid ? '▲' : '▼' }}
+                  {{ d.plugins.length }} {{ $t('pages.devices.extra.unitItem') }} {{ expandedPlugins === d.cuid ? '▲' : '▼' }}
                 </span>
                 <span v-else>{{ d.pluginsUpdatedAt ? $t('pages.devices.zeroCount') : $t('pages.devices.notCollected') }}</span>
               </div>
               <div v-if="d.pluginsUpdatedAt" class="flex justify-between gap-2">
-                <span>插件采集于</span><span>{{ formatTime(d.pluginsUpdatedAt) }}</span>
+                <span>{{ $t('pages.devices.extra.pluginsCollectedAt') }}</span><span>{{ formatTime(d.pluginsUpdatedAt) }}</span>
               </div>
               <div v-if="expandedPlugins === d.cuid" class="pl-2 pt-1 space-y-0.5">
                 <div
@@ -149,12 +149,12 @@
             </div>
 
             <div class="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5 flex-wrap">
-              <el-button size="small" :disabled="!d.online" @click="openNotify(d)">推送通知</el-button>
-              <el-button size="small" :disabled="!d.online" @click="sendDataUpdated(d)">刷新数据</el-button>
+              <el-button size="small" :disabled="!d.online" @click="openNotify(d)">{{ $t('pages.devices.extra.pushNotification') }}</el-button>
+              <el-button size="small" :disabled="!d.online" @click="sendDataUpdated(d)">{{ $t('pages.devices.extra.refreshData') }}</el-button>
               <el-button size="small" :disabled="!d.online" :loading="refreshingCuid === d.cuid" @click="refreshPlugins(d)">
-                刷新插件
+                {{ $t('pages.devices.extra.refreshPlugins') }}
               </el-button>
-              <el-button size="small" text type="danger" :disabled="!d.online" @click="confirmRestart(d)">重启</el-button>
+              <el-button size="small" text type="danger" :disabled="!d.online" @click="confirmRestart(d)">{{ $t('pages.devices.restart') }}</el-button>
             </div>
           </el-card>
         </div>
@@ -162,7 +162,7 @@
 
       <template v-if="visibleStatic.length">
         <div v-if="mode === 'all'" class="text-xs text-gray-400 mb-2">
-          静态配置 · {{ visibleStatic.length }} 台（按 IP 识别，只能看到它来拉过清单）
+          静态配置 · {{ visibleStatic.length }} {{ $t('pages.devices.extra.unit') }}（{{ $t('pages.devices.extra.staticHint') }}）
         </div>
         <el-alert
           v-if="mode === 'static'"
@@ -183,21 +183,21 @@
                 <div class="font-semibold truncate">{{ d.className || $t('pages.devices.unrecognizedClass') }}</div>
                 <div class="text-xs text-gray-400 font-mono truncate">{{ d.ip }}</div>
               </div>
-              <el-tag size="small" type="info" effect="plain">静态</el-tag>
+              <el-tag size="small" type="info" effect="plain">{{ $t('dashboard.static') }}</el-tag>
             </div>
 
             <div class="mt-3 space-y-1 text-xs text-gray-500">
               <div class="flex justify-between gap-2">
-                <span>班级标识</span><span class="font-mono">{{ d.identity || '—' }}</span>
+                <span>{{ $t('pages.devices.extra.classIdentity') }}</span><span class="font-mono">{{ d.identity || '—' }}</span>
               </div>
               <div class="flex justify-between gap-2">
-                <span>最后活跃</span><span>{{ formatTime(d.lastSeen) }}</span>
+                <span>{{ $t('pages.devices.extra.lastSeen') }}</span><span>{{ formatTime(d.lastSeen) }}</span>
               </div>
               <div class="flex justify-between gap-2">
-                <span>累计请求</span><span>{{ d.requestCount ?? 0 }} 次</span>
+                <span>{{ $t('pages.devices.extra.requestsTotal') }}</span><span>{{ d.requestCount ?? 0 }} {{ $t('pages.devices.extra.times') }}</span>
               </div>
               <div class="flex justify-between gap-2">
-                <span>最后请求</span>
+                <span>{{ $t('pages.devices.extra.lastRequest') }}</span>
                 <span class="font-mono truncate" :title="d.lastPath">{{ shortPath(d.lastPath) }}</span>
               </div>
             </div>
@@ -209,10 +209,10 @@
         v-if="!visibleGrpc.length && !visibleStatic.length"
         :image-size="100"
         :description="mode === 'static'
-          ? '暂无静态配置设备（还没有客户端来拉取过清单）'
+          ? $t('pages.devices.extra.emptyStatic')
           : mode === 'grpc'
-            ? '暂无集控设备（客户端需以集控服务器模式加入）'
-            : '暂无设备记录'"
+            ? $t('pages.devices.extra.emptyGrpc')
+            : $t('pages.devices.extra.emptyAll')"
       />
     </div>
 
@@ -238,8 +238,8 @@
           <el-input v-model="notifyForm.messageMask" :placeholder="$t('pages.devices.defaultMaskText')" />
         </el-form-item>
         <div class="flex flex-wrap gap-4 text-sm">
-          <el-checkbox v-model="notifyForm.isEmergency">紧急（置顶覆盖）</el-checkbox>
-          <el-checkbox v-model="notifyForm.isSpeechEnabled">语音朗读</el-checkbox>
+          <el-checkbox v-model="notifyForm.isEmergency">{{ $t('pages.devices.extra.emergency') }}</el-checkbox>
+          <el-checkbox v-model="notifyForm.isSpeechEnabled">{{ $t('pages.devices.extra.speech') }}</el-checkbox>
         </div>
         <div class="flex gap-4 mt-3">
           <el-form-item :label="$t('pages.devices.displayDurationSeconds')" class="flex-1">
@@ -251,8 +251,8 @@
         </div>
       </el-form>
       <template #footer>
-        <el-button @click="notifyVisible = false">取消</el-button>
-        <el-button type="primary" :loading="notifySending" @click="sendNotify">发送</el-button>
+        <el-button @click="notifyVisible = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="notifySending" @click="sendNotify">{{ $t('pages.devices.extra.send') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
@@ -264,7 +264,7 @@
           <AlertDialogDescription>{{ confirmState.description }}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogCancel>{{ $t('reauth.cancel') }}</AlertDialogCancel>
           <AlertDialogAction
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             @click="runConfirm"
@@ -475,7 +475,7 @@ const confirmOpen = ref(false);
 const confirmState = ref({
   title: "",
   description: "",
-  confirmText: "确定",
+  confirmText: t('components.resourceeditor.confirm'),
   onConfirm: null as null | (() => void),
 });
 

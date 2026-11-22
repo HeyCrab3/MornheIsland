@@ -9,15 +9,15 @@
 
     <el-card v-loading="loading">
       <template #header>
-        <span class="font-medium">邀请确认</span>
+        <span class="font-medium">{{ $t('pages.schools.join.token.extra.inviteConfirm') }}</span>
       </template>
 
       <div v-if="state === 'invalid'" class="py-6 text-center">
         <div class="text-red-500 font-medium mb-2">{{ errorMsg }}</div>
         <div class="text-sm text-gray-400 mb-4">
-          邀请链接可能已过期、被吊销或用完使用次数。请联系该校管理员重新生成。
+          {{ $t('pages.schools.join.token.extra.invalidHint') }}
         </div>
-        <el-button @click="navigateTo('/schools')">返回学校列表</el-button>
+        <el-button @click="navigateTo('/schools')">{{ $t('pages.schools.join.token.extra.backToSchools') }}</el-button>
       </div>
 
       <template v-else-if="info">
@@ -35,19 +35,19 @@
         </div>
 
         <el-alert v-if="info.alreadyMember" type="info" :closable="false" show-icon class="mb-4">
-          <template #title>你已经是这所学校的成员</template>
-          当前身份：{{ roleLabel(info.myRole) }}。可以用下面的选项把自己的班级挂进来。
+          <template #title>{{ $t('pages.schools.join.token.extra.alreadyMemberTitle') }}</template>
+          {{ $t('pages.schools.join.token.extra.currentRolePrefix') }}{{ roleLabel(info.myRole) }}{{ $t('pages.schools.join.token.extra.attachOwnClassesHint') }}
         </el-alert>
 
         <el-alert v-else type="warning" :closable="false" show-icon class="mb-4">
-          <template #title>加入前请确认</template>
-          加入后你能使用学校共享的时间表/课程表/设置/策略。
-          <b v-if="info.role === 'member'">普通成员只能只读使用这些资源</b>，不能修改别人共享的内容。
-          邀请链接不要外传，拿到它的人都能进来。
+          <template #title>{{ $t('pages.schools.join.token.extra.confirmBeforeJoin') }}</template>
+          {{ $t('pages.schools.join.token.extra.joinBenefits') }}
+          <b v-if="info.role === 'member'">{{ $t('pages.schools.join.token.extra.memberReadOnly') }}</b>{{ $t('pages.schools.join.token.extra.memberReadOnlySuffix') }}
+          {{ $t('pages.schools.join.token.extra.doNotShareLink') }}
         </el-alert>
 
         <div v-if="classes.length" class="mb-4">
-          <div class="text-sm font-medium mb-2">把自己的班级一并挂进来（可选）</div>
+          <div class="text-sm font-medium mb-2">{{ $t('pages.schools.join.token.extra.attachOwnClasses') }}</div>
           <el-checkbox-group v-model="selected" class="flex flex-col gap-2">
             <el-checkbox v-for="c in classes" :key="c.id" :value="c.id" class="!mr-0">
               {{ c.name || $t('pages.schools.join.token.unnamed') }}
@@ -56,14 +56,14 @@
           </el-checkbox-group>
         </div>
         <div v-else class="text-sm text-gray-400 mb-4">
-          你名下没有可以挂入的班级（没填机构或已在其他学校）。
+          {{ $t('pages.schools.join.token.extra.noClassesToAttach') }}
         </div>
 
         <div class="flex gap-2">
           <el-button type="primary" :loading="accepting" @click="accept">
             {{ info.alreadyMember ? $t('pages.schools.join.token.attachClass') : $t('pages.schools.join.token.join') }}
           </el-button>
-          <el-button @click="navigateTo('/schools')">取消</el-button>
+          <el-button @click="navigateTo('/schools')">{{ $t('reauth.cancel') }}</el-button>
         </div>
       </template>
     </el-card>

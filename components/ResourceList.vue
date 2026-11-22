@@ -2,11 +2,11 @@
   <div>
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">{{ label }}库</h1>
-        <p class="text-sm text-gray-500">管理可复用的{{ label }}资源，创建后可在班级中关联</p>
+        <h1 class="text-2xl font-semibold mb-1">{{ label }}{{ $t('components.resourcelist.extra.librarySuffix') }}</h1>
+        <p class="text-sm text-gray-500">{{ $t('components.resourcelist.extra.descA') }}{{ label }}{{ $t('components.resourcelist.extra.descB') }}</p>
       </div>
       <el-button type="primary" @click="showCreate = true">
-        <el-icon class="mr-1"><Plus /></el-icon>新建{{ label }}
+        <el-icon class="mr-1"><Plus /></el-icon>{{ $t('components.resourcelist.extra.createPrefix') }}{{ label }}
       </el-button>
     </div>
 
@@ -27,12 +27,12 @@
               <div class="flex items-center gap-1.5 min-w-0">
                 <div class="font-semibold text-base truncate">{{ item.name }}</div>
                 <el-tag v-if="item.isSchoolLevel" size="small" type="success" effect="plain" class="shrink-0">
-                  学校共享
+                  {{ $t('components.resourcelist.extra.schoolShared') }}
                 </el-tag>
               </div>
               <div class="text-xs text-gray-400 mt-1">
-                v{{ item.version }} · 更新于 {{ formatDate(item.updatedAt) }}
-                <span v-if="item.isSchoolLevel && !item.editable" class="text-amber-500"> · 只读</span>
+                v{{ item.version }} · {{ $t('components.resourcelist.extra.updatedAt') }} {{ formatDate(item.updatedAt) }}
+                <span v-if="item.isSchoolLevel && !item.editable" class="text-amber-500"> · {{ $t('components.resourcelist.extra.readOnly') }}</span>
               </div>
             </div>
           </div>
@@ -43,11 +43,11 @@
             </el-button>
             <template v-if="item.editable !== false">
               <el-button size="small" text @click.stop="rename(item._id, item.name)">
-                改名
+                {{ $t('components.resourcelist.extra.rename') }}
               </el-button>
               <el-popconfirm :title="`确定删除「${item.name}」？`" @confirm="remove(item._id)">
                 <template #reference>
-                  <el-button size="small" text type="danger" @click.stop>删除</el-button>
+                  <el-button size="small" text type="danger" @click.stop>{{ $t('components.resourceeditor.delete') }}</el-button>
                 </template>
               </el-popconfirm>
             </template>
@@ -65,7 +65,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreate = false">取消</el-button>
+        <el-button @click="showCreate = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="creating" @click="doCreate">{{ $t('components.resourceeditor.confirm') }}</el-button>
       </template>
     </el-dialog>

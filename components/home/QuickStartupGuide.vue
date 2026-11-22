@@ -4,8 +4,8 @@
       <el-collapse-item name="guide">
         <template #title>
           <div class="flex items-center justify-between w-full pr-4">
-            <span class="font-medium">快速上手指南</span>
-            <el-tag size="small" type="warning">{{ stepsActive }} / 5 步已完成</el-tag>
+            <span class="font-medium">{{ $t('components.home.quickstartupguide.extra.guideTitle') }}</span>
+            <el-tag size="small" type="warning">{{ stepsActive }} / 5 {{ $t('components.home.quickstartupguide.extra.stepsDone') }}</el-tag>
           </div>
         </template>
 
@@ -13,8 +13,8 @@
           <el-step :title="$t('components.home.quickstartupguide.timeLayout')" />
           <el-step :title="$t('components.home.quickstartupguide.subjects')" />
           <el-step :title="$t('components.home.quickstartupguide.archive')" />
-          <el-step title="班级" />
-          <el-step title="设备" />
+          <el-step :title="$t('dashboard.cards.classes')" />
+          <el-step :title="$t('dashboard.cards.devices')" />
         </el-steps>
 
         <div class="current-step p-4 rounded-lg" :style="{ background: 'var(--mi-brand-light)', border: '1px solid var(--mi-brand)' }">
@@ -34,7 +34,7 @@
           <el-button type="primary" @click="navigateTo(guideSteps[stepsActive].link)">
             {{ guideSteps[stepsActive].action }}
           </el-button>
-          <span class="text-xs text-gray-400 ml-3">完成后刷新此页面继续下一步</span>
+          <span class="text-xs text-gray-400 ml-3">{{ $t('components.home.quickstartupguide.extra.refreshHint') }}</span>
         </div>
       </el-collapse-item>
     </el-collapse>

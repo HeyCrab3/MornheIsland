@@ -2,44 +2,44 @@
   <el-card class="max-w-2xl mt-4">
     <template #header>
       <div class="flex items-center justify-between">
-        <span class="font-medium">Class Widgets 2 集控</span>
-        <el-tag size="small" type="info" effect="plain">协议 v1</el-tag>
+        <span class="font-medium">{{ $t('components.cw2centralpanel.extra.panelTitle') }}</span>
+        <el-tag size="small" type="info" effect="plain">{{ $t('components.cw2centralpanel.extra.protocolV1') }}</el-tag>
       </div>
     </template>
 
     <p class="text-xs text-gray-500 mb-4 leading-relaxed">
-      把本班下发给 Class Widgets 2 的集控插件。设备的课表与策略随版本号变化时才重新拉取，
-      命令按确认序号增量下发，设备每 10 秒同步一次。
+      {{ $t('components.cw2centralpanel.extra.introA') }}
+      {{ $t('components.cw2centralpanel.extra.introB') }}
       <br />
-      客户端插件目前尚未公开；本面板按官方 <code>contracts/</code> 协议实现，插件到手即可直接连。
+      {{ $t('components.cw2centralpanel.extra.introC') }} <code>contracts/</code> {{ $t('components.cw2centralpanel.extra.introD') }}
     </p>
 
     <!-- 概览 -->
     <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm mb-4">
-      <span>课表版本：<b>{{ revisions.schedule?.revision ?? "未发布" }}</b></span>
-      <span>策略版本：<b>{{ revisions.policy?.revision ?? "未发布" }}</b></span>
-      <span>在线设备：<b>{{ onlineCount }} / {{ devices.length }}</b></span>
+      <span>{{ $t('components.cw2centralpanel.extra.scheduleVersion') }}<b>{{ revisions.schedule?.revision ?? $t('components.cw2centralpanel.unpublished') }}</b></span>
+      <span>{{ $t('components.cw2centralpanel.extra.policyVersion') }}<b>{{ revisions.policy?.revision ?? $t('components.cw2centralpanel.unpublished') }}</b></span>
+      <span>{{ $t('components.cw2centralpanel.extra.onlineDevices') }}<b>{{ onlineCount }} / {{ devices.length }}</b></span>
       <el-button size="small" text type="primary" @click="refreshAll">
-        <el-icon class="mr-0.5"><Refresh /></el-icon>刷新
+        <el-icon class="mr-0.5"><Refresh /></el-icon>{{ $t('components.cw2centralpanel.extra.refresh') }}
       </el-button>
     </div>
 
     <!-- 发布 -->
     <div class="flex flex-wrap gap-2 mb-4">
-      <el-button size="small" :loading="previewing" @click="doPreview">预览课表转换</el-button>
+      <el-button size="small" :loading="previewing" @click="doPreview">{{ $t('components.cw2centralpanel.extra.previewConversion') }}</el-button>
       <el-button size="small" type="primary" :loading="publishing" @click="doPublishSchedule">
-        发布课表
+        {{ $t('components.cw2centralpanel.extra.publishSchedule') }}
       </el-button>
-      <el-button size="small" :loading="pairing" @click="doPairingCode">签发配对码</el-button>
+      <el-button size="small" :loading="pairing" @click="doPairingCode">{{ $t('components.cw2centralpanel.extra.issuePairingCode') }}</el-button>
     </div>
 
     <el-alert v-if="pairingResult" type="success" :closable="false" class="mb-4">
-      <template #title>配对码（15 分钟内有效，只能用一次）</template>
+      <template #title>{{ $t('components.cw2centralpanel.extra.pairingCodeTitle') }}</template>
       <div class="flex items-center gap-2 mt-2 flex-wrap">
         <code class="text-lg font-mono">{{ pairingResult.code }}</code>
-        <el-button size="small" @click="copyPairingCode">复制</el-button>
+        <el-button size="small" @click="copyPairingCode">{{ $t('components.cw2centralpanel.extra.copy') }}</el-button>
         <span class="text-xs text-gray-500">
-          在教室机器的 Class Widgets 2 集控插件里填入此码完成配对
+          {{ $t('components.cw2centralpanel.extra.pairingHint') }}
         </span>
       </div>
     </el-alert>
@@ -70,33 +70,33 @@
           </ul>
         </el-alert>
         <pre class="text-xs bg-gray-50 dark:bg-neutral-700 p-3 rounded overflow-auto max-h-64">{{
-          preview.schedule ? JSON.stringify(preview.schedule, null, 2) : "（无转换结果）"
+          preview.schedule ? JSON.stringify(preview.schedule, null, 2) : $t('components.cw2centralpanel.noConversionResult')
         }}</pre>
       </el-collapse-item>
     </el-collapse>
 
     <!-- 设备 -->
-    <div class="text-sm font-medium mb-2">已配对设备</div>
+    <div class="text-sm font-medium mb-2">{{ $t('components.cw2centralpanel.extra.pairedDevices') }}</div>
     <el-table v-if="devices.length" :data="devices" size="small" class="mb-4">
-      <el-table-column label="名称" min-width="120">
+      <el-table-column :label="$t('components.cw2centralpanel.name')" min-width="120">
         <template #default="{ row }">
           <div class="truncate">{{ row.name || row.installationId }}</div>
-          <div class="text-[11px] text-gray-400 truncate">{{ row.platform || "未知平台" }}</div>
+          <div class="text-[11px] text-gray-400 truncate">{{ row.platform || $t('components.cw2centralpanel.unknownPlatform') }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="80">
+      <el-table-column :label="$t('components.cw2centralpanel.status')" width="80">
         <template #default="{ row }">
           <el-tag size="small" :type="row.revoked ? 'info' : row.online ? 'success' : 'danger'" effect="plain">
-            {{ row.revoked ? "已撤销" : row.online ? "在线" : "离线" }}
+            {{ row.revoked ? $t('components.cw2centralpanel.revoked') : row.online ? $t('dashboard.online') : $t('dashboard.offline') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="课表/策略" width="90">
+      <el-table-column :label="$t('components.cw2centralpanel.planOrPolicy')" width="90">
         <template #default="{ row }">
           <span class="text-xs">v{{ row.scheduleRevision }} / v{{ row.policyRevision }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最近同步" min-width="130">
+      <el-table-column :label="$t('components.cw2centralpanel.lastSync')" min-width="130">
         <template #default="{ row }">
           <span class="text-xs text-gray-500">{{ fmtTime(row.lastSeen) }}</span>
           <div v-if="row.lastError" class="text-[11px] text-red-500 truncate" :title="row.lastError">
@@ -112,14 +112,14 @@
             text
             type="danger"
             @click="revokeDevice(row)"
-          >撤销</el-button>
+          >{{ $t('components.cw2centralpanel.extra.revoke') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <div v-else class="text-xs text-gray-400 mb-4">还没有设备配对。</div>
+    <div v-else class="text-xs text-gray-400 mb-4">{{ $t('components.cw2centralpanel.extra.noPairedDevices') }}</div>
 
     <!-- 命令 -->
-    <el-divider content-position="left">下发命令</el-divider>
+    <el-divider content-position="left">{{ $t('components.cw2centralpanel.extra.dispatchCommand') }}</el-divider>
     <div class="flex flex-wrap items-end gap-2 mb-3">
       <el-select v-model="commandType" size="small" style="width: 190px">
         <el-option v-for="c in COMMAND_TYPES" :key="c.value" :label="c.label" :value="c.value" />
@@ -130,26 +130,26 @@
         type="textarea"
         :rows="1"
         :autosize="{ minRows: 1, maxRows: 4 }"
-        placeholder="payload JSON，可选"
+        :placeholder="$t('components.cw2centralpanel.payloadJsonOptional')"
         style="width: 260px"
       />
-      <el-button size="small" type="primary" :loading="sending" @click="doSendCommand">下发</el-button>
+      <el-button size="small" type="primary" :loading="sending" @click="doSendCommand">{{ $t('components.cw2centralpanel.extra.dispatch') }}</el-button>
     </div>
 
     <el-table v-if="commands.length" :data="commands" size="small">
-      <el-table-column label="命令" min-width="150">
+      <el-table-column :label="$t('components.cw2centralpanel.command')" min-width="150">
         <template #default="{ row }">
           <div class="truncate">{{ row.type }}</div>
           <div class="text-[11px] text-gray-400 truncate">{{ fmtTime(row.createdAt) }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="序号" width="70">
+      <el-table-column :label="$t('components.cw2centralpanel.sequence')" width="70">
         <template #default="{ row }"><span class="text-xs">#{{ row.cursor }}</span></template>
       </el-table-column>
-      <el-table-column label="回执" min-width="120">
+      <el-table-column :label="$t('components.cw2centralpanel.receipt')" min-width="120">
         <template #default="{ row }">
           <span v-if="!row.ackCount" class="text-xs text-gray-400">
-            {{ row.expired ? "已过期未回执" : "等待回执" }}
+            {{ row.expired ? $t('components.cw2centralpanel.expiredNoReceipt') : $t('components.cw2centralpanel.awaitingReceipt') }}
           </span>
           <span v-else class="text-xs">
             <el-tag
@@ -164,18 +164,18 @@
         </template>
       </el-table-column>
     </el-table>
-    <div v-else class="text-xs text-gray-400">还没有下发过命令。</div>
+    <div v-else class="text-xs text-gray-400">{{ $t('components.cw2centralpanel.extra.noCommands') }}</div>
 
     <!-- 策略 -->
     <el-collapse class="mt-4">
-      <el-collapse-item title="CW2 策略（与 ClassIsland 策略不是一套语义，需单独填）">
+      <el-collapse-item :title="$t('components.cw2centralpanel.cw2PolicyHint')">
         <pre class="text-xs bg-gray-50 dark:bg-neutral-700 p-2 rounded mb-2 overflow-auto max-h-40">{{
           policyText
         }}</pre>
         <div class="flex gap-2">
-          <el-button size="small" @click="fillPolicyFromCurrent">载入当前已发布策略</el-button>
+          <el-button size="small" @click="fillPolicyFromCurrent">{{ $t('components.cw2centralpanel.extra.loadPublishedPolicy') }}</el-button>
           <el-button size="small" type="primary" :loading="publishingPolicy" @click="doPublishPolicy">
-            发布策略
+            {{ $t('components.cw2centralpanel.extra.publishPolicy') }}
           </el-button>
         </div>
       </el-collapse-item>
@@ -187,18 +187,19 @@
 import { Refresh } from "@element-plus/icons-vue";
 
 const props = defineProps<{ classId: string }>();
+const { t } = useI18n();
 
 const COMMAND_TYPES = [
-  { value: "refresh_status", label: "刷新状态" },
-  { value: "show_notification", label: "显示通知" },
-  { value: "restart_app", label: "重启应用" },
-  { value: "apply_config", label: "应用配置" },
-  { value: "switch_schedule", label: "切换课表" },
-  { value: "trigger_action", label: "触发动作" },
-  { value: "apply_class_swap", label: "应用换课" },
-  { value: "restore_class_swap", label: "恢复换课" },
-  { value: "request_schedule_snapshot", label: "请求课表快照" },
-  { value: "upload_diagnostics", label: "上传诊断" },
+  { value: "refresh_status", label: t('components.cw2centralpanel.refreshStatus'), },
+  { value: "show_notification", label: t('components.cw2centralpanel.showNotification'), },
+  { value: "restart_app", label: t('components.cw2centralpanel.restartApp'), },
+  { value: "apply_config", label: t('components.cw2centralpanel.applyConfig'), },
+  { value: "switch_schedule", label: t('components.cw2centralpanel.switchPlan'), },
+  { value: "trigger_action", label: t('components.cw2centralpanel.triggerAction'), },
+  { value: "apply_class_swap", label: t('components.cw2centralpanel.applySwap'), },
+  { value: "restore_class_swap", label: t('components.cw2centralpanel.restoreSwap'), },
+  { value: "request_schedule_snapshot", label: t('components.cw2centralpanel.requestPlanSnapshot'), },
+  { value: "upload_diagnostics", label: t('components.cw2centralpanel.uploadDiagnostics'), },
 ] as const;
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
@@ -266,7 +267,7 @@ async function doPreview() {
     });
     preview.value = res.data;
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "预览失败");
+    ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.previewFailed'));
   } finally {
     previewing.value = false;
   }
@@ -286,7 +287,7 @@ async function doPublishSchedule() {
     }
     await refreshAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "发布失败");
+    ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.publishFailed'));
   } finally {
     publishing.value = false;
   }
@@ -302,7 +303,7 @@ async function doPairingCode() {
     });
     pairingResult.value = res.data;
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "签发失败");
+    ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.issueFailed'));
   } finally {
     pairing.value = false;
   }
@@ -311,15 +312,15 @@ async function doPairingCode() {
 async function copyPairingCode() {
   try {
     await navigator.clipboard.writeText(pairingResult.value?.code || "");
-    ElMessage.success("已复制配对码");
+    ElMessage.success(t('components.cw2centralpanel.pairCodeCopied'));
   } catch {
-    ElMessage.error("复制失败");
+    ElMessage.error(t('components.cw2centralpanel.copyFailed'));
   }
 }
 
 async function revokeDevice(row: any) {
   try {
-    await ElMessageBox.confirm(`确定撤销设备「${row.name || row.installationId}」？`, "撤销设备", {
+    await ElMessageBox.confirm(`确定撤销设备「${row.name || row.installationId}」？`, t('components.cw2centralpanel.revokeDevice'), {
       type: "warning",
     });
   } catch {
@@ -330,10 +331,10 @@ async function revokeDevice(row: any) {
       method: "POST",
       headers: authHeaders(),
     });
-    ElMessage.success("已撤销");
+    ElMessage.success(t('components.cw2centralpanel.revoked'));
     await refreshAll();
   } catch {
-    ElMessage.error("撤销失败");
+    ElMessage.error(t('components.cw2centralpanel.revokeFailed'));
   }
 }
 
@@ -344,7 +345,7 @@ async function doSendCommand() {
     try {
       payload = JSON.parse(raw);
     } catch {
-      ElMessage.error("payload 不是合法 JSON");
+      ElMessage.error(t('components.cw2centralpanel.invalidPayloadJson'));
       return;
     }
   }
@@ -355,11 +356,11 @@ async function doSendCommand() {
       headers: authHeaders(),
       body: { classId: props.classId, type: commandType.value, payload, expiresInSeconds: 300 },
     });
-    ElMessage.success("已下发，等待设备下次同步");
+    ElMessage.success(t('components.cw2centralpanel.dispatchedAwaitingSync'));
     commandPayload.value = "";
     await refreshAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "下发失败");
+    ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.dispatchFailed'));
   } finally {
     sending.value = false;
   }
@@ -370,7 +371,7 @@ async function doPublishPolicy() {
   try {
     policy = JSON.parse(policyText.value);
   } catch {
-    ElMessage.error("策略不是合法 JSON");
+    ElMessage.error(t('components.cw2centralpanel.invalidPolicyJson'));
     return;
   }
   publishingPolicy.value = true;
@@ -383,14 +384,14 @@ async function doPublishPolicy() {
     ElMessage.success(`已发布策略 v${res.data?.revision}`);
     await refreshAll();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "发布失败");
+    ElMessage.error(e?.data?.msg || t('components.cw2centralpanel.publishFailed'));
   } finally {
     publishingPolicy.value = false;
   }
 }
 
 function fillPolicyFromCurrent() {
-  ElMessage.info("已发布策略的内容请用接口查看；这里只做新策略的编辑入口");
+  ElMessage.info(t('components.cw2centralpanel.publishedPolicyHint'));
 }
 
 onMounted(refreshAll);

@@ -18,7 +18,7 @@
     />
 
     <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
-      <span class="text-sm font-medium">时间表：</span>
+      <span class="text-sm font-medium">{{ $t('components.classplaneditor.extra.timeLayoutLabel') }}</span>
       <el-select
         v-model="selectedTimelayoutId"
         :placeholder="$t('components.classplaneditor.required')"
@@ -28,7 +28,7 @@
       >
         <el-option v-for="t in timelayouts" :key="t._id" :label="t.name" :value="t._id" />
       </el-select>
-      <span class="text-sm font-medium ml-4">课程表：</span>
+      <span class="text-sm font-medium ml-4">{{ $t('components.classplaneditor.extra.subjectsLabel') }}</span>
       <el-select
         v-model="selectedSubjectsId"
         :placeholder="$t('components.classplaneditor.required')"
@@ -42,7 +42,7 @@
 
     <!-- 周次轮换：每周 / 单周 / 双周 -->
     <div v-if="!mobile" class="mb-4 flex items-center gap-3 flex-wrap">
-      <span class="text-sm font-medium">周次：</span>
+      <span class="text-sm font-medium">{{ $t('components.classplaneditor.extra.weekLabel') }}</span>
       <el-radio-group v-model="activeWeekDiv" @change="forceRender++">
         <el-radio-button v-for="t in WEEK_TABS" :key="t.value" :value="t.value">
           {{ t.label }}
@@ -50,7 +50,7 @@
       </el-radio-group>
       <el-dropdown v-if="!viewOnly" @command="copyWeekTo">
         <el-button size="small" text type="primary">
-          复制当前周到…<el-icon class="ml-1"><ArrowDown /></el-icon>
+          {{ $t('components.classplaneditor.extra.copyWeekTo') }}<el-icon class="ml-1"><ArrowDown /></el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
@@ -60,18 +60,18 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <span class="text-xs text-gray-400">每周 = 不轮换；单周 + 双周 = 两周轮换</span>
+      <span class="text-xs text-gray-400">{{ $t('components.classplaneditor.extra.weekRuleHint') }}</span>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-3">
-      <template #title>和 ClassIsland 对齐的两条规则</template>
-      ① 每个课时有独立的<b>启用</b>开关：取消勾选就是"这节课不上"（比如自习、考试占场），
-      跟"有没有科目"无关；② 一天里<b>最后一个启用的课时之后视为放学</b>，后面的课时会自动按未启用处理。
+      <template #title>{{ $t('components.classplaneditor.extra.rulesTitle') }}</template>
+      {{ $t('components.classplaneditor.extra.ruleA') }}<b>{{ $t('components.classplaneditor.extra.ruleEnabled') }}</b>{{ $t('components.classplaneditor.extra.ruleB') }}
+      <b>{{ $t('components.classplaneditor.extra.ruleAfterSchool') }}</b>{{ $t('components.classplaneditor.extra.ruleC') }}
     </el-alert>
 
     <template v-if="timePoints.length > 0 && subjectPool.length > 0">
       <div v-if="!mobile" class="mb-3 flex items-center gap-2 flex-wrap">
-        <span class="text-sm text-gray-500">上课日：</span>
+        <span class="text-sm text-gray-500">{{ $t('components.classplaneditor.extra.classDaysLabel') }}</span>
         <el-checkbox-group
           v-model="activeDays"
           size="small"
@@ -83,7 +83,7 @@
 
       <div class="flex gap-4">
         <div v-if="!mobile" class="w-32 shrink-0">
-          <div class="text-sm font-medium mb-2">科目</div>
+          <div class="text-sm font-medium mb-2">{{ $t('composables.useciresource.subject') }}</div>
           <div class="space-y-1">
             <div
               v-for="s in subjectPool"
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="text-xs text-gray-400 mt-2 leading-relaxed">
-            选中科目后点格子填入；再点一次取消选择，此时点格子会清空科目。
+            {{ $t('components.classplaneditor.extra.pickHint') }}
           </div>
         </div>
 
@@ -104,7 +104,7 @@
           <table class="border-collapse w-full">
             <thead>
               <tr>
-                <th class="th-cell w-24">节次</th>
+                <th class="th-cell w-24">{{ $t('components.classplaneditor.extra.periodColumn') }}</th>
                 <th v-for="d in activeDays" :key="d" class="th-cell min-w-32">
                   {{ DAYS.find((x) => x.value === d)?.label }}
                 </th>
@@ -144,7 +144,7 @@
                     />
                   </div>
                   <div v-if="isAfterSchoolStart(d, tpi)" class="text-[10px] text-amber-500 text-center">
-                    放学
+                    {{ $t('components.classplaneditor.extra.dismissal') }}
                   </div>
                 </td>
               </tr>
@@ -154,7 +154,7 @@
       </div>
 
       <div class="mt-3 text-xs text-gray-400">
-        当前周次「{{ weekLabel(activeWeekDiv) }}」的放学线：
+        {{ $t('components.classplaneditor.extra.dismissalLineA') }}{{ weekLabel(activeWeekDiv) }}{{ $t('components.classplaneditor.extra.dismissalLineB') }}
         <span class="text-gray-500">
           {{ activeDays.map((d) => `${DAYS.find((x) => x.value === d)?.label}第${lastEnabled(d) + 1}节`).join(" · ") }}
         </span>
@@ -167,7 +167,7 @@
         class="mt-4"
         @click="doSave"
       >
-        保存课表
+        {{ $t('components.classplaneditor.extra.savePlan') }}
       </el-button>
     </template>
 

@@ -1,7 +1,7 @@
 <template>
   <template v-if="!mfaVisible">
     <Spinner class="mx-auto" style="width: 16px" />
-    <p class="text-center mt-4 text-sm text-neutral-600">正在登录</p>
+    <p class="text-center mt-4 text-sm text-neutral-600">{{ $t('pages.callback.extra.loggingIn') }}</p>
   </template>
 
   <!-- 二步验证：SSO 已通过，还差一次动态码 -->
@@ -311,7 +311,7 @@
 
     <p class="text-xs text-center mt-2">
       <a class="text-[var(--mi-brand)]" href="#" @click="$router.push('/login')"
-        >返回重新登录</a
+        >{{ $t('pages.callback.extra.backToLogin') }}</a
       >
     </p>
   </div>
@@ -426,7 +426,7 @@ async function submitMfa() {
     const msg = String(e?.message || "");
     if (msg.includes("票据") || msg.includes("重新登录")) {
       mfaError.value = msg;
-      ElMessageBox.alert(t('pages.callback.ticketExpired'), "提示", {
+      ElMessageBox.alert(t('pages.callback.ticketExpired'), t('composables.useunsavedguard.notice'), {
         type: "warning",
       }).then(() => router.push("/login"));
       return;
@@ -512,7 +512,7 @@ async function submitPasskey() {
     const msg = String(e?.message || e || "");
     mfaError.value = msg || t('login.errors.passkeyFailed');
     if (msg.includes("票据") || msg.includes("重新登录")) {
-      ElMessageBox.alert(t('pages.callback.ticketExpired'), "提示", {
+      ElMessageBox.alert(t('pages.callback.ticketExpired'), t('composables.useunsavedguard.notice'), {
         type: "warning",
       }).then(() => router.push("/login"));
     }

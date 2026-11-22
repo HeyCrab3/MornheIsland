@@ -4,25 +4,25 @@
       <div>
         <h1 class="text-2xl font-semibold mb-1">{{ $t('dashboard.examEntry') }}</h1>
         <p class="text-sm text-gray-500">
-          按<b>账号</b>保存，该账号下所有班级的看板共用这一份，不用每个班重复录入。
+          {{ $t('pages.exams.extra.saveScope1') }}<b>{{ $t('pages.exams.extra.saveScopeBold') }}</b>{{ $t('pages.exams.extra.saveScope2') }}
         </p>
       </div>
       <div class="flex gap-2">
-        <el-button :disabled="!hasPast" @click="cleanPast">清理过期</el-button>
+        <el-button :disabled="!hasPast" @click="cleanPast">{{ $t('pages.exams.extra.cleanPast') }}</el-button>
         <el-button type="primary" :loading="saving" :disabled="!dirty" @click="save">
-          保存
+          {{ $t('pages.subaccounts.save') }}
         </el-button>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-3xl">
-      <template #title>生效规则</template>
-      与考试时间<b>重合</b>的标准课时会被考试整段替换，不重合的课时照常显示。
-      考试只在看板上生效，不会改动下发给 ClassIsland 的课表。
+      <template #title>{{ $t('pages.exams.extra.effectiveTitle') }}</template>
+      {{ $t('pages.exams.extra.effectiveBody1') }}<b>{{ $t('pages.exams.extra.effectiveBold') }}</b>{{ $t('pages.exams.extra.effectiveBody2') }}
+      {{ $t('pages.exams.extra.effectiveBody3') }}
     </el-alert>
 
     <el-card class="max-w-3xl mb-4">
-      <template #header><span class="font-medium">添加考试</span></template>
+      <template #header><span class="font-medium">{{ $t('pages.exams.extra.addExam') }}</span></template>
       <div class="flex flex-wrap items-center gap-2">
         <el-date-picker
           v-model="draft.date"
@@ -46,16 +46,16 @@
           :placeholder="$t('components.timelayouteditor.end')"
           style="width: 118px"
         />
-        <el-button type="primary" @click="add">添加</el-button>
+        <el-button type="primary" @click="add">{{ $t('pages.exams.extra.add') }}</el-button>
       </div>
     </el-card>
 
     <el-card v-loading="loading" class="max-w-3xl">
       <template #header>
         <div class="flex items-center justify-between">
-          <span class="font-medium">已安排 {{ entries.length }} 场</span>
+          <span class="font-medium">{{ $t('pages.exams.extra.scheduledPrefix') }} {{ entries.length }} {{ $t('pages.exams.extra.scheduledSuffix') }}</span>
           <span v-if="dirty" class="text-xs" style="color: var(--el-color-warning)">
-            有未保存的修改
+            {{ $t('pages.exams.extra.unsavedChanges') }}
           </span>
         </div>
       </template>
@@ -85,7 +85,7 @@
     </el-card>
 
     <div class="max-w-3xl mt-3 text-xs text-gray-400 leading-relaxed">
-      提示：看板每 10 分钟同步一次，保存后最多等这么久生效；想立刻看到就刷新看板页面。
+      {{ $t('pages.exams.extra.syncHint') }}
     </div>
   </div>
 </template>

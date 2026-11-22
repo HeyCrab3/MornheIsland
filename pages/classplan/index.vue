@@ -2,17 +2,17 @@
   <div>
     <div class="flex items-center justify-end mb-4">
       <el-button @click="showImport = true">
-        <el-icon class="mr-1"><Upload /></el-icon>导入 CSES 格式
+        <el-icon class="mr-1"><Upload /></el-icon>{{ $t('pages.classplan.index.extra.importCsesFormat') }}
       </el-button>
     </div>
 
-    <ResourceList collection="classplan" label="档案" />
+    <ResourceList collection="classplan" :label="$t('components.home.quickstartupguide.archive')" />
 
     <el-dialog v-model="showImport" :title="$t('pages.classplan.index.importCsesSchedule')" width="560px" :close-on-click-modal="false">
       <p class="text-sm text-gray-500 mb-3">
-        拖入或选择 .yaml/.yml 文件，自动创建课程表、时间表和课表。
-        <br><span class="text-orange-500">注意：含「临时」字样的临时层不会被导入。</span>
-        <br><span class="text-red-500">目前受到 CSES 的本身限制，两周以上的多周轮换课表不能被任何应用导出，因此也无法被莫宁岛接受，这个问题与本平台无关。</span>
+        {{ $t('pages.classplan.index.extra.importHint') }}
+        <br><span class="text-orange-500">{{ $t('pages.classplan.index.extra.importNotice') }}</span>
+        <br><span class="text-red-500">{{ $t('pages.classplan.index.extra.importLimit') }}</span>
       </p>
 
       <!-- 拖拽区域 -->
@@ -25,22 +25,22 @@
       >
         <el-icon size="32" class="text-gray-300 mb-2"><UploadFilled /></el-icon>
         <p v-if="!fileName" class="text-sm text-gray-400">
-          拖拽 .yaml 文件到此处，或
-          <label class="upload-link">点击选择<input type="file" accept=".yaml,.yml" hidden @change="onFileChange" /></label>
+          {{ $t('pages.classplan.index.extra.dropHint') }}
+          <label class="upload-link">{{ $t('pages.classplan.index.extra.clickSelect') }}<input type="file" accept=".yaml,.yml" hidden @change="onFileChange" /></label>
         </p>
         <p v-else class="text-sm">
           <el-icon class="mr-1"><Document /></el-icon>
           {{ fileName }}
-          <el-button text size="small" type="danger" class="ml-2" @click="clearFile">移除</el-button>
+          <el-button text size="small" type="danger" class="ml-2" @click="clearFile">{{ $t('pages.classplan.index.extra.remove') }}</el-button>
         </p>
       </div>
 
       <el-input v-model="importName" :placeholder="$t('pages.classplan.index.importNameOptional')" class="mt-3" />
 
       <template #footer>
-        <el-button @click="showImport = false">取消</el-button>
+        <el-button @click="showImport = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="importing" :disabled="!yamlText" @click="doImport">
-          导入
+          {{ $t('pages.import.import') }}
         </el-button>
       </template>
     </el-dialog>

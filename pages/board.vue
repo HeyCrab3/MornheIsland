@@ -61,7 +61,7 @@
                 :style="{ width: progress * 100 + '%' }"
               />
             </div>
-            <div class="subject-sub">还剩 {{ remainMinutes }} 分钟</div>
+            <div class="subject-sub">{{ $t('pages.board.extra.remainingPrefix') }} {{ remainMinutes }} {{ $t('pages.board.extra.minuteUnit') }}</div>
           </template>
           <template v-else>
             <div class="subject-label">
@@ -79,7 +79,7 @@
             </div>
           </template>
         </template>
-        <div v-else class="subject-label">未设置班级</div>
+        <div v-else class="subject-label">{{ $t('pages.board.extra.noClassSet') }}</div>
       </div>
 
       <!-- 天气 -->
@@ -106,18 +106,18 @@
             {{ weather.today.tempMax }}°
           </div>
           <div v-if="weather.now.windDir" class="weather-sub">
-            {{ weather.now.windDir }} {{ weather.now.windScale }} 级
+            {{ weather.now.windDir }} {{ weather.now.windScale }} {{ $t('pages.board.extra.windScaleUnit') }}
           </div>
           <div class="weather-credit">
             <a
               href="https://www.qweather.com/"
               target="_blank"
               rel="noopener noreferrer"
-              >和风天气</a
+              >{{ $t('pages.board.extra.qweather') }}</a
             >
           </div>
         </template>
-        <div v-else class="subject-label">天气加载中…</div>
+        <div v-else class="subject-label">{{ $t('pages.board.extra.weatherLoading') }}</div>
       </div>
 
       <!-- 公告板 -->
@@ -163,7 +163,7 @@
       <!-- 水印 -->
       <el-popover placement="top-end" width="256px">
         <img class="w-36 mx-auto mb-4" src="data:image/png;base64,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"/>
-        <p class="text-center">想让自己的班级也用上大屏看板？<br/>扫描二维码立即试用莫宁岛！</p>
+        <p class="text-center">{{ $t('pages.board.extra.qrPrompt') }}<br/>{{ $t('pages.board.extra.qrPromptSub') }}</p>
         <template #reference>
           <a
             class="board-watermark"
@@ -171,15 +171,15 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            由莫宁岛驱动
+            {{ $t('pages.board.extra.poweredBy') }}
           </a>
         </template>
       </el-popover>
 
       <!-- 底部操作提示 -->
       <div v-if="settings.showHints" class="board-hints">
-        按 <kbd>E</kbd> 调整元素位置 · 拖动元素即可移动 · 左下角「设置」可换背景
-        / 写公告 / 选班级
+        {{ $t('pages.board.extra.hintBeforeKey') }} <kbd>E</kbd> {{ $t('pages.board.extra.hintAfterKey') }}
+        {{ $t('pages.board.extra.hintMore') }}
       </div>
 
       <!-- 设置入口 -->
@@ -192,7 +192,7 @@
         <span>{{ $t('composables.useciresource.settings') }}</span>
       </button>
       <div v-if="editMode" class="board-edithint">
-        布局编辑中：拖动元素调整位置，再按 E 退出
+        {{ $t('pages.board.extra.editingHint') }}
       </div>
     </div>
 
@@ -204,7 +204,7 @@
       :append-to-body="true"
     >
       <el-form label-position="top" size="small">
-        <el-form-item label="班级">
+        <el-form-item :label="$t('dashboard.cards.classes')">
           <el-select
             v-if="classList.length"
             v-model="settings.identity"
@@ -217,7 +217,7 @@
             <el-option
               v-for="c in classList"
               :key="c._id"
-              :label="`${c.name || '未命名'}${c.identity ? ' · ' + c.identity : ''}`"
+              :label="`${c.name || $t('components.resourceeditor.untitled')}${c.identity ? ' · ' + c.identity : ''}`"
               :value="String(c._id)"
             />
           </el-select>
@@ -228,21 +228,21 @@
           />
           <div class="hint">
             <template v-if="classLoadState === 'anon'">
-              未登录，拉不到班级列表。可以先
-              <a href="/login" target="_blank">登录控制台</a>
-              再回到看板（就能直接选班级），或者手动填班级
-              ID——班级管理里点「管理」，地址栏最后一段就是。
+              {{ $t('pages.board.extra.classAnonA') }}
+              <a href="/login" target="_blank">{{ $t('pages.board.extra.loginConsole') }}</a>
+              {{ $t('pages.board.extra.classAnonB') }}
+              {{ $t('pages.board.extra.classAnonC') }}
             </template>
             <template v-else-if="classLoadState === 'loading'"
-              >正在读取你的班级列表…</template
+              >{{ $t('pages.board.extra.classLoading') }}</template
             >
             <template v-else-if="classLoadState === 'ok' && !classList.length">
-              你还没有创建班级。可手动填班级 ID，或先去
-              <a href="/classes" target="_blank">班级管理</a> 建一个。
+              {{ $t('pages.board.extra.classEmptyA') }}
+              <a href="/classes" target="_blank">{{ $t('dashboard.cards.classes') }}</a> {{ $t('pages.board.extra.classEmptyB') }}
             </template>
             <template v-else>
-              填班级 <b>ID</b> 最准；也兼容班级标识。URL 参数可用
-              <code>?id=</code> 覆盖。
+              {{ $t('pages.board.extra.classIdHintA') }} <b>ID</b> {{ $t('pages.board.extra.classIdHintB') }}
+              <code>?id=</code> {{ $t('pages.board.extra.classIdHintC') }}
             </template>
           </div>
         </el-form-item>
@@ -256,7 +256,7 @@
               @keyup.enter="searchCity"
             />
             <el-button size="small" :loading="citySearching" @click="searchCity"
-              >搜索</el-button
+              >{{ $t('pages.board.extra.search') }}</el-button>
             >
           </div>
           <div v-if="cityResults.length" class="w-full mt-2">
@@ -275,7 +275,7 @@
             </el-radio-group>
           </div>
           <div class="hint">
-            当前：<b>{{
+            {{ $t('pages.board.extra.currentCity') }}<b>{{
               settings.weatherLocationName || $t('pages.board.followServerDefaultCity')
             }}</b>
             <span v-if="settings.weatherLocation"
@@ -287,7 +287,7 @@
               text
               type="primary"
               @click="clearCity"
-              >恢复默认</el-button
+              >{{ $t('pages.board.extra.restoreDefault') }}</el-button>
             >
           </div>
         </el-form-item>
@@ -302,61 +302,60 @@
             class="!w-full"
           />
           <div class="hint">
-            留空时单双周不做区分，按每周都上处理。
+            {{ $t('pages.board.extra.weekEmptyHint') }}
             <template v-if="currentWeek"
-              >按此日期算，今天属于第 {{ currentWeek }} 周。</template
+              >{{ $t('pages.board.extra.weekCalcA') }} {{ currentWeek }} {{ $t('pages.board.extra.weekCalcB') }}</template
             >
             <template v-else-if="settings.termStart"
-              >日期在未来，暂不参与计算。</template
+              >{{ $t('pages.board.extra.weekFutureHint') }}</template
             >
           </div>
         </el-form-item>
 
-        <el-form-item label="考试安排">
+        <el-form-item :label="$t('dashboard.examEntry')">
           <div class="w-full">
             <div class="text-sm">
-              已在账号里安排
+              {{ $t('pages.board.extra.examCountA') }}
               <b>{{ serverExams.length }}</b>
-              场考试，今天 <b>{{ todayExams.length }}</b> 场。
+              {{ $t('pages.board.extra.examCountB') }} <b>{{ todayExams.length }}</b> {{ $t('pages.board.extra.examCountC') }}
             </div>
             <el-button size="small" class="mt-2" @click="openExamsPage"
-              >去控制台编辑</el-button
+              >{{ $t('pages.board.extra.editInConsole') }}</el-button>
             >
           </div>
           <div class="hint">
-            考试安排现在按<b>账号</b>存在服务端，该账号下所有班级共用一份，
-            所以不用在这台机器上重复配置。规则：<b>与考试时间重合的标准课时用考试替代</b>，不重合的课时照常。
+            {{ $t('pages.board.extra.examRuleA') }}<b>{{ $t('composables.useciresource.settings') }}</b>{{ $t('pages.board.extra.examRuleB') }}<b>{{ $t('pages.board.extra.examReplaceRule') }}</b>{{ $t('pages.board.extra.examRuleC') }}
           </div>
         </el-form-item>
 
         <el-form-item :label="$t('pages.board.displayItems')">
           <div class="flex flex-wrap gap-3">
-            <el-checkbox v-model="settings.showClock">时间</el-checkbox>
-            <el-checkbox v-model="settings.showSubject">科目</el-checkbox>
-            <el-checkbox v-model="settings.showWeather">天气</el-checkbox>
-            <el-checkbox v-model="settings.showNotice">公告</el-checkbox>
-            <el-checkbox v-model="settings.showSeconds">显示秒</el-checkbox>
-            <el-checkbox v-model="settings.showHints">显示操作提示</el-checkbox>
+            <el-checkbox v-model="settings.showClock">{{ $t('pages.board.extra.showClock') }}</el-checkbox>
+            <el-checkbox v-model="settings.showSubject">{{ $t('composables.useciresource.subject') }}</el-checkbox>
+            <el-checkbox v-model="settings.showWeather">{{ $t('pages.board.extra.showWeather') }}</el-checkbox>
+            <el-checkbox v-model="settings.showNotice">{{ $t('pages.board.extra.showNotice') }}</el-checkbox>
+            <el-checkbox v-model="settings.showSeconds">{{ $t('pages.board.extra.showSeconds') }}</el-checkbox>
+            <el-checkbox v-model="settings.showHints">{{ $t('pages.board.extra.showHints') }}</el-checkbox>
           </div>
         </el-form-item>
 
         <el-form-item :label="$t('pages.board.colorScheme')">
           <el-radio-group v-model="settings.theme">
-            <el-radio-button value="dark">深色文字</el-radio-button>
-            <el-radio-button value="light">浅色文字</el-radio-button>
+            <el-radio-button value="dark">{{ $t('pages.board.extra.deepText') }}</el-radio-button>
+            <el-radio-button value="light">{{ $t('pages.board.extra.lightText') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item :label="$t('pages.board.textShadow')">
           <el-radio-group v-model="settings.textShadow">
-            <el-radio-button value="auto">跟随配色</el-radio-button>
-            <el-radio-button value="dark">深色</el-radio-button>
-            <el-radio-button value="light">浅色</el-radio-button>
-            <el-radio-button value="none">无</el-radio-button>
+            <el-radio-button value="auto">{{ $t('pages.board.extra.followTheme') }}</el-radio-button>
+            <el-radio-button value="dark">{{ $t('pages.board.extra.deep') }}</el-radio-button>
+            <el-radio-button value="light">{{ $t('pages.board.extra.light') }}</el-radio-button>
+            <el-radio-button value="none">{{ $t('components.timelayouteditor.none') }}</el-radio-button>
           </el-radio-group>
           <div class="hint">
-            跟随配色 = 浅色文字配深色阴影、深色文字配浅色阴影。
-            深色文字模式下背景遮罩会自动换成浅色，否则深色字在暗背景上怎么加阴影都不清楚。
+            {{ $t('pages.board.extra.shadowHintA') }}
+            {{ $t('pages.board.extra.shadowHintB') }}
           </div>
         </el-form-item>
 
@@ -372,26 +371,26 @@
             :step="1"
           />
           <div class="hint">
-            数值越小越慢、越好读。鼠标移到预警条上会暂停。
+            {{ $t('pages.board.extra.warningSpeedHint') }}
             <template v-if="warningTotalChars">
-              当前预警共 {{ warningTotalChars }} 字，滚完一轮约
-              {{ warningScrollSeconds }} 秒。
+              {{ $t('pages.board.extra.warnTotalA') }} {{ warningTotalChars }} {{ $t('pages.board.extra.warnTotalB') }}
+              {{ warningScrollSeconds }} {{ $t('pages.board.extra.warnTotalC') }}
             </template>
-            <template v-else>（当前没有生效中的预警）</template>
+            <template v-else>{{ $t('pages.board.extra.noActiveWarning') }}</template>
           </div>
         </el-form-item>
 
         <el-form-item :label="$t('pages.board.background')">
           <el-radio-group v-model="settings.bgType" class="mb-2">
-            <el-radio-button value="gradient">渐变</el-radio-button>
-            <el-radio-button value="image">图片</el-radio-button>
+            <el-radio-button value="gradient">{{ $t('pages.board.extra.gradient') }}</el-radio-button>
+            <el-radio-button value="image">{{ $t('pages.board.extra.image') }}</el-radio-button>
           </el-radio-group>
           <el-input
             v-model="settings.bgValue"
             :placeholder="
               settings.bgType === 'image'
-                ? '图片 URL，或点下面上传'
-                : 'CSS 渐变，留空用默认'
+                ? $t('pages.board.extra.imageUrlPlaceholder')
+                : $t('pages.board.extra.gradientPlaceholder')
             "
             clearable
           />
@@ -407,19 +406,19 @@
               size="small"
               :loading="bgProcessing"
               @click="pickBackground"
-              >上传图片</el-button
+              >{{ $t('pages.quickcreate.uploadImage') }}</el-button>
             >
             <el-button
               v-if="settings.bgValue"
               size="small"
               text
               @click="clearBackground"
-              >清除</el-button
+              >{{ $t('pages.board.extra.clear') }}</el-button>
             >
           </div>
           <div class="hint">
-            上传的图片在<b>本地</b>压缩后存进浏览器（localStorage），不会上传到服务器；
-            渐变示例：<code>linear-gradient(135deg,#0f1320,#243b55)</code>。
+            {{ $t('pages.board.extra.bgHintA') }}<b>{{ $t('pages.board.extra.local') }}</b>{{ $t('pages.board.extra.bgHintB') }}
+            {{ $t('pages.board.extra.bgHintC') }}<code>linear-gradient(135deg,#0f1320,#243b55)</code>。
           </div>
         </el-form-item>
 
@@ -430,8 +429,7 @@
             :autosize="{ minRows: 5, maxRows: 12 }"
           />
           <div class="hint">
-            支持标题、粗体、斜体、列表、引用、代码、链接；出于安全不执行原始
-            HTML。
+            {{ $t('pages.board.extra.noticeHint') }}
           </div>
         </el-form-item>
 
@@ -443,11 +441,10 @@
             readonly
           />
           <el-button class="mt-2" size="small" @click="copyIframe"
-            >复制嵌入代码</el-button
+            >{{ $t('pages.board.extra.copyEmbedCode') }}</el-button>
           >
           <div class="hint">
-            壁纸引擎里选「网页」类型，把上面代码存成本地 html
-            打开即可；也可直接把看板地址填进去。
+            {{ $t('pages.board.extra.embedHint') }}
           </div>
         </el-form-item>
 
@@ -457,11 +454,11 @@
             {{ editMode ? $t('pages.board.exitLayoutEdit') : $t('pages.board.adjustElementPosition') }}
           </el-button>
           <el-button size="small" text @click="backToConsole"
-            >返回控制台</el-button
+            >{{ $t('pages.board.extra.backToConsole') }}</el-button>
           >
         </div>
         <div class="hint mt-2">
-          设置自动保存在本机浏览器（localStorage），换台机器需重新设置。
+          {{ $t('pages.board.extra.settingsAutosaveHint') }}
         </div>
       </el-form>
     </el-drawer>
@@ -808,9 +805,9 @@ const iframeCode = computed(() => {
 async function copyIframe() {
   try {
     await navigator.clipboard.writeText(iframeCode.value);
-    ElMessage.success("已复制");
+    ElMessage.success(t('components.resourceeditor.copied'));
   } catch {
-    ElMessage.error("复制失败");
+    ElMessage.error(t('components.cw2centralpanel.copyFailed'));
   }
 }
 
@@ -995,7 +992,7 @@ function downscaleImage(
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error("无法读取这张图片"));
+      reject(new Error(t('pages.board.cannotReadImage')));
     };
     img.src = objectUrl;
   });
@@ -1007,7 +1004,7 @@ async function onPickBackground(e: Event) {
   input.value = ""; // 允许重复选同一个文件
   if (!file) return;
   if (!file.type.startsWith("image/")) {
-    ElMessage.error("请选择图片文件");
+    ElMessage.error(t('pages.board.selectImageFile'));
     return;
   }
 
@@ -1027,11 +1024,11 @@ async function onPickBackground(e: Event) {
         settings.bgValue = prevValue;
         saveSettings();
         ElMessage.error(
-          "这张图太大，浏览器存储放不下。换张小一点的，或用图片直链。",
+          t('pages.board.imageTooLarge'),
         );
         return;
       }
-      ElMessage.warning("原图太大，已用更小的尺寸保存");
+      ElMessage.warning(t('pages.board.imageResized'));
       return;
     }
     const kb = Math.round((dataUrl.length * 3) / 4 / 1024);
@@ -1039,7 +1036,7 @@ async function onPickBackground(e: Event) {
   } catch (err: any) {
     settings.bgType = prevType;
     settings.bgValue = prevValue;
-    ElMessage.error(err?.message || "图片处理失败");
+    ElMessage.error(err?.message || t('pages.board.imageProcessingFailed'));
   } finally {
     bgProcessing.value = false;
   }

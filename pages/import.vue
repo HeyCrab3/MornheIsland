@@ -2,24 +2,23 @@
   <div class="max-w-4xl">
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">导入 ClassIsland 档案</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('pages.import.extra.pageTitle') }}</h1>
         <p class="text-sm text-gray-500">
-          直接导入用户的 <code class="px-1 bg-gray-100 dark:bg-neutral-700 rounded">.cidata</code> 数据包，
-          不用手抄课表。时间表、课表、科目、设置、集控策略一次性搬进来。
+          {{ $t('pages.import.extra.pageDesc1') }} <code class="px-1 bg-gray-100 dark:bg-neutral-700 rounded">.cidata</code> {{ $t('pages.import.extra.pageDesc2') }}
         </p>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4">
-      <template #title>导入是「原样搬运」，不会重建结构</template>
-      分割线、行动段（含其中的自动动作）、每个时间点的上课提醒/天气提醒/课程显示设置、
-      放学提醒、<code>.bak</code> 之外的字段都按原样保留。
-      插件（<code>Plugins/</code> 里的 DLL）不会导入 —— 那要在客户端本地装。
+      <template #title>{{ $t('pages.import.extra.alertTitle') }}</template>
+      {{ $t('pages.import.extra.alertBody1') }}
+      {{ $t('pages.import.extra.alertBeforeBak') }}<code>.bak</code>{{ $t('pages.import.extra.alertAfterBak') }}
+      {{ $t('pages.import.extra.alertBeforePlugins') }}<code>Plugins/</code>{{ $t('pages.import.extra.alertAfterPlugins') }}
     </el-alert>
 
     <!-- 1. 选文件 -->
     <el-card class="mb-4">
-      <template #header><span class="font-medium">第一步：选择 .cidata 文件</span></template>
+      <template #header><span class="font-medium">{{ $t('pages.import.extra.step1') }}</span></template>
       <div
         class="drop-zone"
         :class="{ dragging: dragging }"
@@ -38,19 +37,19 @@
       <input ref="fileInput" type="file" accept=".cidata,.zip" class="hidden" @change="onPick" />
       <div class="flex gap-2 mt-3">
         <el-button type="primary" :loading="previewing" :disabled="!fileBase64" @click="doPreview">
-          解析并预览
+          {{ $t('pages.import.extra.parsePreview') }}
         </el-button>
-        <el-button v-if="fileBase64" @click="reset">重新选择</el-button>
+        <el-button v-if="fileBase64" @click="reset">{{ $t('pages.import.extra.reselect') }}</el-button>
       </div>
     </el-card>
 
     <!-- 2. 预览结果 -->
     <template v-if="preview">
       <el-card class="mb-4">
-        <template #header><span class="font-medium">第二步：确认要导入的内容</span></template>
+        <template #header><span class="font-medium">{{ $t('pages.import.extra.step2') }}</span></template>
 
         <div class="text-sm mb-3">
-          这个包里有 {{ preview.availableProfiles.length }} 个档案：
+          {{ $t('pages.import.extra.profilesIntroPrefix') }} {{ preview.availableProfiles.length }} {{ $t('pages.import.extra.profilesIntroSuffix') }}
           <el-tag v-for="p in preview.availableProfiles" :key="p" size="small" class="ml-1">{{ p }}</el-tag>
         </div>
 
@@ -72,10 +71,10 @@
               <el-form-item :label="$t('pages.import.extraContent')">
                 <div class="flex flex-col gap-1">
                   <el-checkbox v-model="includeSettings" :disabled="!preview.hasSettings">
-                    应用设置（{{ preview.settingsKeys }} 个键）
+                    {{ $t('pages.import.extra.applySettings') }}（{{ preview.settingsKeys }} {{ $t('pages.import.extra.keys') }}）
                   </el-checkbox>
                   <el-checkbox v-model="includePolicy" :disabled="!preview.hasPolicy">
-                    集控策略
+                    {{ $t('pages.import.extra.centralPolicy') }}
                   </el-checkbox>
                 </div>
               </el-form-item>
@@ -85,41 +84,41 @@
 
         <div v-for="p in preview.importedProfiles" :key="p.profile" class="mb-4">
           <div class="text-sm font-medium mb-2">
-            档案「{{ p.profile }}」· {{ p.subjectCount }} 个科目
+            {{ $t('pages.import.extra.archiveLabelPrefix') }}{{ p.profile }}{{ $t('pages.import.extra.archiveLabelSuffix') }} {{ p.subjectCount }} {{ $t('pages.import.extra.subjectsUnit') }}
           </div>
 
           <div v-for="tl in p.timeLayouts" :key="tl.uuid" class="preview-box mb-2">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="font-medium">{{ tl.name }}</span>
-              <el-tag size="small" effect="plain">{{ tl.segments }} 段</el-tag>
-              <el-tag v-if="tl.class" size="small" type="primary" effect="plain">上课 {{ tl.class }}</el-tag>
-              <el-tag v-if="tl.break" size="small" effect="plain">课间 {{ tl.break }}</el-tag>
-              <el-tag v-if="tl.divider" size="small" type="warning" effect="plain">分割线 {{ tl.divider }}</el-tag>
-              <el-tag v-if="tl.action" size="small" type="danger" effect="plain">行动 {{ tl.action }}</el-tag>
+              <el-tag size="small" effect="plain">{{ tl.segments }} {{ $t('pages.import.extra.segments') }}</el-tag>
+              <el-tag v-if="tl.class" size="small" type="primary" effect="plain">{{ $t('components.timelayouteditor.classPeriod') }} {{ tl.class }}</el-tag>
+              <el-tag v-if="tl.break" size="small" effect="plain">{{ $t('components.timelayouteditor.break') }} {{ tl.break }}</el-tag>
+              <el-tag v-if="tl.divider" size="small" type="warning" effect="plain">{{ $t('components.timelayouteditor.divider') }} {{ tl.divider }}</el-tag>
+              <el-tag v-if="tl.action" size="small" type="danger" effect="plain">{{ $t('components.timelayouteditor.action') }} {{ tl.action }}</el-tag>
             </div>
             <div v-if="tl.attachedSettings?.length" class="text-xs text-gray-500 mt-1.5">
-              带附加设置：{{ tl.attachedSettings.map(attachedName).join("、") }}
+              {{ $t('pages.import.extra.withAttachedSettings') }}：{{ tl.attachedSettings.map(attachedName).join("、") }}
             </div>
           </div>
 
           <div v-for="g in p.classPlans" :key="g.groupId + g.timeLayoutId" class="preview-box">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-medium">课表群「{{ g.groupName }}」</span>
-              <el-tag size="small" effect="plain">{{ g.planCount }} 个计划</el-tag>
+              <span class="font-medium">{{ $t('pages.import.extra.planGroupPrefix') }}{{ g.groupName }}{{ $t('pages.import.extra.planGroupSuffix') }}</span>
+              <el-tag size="small" effect="plain">{{ g.planCount }} {{ $t('pages.import.extra.plans') }}</el-tag>
               <el-tag size="small" type="success" effect="plain">
                 {{ g.weekDays.map((d: number) => [$t('pages.import.day'),$t('pages.import.mondayShort'),$t('pages.import.tuesdayShort'),$t('pages.import.wednesdayShort'),$t('pages.import.thursdayShort'),$t('pages.import.fridayShort'),$t('pages.import.saturdayShort')][d] ?? "?").join("/") }}
               </el-tag>
-              <span class="text-xs text-gray-400">→ 时间轴「{{ g.timeLayoutName }}」</span>
+              <span class="text-xs text-gray-400">→ {{ $t('pages.import.extra.timelinePrefix') }}{{ g.timeLayoutName }}{{ $t('pages.import.extra.timelineSuffix') }}</span>
             </div>
-            <div class="text-xs text-gray-500 mt-1">计划名：{{ g.names.join("、") }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ $t('pages.import.extra.planNames') }}：{{ g.names.join("、") }}</div>
           </div>
         </div>
 
         <el-alert type="warning" :closable="false" show-icon class="mt-2">
-          <template #title>将创建 {{ totalWillCreate }} 份资源</template>
-          设置 {{ preview.willCreate.settings }}、策略 {{ preview.willCreate.policy }}、
-          科目 {{ preview.willCreate.subjects }}、时间轴 {{ preview.willCreate.timeLayouts }}、
-          课表 {{ preview.willCreate.classPlans }}。导入后可以照常改名、删除，不影响已有资源。
+          <template #title>{{ $t('pages.import.extra.willCreatePrefix') }} {{ totalWillCreate }} {{ $t('pages.import.extra.willCreateSuffix') }}</template>
+          {{ $t('pages.import.extra.settingsLabel') }} {{ preview.willCreate.settings }}、{{ $t('pages.import.extra.policyLabel') }} {{ preview.willCreate.policy }}、
+          {{ $t('pages.import.extra.subjectsLabel') }} {{ preview.willCreate.subjects }}、{{ $t('pages.import.extra.timeLayoutsLabel') }} {{ preview.willCreate.timeLayouts }}、
+          {{ $t('pages.import.extra.classPlansLabel') }} {{ preview.willCreate.classPlans }}。{{ $t('pages.import.extra.willCreateHint') }}
         </el-alert>
 
         <div class="mt-4">
@@ -132,40 +131,40 @@
 
     <!-- 3. 结果 -->
     <el-card v-if="result">
-      <template #header><span class="font-medium">导入完成</span></template>
+      <template #header><span class="font-medium">{{ $t('pages.import.extra.importDone') }}</span></template>
       <div class="text-sm mb-3">
-        共创建 <b>{{ result.total }}</b> 份资源。
+        {{ $t('pages.import.extra.createdPrefix') }} <b>{{ result.total }}</b> {{ $t('pages.import.extra.createdSuffix') }}。
       </div>
       <div v-if="result.created.classPlans.length" class="mb-3">
-        <div class="text-xs text-gray-500 mb-1.5">课表（可以直接去班级里关联）</div>
+        <div class="text-xs text-gray-500 mb-1.5">{{ $t('pages.import.extra.classPlansHint') }}</div>
         <div v-for="x in result.created.classPlans" :key="x.id" class="flex items-center gap-2">
           <el-button size="small" text type="primary" @click="navigateTo(`/classplan/${x.id}`)">
             {{ x.name }}
           </el-button>
-          <span class="text-xs text-gray-400">{{ x.plans }} 个计划</span>
+          <span class="text-xs text-gray-400">{{ x.plans }} {{ $t('pages.import.extra.plans') }}</span>
         </div>
       </div>
       <div v-if="result.created.timeLayouts.length" class="mb-3">
-        <div class="text-xs text-gray-500 mb-1.5">时间表</div>
+        <div class="text-xs text-gray-500 mb-1.5">{{ $t('components.home.quickstartupguide.timeLayout') }}</div>
         <div v-for="x in result.created.timeLayouts" :key="x.id" class="flex items-center gap-2">
           <el-button size="small" text type="primary" @click="navigateTo(`/timelayout/${x.id}`)">
             {{ x.name }}
           </el-button>
-          <span class="text-xs text-gray-400">{{ x.segments }} 段</span>
+          <span class="text-xs text-gray-400">{{ x.segments }} {{ $t('pages.import.extra.segments') }}</span>
         </div>
       </div>
       <div v-if="result.created.subjects.length" class="mb-3">
-        <div class="text-xs text-gray-500 mb-1.5">课程表（科目）</div>
+        <div class="text-xs text-gray-500 mb-1.5">{{ $t('pages.import.extra.subjectsWithParentheses') }}</div>
         <div v-for="x in result.created.subjects" :key="x.id" class="flex items-center gap-2">
           <el-button size="small" text type="primary" @click="navigateTo(`/subjects/${x.id}`)">
             {{ x.name }}
           </el-button>
-          <span class="text-xs text-gray-400">{{ x.count }} 个科目</span>
+          <span class="text-xs text-gray-400">{{ x.count }} {{ $t('pages.import.extra.subjectsUnit') }}</span>
         </div>
       </div>
       <div class="flex gap-2">
-        <el-button @click="navigateTo('/classes')">去班级关联</el-button>
-        <el-button @click="reset">再导一个</el-button>
+        <el-button @click="navigateTo('/classes')">{{ $t('pages.import.extra.goLinkClasses') }}</el-button>
+        <el-button @click="reset">{{ $t('pages.import.extra.importAnother') }}</el-button>
       </div>
     </el-card>
   </div>
@@ -192,7 +191,7 @@ const preview = ref<any>(null);
 const result = ref<any>(null);
 
 const profileName = ref("");
-const prefix = ref("导入");
+const prefix = ref(t('pages.import.import'));
 const includeSettings = ref(true);
 const includePolicy = ref(true);
 
@@ -284,7 +283,7 @@ async function doImport() {
         fileBase64: fileBase64.value,
         fileName: fileName.value,
         profileName: profileName.value || undefined,
-        prefix: prefix.value || "导入",
+        prefix: prefix.value || t('pages.import.import'),
         includeSettings: includeSettings.value,
         includePolicy: includePolicy.value,
       },

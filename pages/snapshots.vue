@@ -2,37 +2,35 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">数据恢复</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.snapshots') }}</h1>
         <p class="text-sm text-gray-500">
-          每次修改、删除、导入覆盖、批量修复之前，系统都会自动把当时的完整数据存一份。
+          {{ $t('pages.snapshots.extra.pageDesc') }}
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <el-button :loading="loading" @click="load">刷新</el-button>
+        <el-button :loading="loading" @click="load">{{ $t('pages.snapshots.extra.refresh') }}</el-button>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>这份东西和「历史版本」不一样</template>
-      「历史版本」按版本号记，只有保存/回滚会写；这里按<b>动作</b>记，连<b>删除前</b>、
-      <b>导入覆盖前</b>、<b>批量修复前</b>都留。资源被删掉之后，历史版本跟着没了，快照还在 ——
-      所以在这里可以把已经删掉的资源原地恢复回来。
+      <template #title>{{ $t('pages.snapshots.extra.alertTitle') }}</template>
+      {{ $t('pages.snapshots.extra.alertBody1') }}<b>{{ $t('pages.snapshots.extra.alertBold1') }}</b>{{ $t('pages.snapshots.extra.alertBody2') }}<b>{{ $t('pages.snapshots.extra.alertBold2') }}</b>{{ $t('pages.snapshots.extra.alertBody3') }}<b>{{ $t('pages.snapshots.extra.alertBold3') }}</b>{{ $t('pages.snapshots.extra.alertBody4') }}<b>{{ $t('pages.snapshots.extra.alertBold4') }}</b>{{ $t('pages.snapshots.extra.alertBody5') }}
     </el-alert>
 
     <div class="flex flex-wrap items-center gap-2 mb-3">
       <el-radio-group v-model="filter" size="small" @change="load">
-        <el-radio-button value="">全部</el-radio-button>
-        <el-radio-button value="ci_classplans">课表</el-radio-button>
-        <el-radio-button value="ci_timelayouts">时间表</el-radio-button>
-        <el-radio-button value="ci_subjects">科目</el-radio-button>
-        <el-radio-button value="ci_settings">设置</el-radio-button>
-        <el-radio-button value="ci_policies">策略</el-radio-button>
+        <el-radio-button value="">{{ $t('pages.devices.extra.all') }}</el-radio-button>
+        <el-radio-button value="ci_classplans">{{ $t('composables.useciresource.plan') }}</el-radio-button>
+        <el-radio-button value="ci_timelayouts">{{ $t('components.home.quickstartupguide.timeLayout') }}</el-radio-button>
+        <el-radio-button value="ci_subjects">{{ $t('composables.useciresource.subject') }}</el-radio-button>
+        <el-radio-button value="ci_settings">{{ $t('composables.useciresource.settings') }}</el-radio-button>
+        <el-radio-button value="ci_policies">{{ $t('composables.useciresource.policy') }}</el-radio-button>
       </el-radio-group>
     </div>
 
     <el-card v-loading="loading" class="max-w-5xl">
       <div v-if="rows.length === 0 && !loading" class="py-8 text-sm text-gray-400 text-center">
-        还没有任何快照。修改或删除资源之后，这里会自动出现记录。
+        {{ $t('pages.snapshots.extra.empty') }}
       </div>
       <div
         v-for="r in rows"
@@ -42,7 +40,7 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <el-tag size="small" effect="plain" type="info">{{ r.reasonLabel }}</el-tag>
-            <span class="font-medium truncate">{{ r.name || "未命名" }}</span>
+            <span class="font-medium truncate">{{ r.name || $t('components.resourceeditor.untitled') }}</span>
             <el-tag size="small" effect="plain" round>{{ typeLabel(r.collection) }}</el-tag>
             <span v-if="r.version" class="text-xs text-gray-400 font-mono">v{{ r.version }}</span>
           </div>
@@ -51,7 +49,7 @@
             <span v-if="r.detail"> · {{ r.detail }}</span>
           </div>
         </div>
-        <el-button size="small" type="primary" text @click="restore(r)">恢复到这一刻</el-button>
+        <el-button size="small" type="primary" text @click="restore(r)">{{ $t('pages.snapshots.extra.restoreToMoment') }}</el-button>
       </div>
     </el-card>
   </div>
@@ -77,7 +75,7 @@ const TYPE_OF: Record<string, string> = {
 };
 const LABEL_OF: Record<string, string> = {
   ci_classplans: t('composables.useciresource.plan'),
-  ci_timelayouts: "时间表",
+  ci_timelayouts: t('components.home.quickstartupguide.timeLayout'),
   ci_subjects: t('composables.useciresource.subject'),
   ci_settings: t('composables.useciresource.settings'),
   ci_policies: t('composables.useciresource.policy'),
@@ -114,7 +112,7 @@ async function restore(r: any) {
       `将把「${r.name || "未命名"}」恢复成 ${fmt(r.at)} 时的内容。\n` +
         t('pages.snapshots.snapshotBeforeRestore'),
       `恢复到「${r.reasonLabel}」`,
-      { type: "warning", confirmButtonText: t('components.resourceeditor.restore'), cancelButtonText: "取消" },
+      { type: "warning", confirmButtonText: t('components.resourceeditor.restore'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
     return;

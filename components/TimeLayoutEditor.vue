@@ -18,7 +18,7 @@
     />
 
     <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
-      <span class="text-sm font-medium">关联课程表：</span>
+      <span class="text-sm font-medium">{{ $t('components.timelayouteditor.extra.linkedSubjects') }}</span>
       <el-select
         v-model="selectedSubjectsId"
         :placeholder="$t('components.timelayouteditor.selectSubjectsOptional')"
@@ -32,28 +32,27 @@
     </div>
 
     <el-alert type="warning" :closable="false" show-icon class="mb-4">
-      <template #title>关于「分割线 / 课间」</template>
-      上课段和课间段现在是<b>分别编辑、原样保存</b>的。以前保存会丢掉所有课间段再按时间间隙重新生成，
-      你从 ClassIsland 导入的分割线、隐藏设置每次保存都会被改写 —— 现在不会了。
+      <template #title>{{ $t('components.timelayouteditor.extra.aboutDividerBreak') }}</template>
+      {{ $t('components.timelayouteditor.extra.dividerNoticeA') }}<b>{{ $t('components.timelayouteditor.extra.separatelyEdited') }}</b>{{ $t('components.timelayouteditor.extra.dividerNoticeB') }}
     </el-alert>
 
     <div v-if="!mobile" class="flex items-center justify-between mb-3 flex-wrap gap-2">
-      <div class="text-sm text-gray-500">拖拽排序，保存时按当前顺序写回</div>
+      <div class="text-sm text-gray-500">{{ $t('components.timelayouteditor.extra.dragHint') }}</div>
       <div v-if="!viewOnly" class="flex gap-2">
         <el-button size="small" @click="addSeg(0)">
-          <el-icon><Plus /></el-icon>添加课时
+          <el-icon><Plus /></el-icon>{{ $t('components.timelayouteditor.extra.addPeriod') }}
         </el-button>
         <el-button size="small" @click="addSeg(1)">
-          <el-icon><Plus /></el-icon>添加课间
+          <el-icon><Plus /></el-icon>{{ $t('components.timelayouteditor.extra.addBreak') }}
         </el-button>
-        <el-button size="small" @click="addSeg(2)">添加分割线</el-button>
-        <el-button size="small" @click="addSeg(3)">添加行动</el-button>
+        <el-button size="small" @click="addSeg(2)">{{ $t('components.timelayouteditor.extra.addDivider') }}</el-button>
+        <el-button size="small" @click="addSeg(3)">{{ $t('components.timelayouteditor.extra.addAction') }}</el-button>
       </div>
     </div>
 
     <div v-if="warnings.length" class="mb-3">
       <el-alert type="warning" :closable="false" show-icon>
-        <template #title>时间上有 {{ warnings.length }} 处问题，保存前请确认</template>
+        <template #title>{{ $t('components.timelayouteditor.extra.warnA') }} {{ warnings.length }} {{ $t('components.timelayouteditor.extra.warnB') }}</template>
         <div v-for="(w, i) in warnings" :key="i" class="text-xs leading-relaxed">{{ w }}</div>
       </el-alert>
     </div>
@@ -96,7 +95,7 @@
           v-model="p.name"
           size="small"
           class="flex-1 min-w-24"
-          :placeholder="p.TimeType === 1 ? '课间名（留空显示「课间休息」）' : '课时名'"
+          :placeholder="p.TimeType === 1 ? $t('components.timelayouteditor.extra.breakNamePlaceholder') : $t('components.timelayouteditor.extra.periodNamePlaceholder')"
           :disabled="mobile || viewOnly"
         />
         <div v-else class="flex-1 min-w-24 text-xs text-gray-400">
@@ -124,12 +123,12 @@
             :disabled="mobile || viewOnly"
           />
         </template>
-        <span v-else class="text-xs text-gray-300">零长度</span>
+        <span v-else class="text-xs text-gray-300">{{ $t('components.timelayouteditor.extra.zeroLength') }}</span>
 
         <el-select
           v-if="p.TimeType === 0"
           v-model="p.defaultSubject"
-          :placeholder="selectedSubjectsId ? '默认科目' : '未关联课程表'"
+          :placeholder="selectedSubjectsId ? $t('components.timelayouteditor.extra.defaultSubject') : $t('components.timelayouteditor.extra.noSubjectsLinked')"
           :disabled="!selectedSubjectsId || mobile || viewOnly"
           size="small"
           clearable
@@ -140,7 +139,7 @@
 
         <el-tooltip :content="$t('components.timelayouteditor.hideInClient')" placement="top">
           <el-checkbox v-model="p.hideDefault" size="small" :disabled="mobile || viewOnly">
-            隐藏
+            {{ $t('components.timelayouteditor.extra.hide') }}
           </el-checkbox>
         </el-tooltip>
 
@@ -151,10 +150,10 @@
           class="shrink-0"
         >
           <el-button size="small" text @click="toggleActions(p)">
-            动作
+            {{ $t('components.timelayouteditor.extra.actionShort') }}
           </el-button>
         </el-badge>
-        <el-button v-else size="small" text @click="toggleActions(p)">动作</el-button>
+        <el-button v-else size="small" text @click="toggleActions(p)">{{ $t('components.timelayouteditor.extra.actionShort') }}</el-button>
 
         <el-button
           v-if="!mobile && !viewOnly"
@@ -169,16 +168,15 @@
         <!-- 这一刻的「更多选项」：附加设置（提醒/显示/天气）+ 行动 -->
         <div v-if="actionOpenId === p._id" class="action-panel">
           <div class="text-xs text-gray-500 leading-relaxed mb-3">
-            这些是 ClassIsland 时间点上的<b>附加设置</b>（源码里的 AttachedObjects，键是设置类型的 GUID）。
-            不开就不写这一项，客户端会按全局设置走。
+            {{ $t('components.timelayouteditor.extra.attachDescA') }}<b>{{ $t('components.timelayouteditor.extra.attachSettings') }}</b>{{ $t('components.timelayouteditor.extra.attachDescB') }}
           </div>
 
           <div v-for="def in ATTACHED_DEFS" :key="def.key" class="attach-block">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="flex items-center gap-2 min-w-0">
                 <span class="text-sm font-medium">{{ def.label }}</span>
-                <el-tag v-if="getAttached(p, def)" size="small" type="success" effect="plain">已设置</el-tag>
-                <el-tag v-else size="small" type="info" effect="plain">跟随全局</el-tag>
+                <el-tag v-if="getAttached(p, def)" size="small" type="success" effect="plain">{{ $t('components.timelayouteditor.extra.set') }}</el-tag>
+                <el-tag v-else size="small" type="info" effect="plain">{{ $t('components.timelayouteditor.extra.followGlobal') }}</el-tag>
               </div>
               <div class="flex gap-1">
                 <el-button
@@ -188,7 +186,7 @@
                   type="primary"
                   :disabled="viewOnly"
                   @click="addAttached(p, def)"
-                >添加</el-button>
+                >{{ $t('components.timelayouteditor.extra.add') }}</el-button>
                 <el-button
                   v-else
                   size="small"
@@ -196,7 +194,7 @@
                   type="danger"
                   :disabled="viewOnly"
                   @click="removeAttached(p, def)"
-                >移除</el-button>
+                >{{ $t('components.timelayouteditor.extra.remove') }}</el-button>
               </div>
             </div>
 
@@ -207,7 +205,7 @@
                   :disabled="viewOnly"
                   @change="(v: any) => setAttachedField(p, def, 'IsAttachSettingsEnabled', !!v)"
                 >
-                  启用这项附加设置
+                  {{ $t('components.timelayouteditor.extra.enableAttach') }}
                 </el-checkbox>
                 <div class="flex flex-wrap gap-x-5 gap-y-1 mt-1">
                   <el-checkbox
@@ -260,10 +258,10 @@
           </div>
 
           <div class="attach-block">
-            <div class="text-sm font-medium mb-1">行动（ActionSet）</div>
+            <div class="text-sm font-medium mb-1">{{ $t('components.timelayouteditor.extra.actionSet') }}</div>
             <div class="text-xs text-gray-500 leading-relaxed mb-2">
-              时间点类型选「行动」时，到点执行的就是这里的动作组。字段结构随客户端版本变化，
-              我们不解释、也不生成，只保证原样保留；清空等于关掉这个时间点的所有动作。
+              {{ $t('components.timelayouteditor.extra.actionDescA') }}
+              {{ $t('components.timelayouteditor.extra.actionDescB') }}
             </div>
             <div class="flex items-center gap-3 mb-2 flex-wrap">
               <el-checkbox
@@ -271,7 +269,7 @@
                 :disabled="viewOnly"
                 @change="(v: any) => setActionsCleared(p, !v)"
               >
-                保留原动作
+                {{ $t('components.timelayouteditor.extra.keepOriginalActions') }}
               </el-checkbox>
               <span class="text-xs text-gray-400">
                 {{ p.raw?.ActionSet ? `原有 ${JSON.stringify(p.raw.ActionSet).length} 字节` : $t('components.timelayouteditor.originallyAbsent') }}
@@ -303,7 +301,7 @@
       class="mt-4"
       @click="doSave"
     >
-      保存
+      {{ $t('pages.subaccounts.save') }}
     </el-button>
   </div>
 </template>
@@ -719,7 +717,7 @@ function doSave() {
   });
 
   const layoutObj: any = { ...(layoutBase || {}) };
-  layoutObj.Name = layoutBase?.Name || props.name || "时间表";
+  layoutObj.Name = layoutBase?.Name || props.name || t('components.home.quickstartupguide.timeLayout');
   layoutObj.Layouts = layouts;
   if (selectedSubjectsId.value) layoutObj.subjectsId = selectedSubjectsId.value;
   else delete layoutObj.subjectsId;

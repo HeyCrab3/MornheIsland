@@ -1,9 +1,9 @@
 <template>
   <div class="max-w-xl">
     <div class="flex items-center justify-between mb-4">
-      <div class="text-sm text-gray-500">科目列表，点击字段直接编辑</div>
+      <div class="text-sm text-gray-500">{{ $t('components.subjectseditor.extra.listHint') }}</div>
       <el-button size="small" @click="addSubject">
-        <el-icon><Plus /></el-icon>添加科目
+        <el-icon><Plus /></el-icon>{{ $t('components.subjectseditor.extra.addSubject') }}
       </el-button>
     </div>
 
@@ -37,7 +37,7 @@
       </el-table-column>
     </el-table>
 
-    <el-button type="primary" :loading="saving" class="mt-4" @click="doSave">保存</el-button>
+    <el-button type="primary" :loading="saving" class="mt-4" @click="doSave">{{ $t('pages.subaccounts.save') }}</el-button>
   </div>
 </template>
 

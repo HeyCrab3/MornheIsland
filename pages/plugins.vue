@@ -2,14 +2,14 @@
   <div>
     <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">插件管理</h1>
-        <p class="text-sm text-gray-500">从 ClassIsland 插件市场导入插件，并按配置组对账分发到集控设备</p>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.plugins') }}</h1>
+        <p class="text-sm text-gray-500">{{ $t('pages.plugins.extra.subtitle') }}</p>
       </div>
       <el-radio-group v-model="tab">
-        <el-radio-button value="market">插件市场</el-radio-button>
-        <el-radio-button value="local">本地插件</el-radio-button>
-        <el-radio-button value="profile">配置组</el-radio-button>
-        <el-radio-button value="compliance">部署状态</el-radio-button>
+        <el-radio-button value="market">{{ $t('pages.plugins.extra.marketTab') }}</el-radio-button>
+        <el-radio-button value="local">{{ $t('pages.plugins.extra.localTab') }}</el-radio-button>
+        <el-radio-button value="profile">{{ $t('pages.plugins.extra.profileTab') }}</el-radio-button>
+        <el-radio-button value="compliance">{{ $t('pages.plugins.extra.complianceTab') }}</el-radio-button>
       </el-radio-group>
     </div>
 
@@ -20,10 +20,9 @@
           <el-icon :size="20"><MagicStick /></el-icon>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="font-semibold mb-1">第一步：先装引导插件</div>
+          <div class="font-semibold mb-1">{{ $t('pages.plugins.extra.bootstrapFirst') }}</div>
           <p class="text-xs text-gray-500 mb-2 leading-relaxed">
-            ClassIsland 不支持由服务端安装插件，所以每台机器要先手动装一次引导插件；装好之后，
-            下方分发的插件它才收得到。若已装，对账会显示「已是最新」。
+            {{ $t('pages.plugins.extra.bootstrapIntro') }}
           </p>
           <div class="flex items-center gap-2 flex-wrap">
             <el-input
@@ -32,9 +31,9 @@
               class="bootstrap-input"
               readonly
             />
-            <el-button size="small" @click="copyBootstrap">复制</el-button>
-            <el-button size="small" type="primary" @click="openBootstrap">下载</el-button>
-            <el-tag v-if="bootstrapForm.isDefault" size="small" type="info" effect="plain">默认地址</el-tag>
+            <el-button size="small" @click="copyBootstrap">{{ $t('components.notifyqrdialog.extra.copy') }}</el-button>
+            <el-button size="small" type="primary" @click="openBootstrap">{{ $t('pages.plugins.extra.download') }}</el-button>
+            <el-tag v-if="bootstrapForm.isDefault" size="small" type="info" effect="plain">{{ $t('pages.plugins.extra.defaultAddress') }}</el-tag>
           </div>
         </div>
       </div>
@@ -42,7 +41,7 @@
 
     <!-- ==================== 插件市场 ==================== -->
     <div v-if="tab === 'market'">
-      <el-input v-model="search" placeholder="搜索插件名称 / 作者 / 描述" clearable class="mb-4 max-w-md">
+      <el-input v-model="search" :placeholder="$t('pages.plugins.searchPluginHint')" clearable class="mb-4 max-w-md">
         <template #prefix><el-icon><Search /></el-icon></template>
       </el-input>
 
@@ -64,18 +63,18 @@
             <div class="mt-3 flex items-center gap-3 text-xs text-gray-400">
               <span>↓ {{ p.downloadCount }}</span>
               <span>★ {{ p.starsCount }}</span>
-              <span v-if="p.dependencies?.length">依赖 {{ p.dependencies.length }}</span>
+              <span v-if="p.dependencies?.length">{{ $t('pages.plugins.extra.dependencies') }} {{ p.dependencies.length }}</span>
             </div>
 
             <div class="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
               <el-button size="small" type="primary" :loading="importingId === p.id" @click="importFromMarket(p)">
-                导入
+                {{ $t('pages.backup.plugins') }}
               </el-button>
-              <el-button v-if="p.url" size="small" text @click="openUrl(p.url)">仓库</el-button>
+              <el-button v-if="p.url" size="small" text @click="openUrl(p.url)">{{ $t('pages.plugins.extra.repository') }}</el-button>
             </div>
           </el-card>
         </div>
-        <el-empty v-else :image-size="100" description="暂无匹配插件" />
+        <el-empty v-else :image-size="100" :description="$t('pages.plugins.noMatchingPlugins')" />
       </div>
     </div>
 
@@ -83,14 +82,14 @@
     <div v-else-if="tab === 'local'">
       <div class="flex items-center justify-end gap-2 mb-4 flex-wrap">
         <el-button :loading="checkingUpdates" @click="checkUpdates">
-          <el-icon class="mr-1"><Refresh /></el-icon>检查更新
+          <el-icon class="mr-1"><Refresh /></el-icon>{{ $t('pages.plugins.extra.checkUpdates') }}
         </el-button>
-        <el-button :loading="deduping" @click="dedupePlugins">清理重复</el-button>
+        <el-button :loading="deduping" @click="dedupePlugins">{{ $t('pages.plugins.extra.dedupe') }}</el-button>
         <el-button @click="showFromUrl = true">
-          <el-icon class="mr-1"><Link /></el-icon>从 URL 添加
+          <el-icon class="mr-1"><Link /></el-icon>{{ $t('pages.plugins.extra.addFromUrl') }}
         </el-button>
         <el-button @click="triggerUpload">
-          <el-icon class="mr-1"><Upload /></el-icon>上传 .cipx
+          <el-icon class="mr-1"><Upload /></el-icon>{{ $t('pages.plugins.extra.uploadCipx') }}
         </el-button>
         <input ref="fileInput" type="file" accept=".cipx" hidden @change="onFileChange" />
       </div>
@@ -118,7 +117,7 @@
             </div>
 
             <div v-if="p.url" class="mt-2 text-xs text-gray-400 truncate" :title="p.url">
-              来源 {{ p.url }}
+              {{ $t('pages.plugins.extra.source') }} {{ p.url }}
             </div>
 
             <div class="mt-2 text-xs text-gray-400 font-mono truncate" :title="p.sha256">
@@ -126,14 +125,14 @@
             </div>
 
             <div class="mt-3 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5 flex-wrap">
-              <el-button size="small" type="primary" @click="openDeliver(p)">分发到设备</el-button>
-              <el-button v-if="p.marketId" size="small" text :loading="updatingId === p._id" @click="updatePlugin(p)">更新到最新版</el-button>
-              <el-button size="small" text @click="openRename(p)">改名</el-button>
-              <el-button size="small" text type="danger" @click="removePlugin(p)">删除</el-button>
+              <el-button size="small" type="primary" @click="openDeliver(p)">{{ $t('pages.plugins.extra.deliverToDevices') }}</el-button>
+              <el-button v-if="p.marketId" size="small" text :loading="updatingId === p._id" @click="updatePlugin(p)">{{ $t('pages.plugins.extra.updateToLatest') }}</el-button>
+              <el-button size="small" text @click="openRename(p)">{{ $t('pages.plugins.extra.rename') }}</el-button>
+              <el-button size="small" text type="danger" @click="removePlugin(p)">{{ $t('components.resourceeditor.delete') }}</el-button>
             </div>
           </el-card>
         </div>
-        <el-empty v-else :image-size="100" description="插件库还是空的：从市场导入、填直链，或上传 .cipx" />
+        <el-empty v-else :image-size="100" :description="$t('pages.plugins.emptyPluginLibrary')" />
       </div>
     </div>
 
@@ -141,10 +140,10 @@
     <div v-else-if="tab === 'profile'">
       <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
         <p class="text-sm text-gray-500">
-          配置组声明「这些班级应该装哪些插件」。对账时只补发客户端缺的那些，已装的不重复下发。
+          {{ $t('pages.plugins.extra.profileIntro') }}
         </p>
         <el-button type="primary" @click="openProfileEditor()">
-          <el-icon class="mr-1"><Plus /></el-icon>新建配置组
+          <el-icon class="mr-1"><Plus /></el-icon>{{ $t('pages.plugins.extra.newProfile') }}
         </el-button>
       </div>
 
@@ -157,12 +156,12 @@
               </div>
               <div class="flex-1 min-w-0">
                 <div class="font-semibold truncate">{{ g.name }}</div>
-                <div class="text-xs text-gray-400 truncate">{{ g.description || '未填写说明' }}</div>
+                <div class="text-xs text-gray-400 truncate">{{ g.description || $t('pages.plugins.noDescription') }}</div>
               </div>
             </div>
 
             <div class="mt-3">
-              <div class="text-xs text-gray-400 mb-1">期望插件（{{ g.plugins.length }}）</div>
+              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.expectedPlugins') }}（{{ g.plugins.length }}）</div>
               <div class="flex flex-wrap gap-1">
                 <el-tag
                   v-for="p in g.plugins"
@@ -171,14 +170,14 @@
                   :type="p.exists ? 'primary' : 'danger'"
                   effect="plain"
                 >
-                  {{ p.exists ? p.name : '插件已删除' }}
+                  {{ p.exists ? p.name : $t('pages.plugins.pluginDeleted') }}
                 </el-tag>
-                <span v-if="!g.plugins.length" class="text-xs text-gray-400">未选择插件</span>
+                <span v-if="!g.plugins.length" class="text-xs text-gray-400">{{ $t('pages.plugins.extra.noPluginsSelected') }}</span>
               </div>
             </div>
 
             <div class="mt-2">
-              <div class="text-xs text-gray-400 mb-1">绑定班级（{{ g.classes.length }}）</div>
+              <div class="text-xs text-gray-400 mb-1">{{ $t('pages.plugins.extra.boundClasses') }}（{{ g.classes.length }}）</div>
               <div class="flex flex-wrap gap-1">
                 <el-tag
                   v-for="c in g.classes"
@@ -187,9 +186,9 @@
                   :type="c.identity ? 'success' : 'danger'"
                   effect="plain"
                 >
-                  {{ c.identity ? (c.name || c.identity) : '班级已删除' }}
+                  {{ c.identity ? (c.name || c.identity) : $t('pages.plugins.classDeleted') }}
                 </el-tag>
-                <span v-if="!g.classes.length" class="text-xs text-gray-400">未绑定班级</span>
+                <span v-if="!g.classes.length" class="text-xs text-gray-400">{{ $t('pages.plugins.extra.noClassesBound') }}</span>
               </div>
             </div>
 
@@ -201,14 +200,14 @@
                 :disabled="!g.plugins.length || !g.classes.length"
                 @click="applyProfile(g)"
               >
-                对账下发
+                {{ $t('pages.plugins.extra.reconcileDispatch') }}
               </el-button>
-              <el-button size="small" text @click="openProfileEditor(g)">编辑</el-button>
-              <el-button size="small" text type="danger" @click="removeProfile(g)">删除</el-button>
+              <el-button size="small" text @click="openProfileEditor(g)">{{ $t('components.resourcelist.edit') }}</el-button>
+              <el-button size="small" text type="danger" @click="removeProfile(g)">{{ $t('components.resourceeditor.delete') }}</el-button>
             </div>
           </el-card>
         </div>
-        <el-empty v-else :image-size="100" description="还没有配置组，建一个来声明班级应装哪些插件" />
+        <el-empty v-else :image-size="100" :description="$t('pages.plugins.noConfigGroups')" />
       </div>
     </div>
 
@@ -216,38 +215,38 @@
     <div v-else>
       <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
         <p class="text-sm text-gray-500 leading-relaxed">
-          期望 = 设备所属班级绑定的配置组插件并集。设备侧数据由命令 104 采集，可能过期，点右侧刷新。
-          <span class="text-gray-400">（只能比插件 id，比不了版本）</span>
+          {{ $t('pages.plugins.extra.complianceIntro') }}
+          <span class="text-gray-400">{{ $t('pages.plugins.extra.complianceHint') }}</span>
         </p>
         <el-button :loading="refreshing" @click="refreshAllDevices">
-          <el-icon class="mr-1"><Refresh /></el-icon>刷新在线设备
+          <el-icon class="mr-1"><Refresh /></el-icon>{{ $t('pages.plugins.extra.refreshOnlineDevices') }}
         </el-button>
       </div>
 
       <div v-if="compliance" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.devices }}</div>
-          <div class="report-stat-label">设备</div>
+          <div class="report-stat-label">{{ $t('dashboard.cards.devices') }}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.online }}</div>
-          <div class="report-stat-label">在线</div>
+          <div class="report-stat-label">{{ $t('dashboard.online') }}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.ok }}</div>
-          <div class="report-stat-label">已齐</div>
+          <div class="report-stat-label">{{ $t('pages.plugins.allUpToDate') }}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.missing }}</div>
-          <div class="report-stat-label">缺插件</div>
+          <div class="report-stat-label">{{ $t('pages.plugins.missingPlugins') }}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.noBootstrap }}</div>
-          <div class="report-stat-label">缺引导插件</div>
+          <div class="report-stat-label">{{ $t('pages.plugins.missingBootstrapPlugin') }}</div>
         </div>
         <div class="report-stat">
           <div class="report-stat-num">{{ compliance.summary.uncollected }}</div>
-          <div class="report-stat-label">未采集</div>
+          <div class="report-stat-label">{{ $t('pages.devices.notCollected') }}</div>
         </div>
       </div>
 
@@ -256,7 +255,7 @@
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div class="flex items-center gap-2 min-w-0">
               <span class="text-sm font-medium truncate">{{ d.className || d.identity || d.cuid }}</span>
-              <el-tag v-if="!d.online" size="small" type="info" effect="plain">离线</el-tag>
+              <el-tag v-if="!d.online" size="small" type="info" effect="plain">{{ $t('dashboard.offline') }}</el-tag>
             </div>
             <el-tag size="small" :type="complianceTagType(d.status)" effect="plain">
               {{ complianceLabel(d.status) }}
@@ -264,76 +263,75 @@
           </div>
 
           <div class="text-xs text-gray-500 mt-1">
-            已装 {{ d.installedCount }} 个
-            <span v-if="d.collected"> · 采集于 {{ formatTime(d.pluginsUpdatedAt) }}</span>
-            <span v-else> · 尚未采集</span>
-            <span v-if="d.profiles.length"> · 配置组：{{ d.profiles.map((p: any) => p.name).join('、') }}</span>
+            {{ $t('pages.plugins.extra.installedCount') }} {{ d.installedCount }} {{ $t('pages.plugins.extra.units') }}
+            <span v-if="d.collected"> · {{ $t('pages.plugins.extra.collectedAt') }} {{ formatTime(d.pluginsUpdatedAt) }}</span>
+            <span v-else> · {{ $t('pages.plugins.extra.notCollectedYet') }}</span>
+            <span v-if="d.profiles.length"> · {{ $t('pages.plugins.extra.profilesColon') }}{{ d.profiles.map((p: any) => p.name).join('、') }}</span>
           </div>
 
           <div v-if="d.missing.length" class="text-xs mt-1">
-            <span class="text-red-500">缺少：</span>{{ d.missing.map(pluginLabel).join('、') }}
+            <span class="text-red-500">{{ $t('pages.plugins.extra.missingColon') }}</span>{{ d.missing.map(pluginLabel).join('、') }}
           </div>
           <div
             v-if="d.extra.length"
             class="text-xs text-gray-400 mt-1 truncate"
             :title="d.extra.map(pluginLabel).join('、')"
           >
-            未纳管（手工装的）：{{ d.extra.map(pluginLabel).join('、') }}
+            {{ $t('pages.plugins.extra.unmanaged') }}{{ d.extra.map(pluginLabel).join('、') }}
           </div>
         </div>
         <el-empty
           v-if="!compliance?.devices?.length"
           :image-size="100"
-          description="没有设备，或设备所属班级还没有 identity"
+          :description="$t('pages.plugins.noDevicesOrIdentity')"
         />
       </div>
     </div>
 
     <!-- 改名 -->
-    <ResponsiveDrawer v-model:open="renameVisible" title="重命名插件">
+    <ResponsiveDrawer v-model:open="renameVisible" :title="$t('pages.plugins.renamePlugin')">
       <div class="py-2 space-y-3">
         <div>
-          <div class="text-sm mb-1.5">显示名称</div>
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.displayName') }}</div>
           <el-input v-model="renameForm.name" maxlength="60" />
           <div class="text-xs text-gray-400 mt-1 leading-relaxed">
-            只改平台里显示的名字，不影响客户端——插件身份是包内 manifest 的
-            <code>{{ renameForm.pluginId || '(未识别)' }}</code>，不随改名变化。
+            {{ $t('pages.plugins.extra.renameHint1') }}
+            <code>{{ renameForm.pluginId || $t('pages.plugins.unrecognized') }}</code>{{ $t('pages.plugins.extra.renameHint2') }}
           </div>
         </div>
       </div>
       <template #footer>
-        <el-button @click="renameVisible = false">取消</el-button>
-        <el-button type="primary" :loading="renaming" @click="saveRename">保存</el-button>
+        <el-button @click="renameVisible = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="renaming" @click="saveRename">{{ $t('pages.subaccounts.save') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
     <!-- 从 URL 添加插件 -->
-    <ResponsiveDrawer v-model:open="showFromUrl" title="从 URL 添加插件">
+    <ResponsiveDrawer v-model:open="showFromUrl" :title="$t('pages.plugins.addPluginFromUrl')">
       <div class="py-2 space-y-4">
         <div>
-          <div class="text-sm mb-1.5">插件包直链（.cipx）</div>
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.pluginDirectLink') }}</div>
           <el-input v-model="fromUrl.url" placeholder="https://example.com/MyPlugin.cipx" />
           <div class="text-xs text-gray-400 mt-1 leading-relaxed">
-            会拉取一次以读取 manifest 并计算校验值，随后丢弃文件——库里只登记来源地址，不占存储。
-            客户端下载时直连该地址，不经过本服务。
+            {{ $t('pages.plugins.extra.fromUrlHint') }}
           </div>
         </div>
         <div>
-          <div class="text-sm mb-1.5">名称（可选，留空用包内 manifest 的名字）</div>
-          <el-input v-model="fromUrl.name" placeholder="我的插件" />
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.optionalName') }}</div>
+          <el-input v-model="fromUrl.name" :placeholder="$t('pages.plugins.myPlugins')" />
         </div>
       </div>
       <template #footer>
-        <el-button @click="showFromUrl = false">取消</el-button>
-        <el-button type="primary" :loading="addingFromUrl" @click="addFromUrl">添加</el-button>
+        <el-button @click="showFromUrl = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="addingFromUrl" @click="addFromUrl">{{ $t('pages.plugins.extra.add') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
     <!-- 分发弹窗（单插件） -->
-    <ResponsiveDrawer v-model:open="deliverVisible" :title="`分发插件 · ${deliverTarget?.name || ''}`">
+    <ResponsiveDrawer v-model:open="deliverVisible" :title="`${$t('pages.plugins.extra.distributePlugin')} · ${deliverTarget?.name || ''}`">
       <div class="py-2">
-        <div class="text-sm mb-3">选择目标设备（仅在线设备可接收）：</div>
-        <el-checkbox v-model="deliverAll" class="mb-3">全部在线设备</el-checkbox>
+        <div class="text-sm mb-3">{{ $t('pages.plugins.extra.selectTargetDevices') }}</div>
+        <el-checkbox v-model="deliverAll" class="mb-3">{{ $t('pages.plugins.extra.allOnlineDevices') }}</el-checkbox>
 
         <el-checkbox-group v-if="!deliverAll" v-model="selectedCuis" class="block space-y-1 max-h-72 overflow-y-auto">
           <div
@@ -344,29 +342,29 @@
             <span class="text-sm">{{ c.className || c.identity || c.cuid }}</span>
             <el-checkbox :value="c.cuid" />
           </div>
-          <div v-if="!onlineClients.length" class="text-center text-gray-400 py-6 text-sm">当前没有在线设备</div>
+          <div v-if="!onlineClients.length" class="text-center text-gray-400 py-6 text-sm">{{ $t('components.notifyqrdialog.noOnlineDevice') }}</div>
         </el-checkbox-group>
       </div>
       <template #footer>
-        <el-button @click="deliverVisible = false">取消</el-button>
-        <el-button type="primary" :loading="delivering" @click="doDeliver">下发</el-button>
+        <el-button @click="deliverVisible = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="delivering" @click="doDeliver">{{ $t('pages.plugins.extra.dispatch') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
     <!-- 配置组编辑 -->
-    <ResponsiveDrawer v-model:open="editorVisible" :title="editorForm._id ? '编辑配置组' : '新建配置组'">
+    <ResponsiveDrawer v-model:open="editorVisible" :title="editorForm._id ? $t('pages.plugins.extra.editProfile') : $t('pages.plugins.extra.newProfile')">
       <div class="py-2 space-y-4">
         <div>
-          <div class="text-sm mb-1.5">名称</div>
-          <el-input v-model="editorForm.name" placeholder="自定义名称1" maxlength="50" />
+          <div class="text-sm mb-1.5">{{ $t('components.cw2centralpanel.name') }}</div>
+          <el-input v-model="editorForm.name" :placeholder="$t('pages.plugins.customName')" maxlength="50" />
         </div>
         <div>
-          <div class="text-sm mb-1.5">说明（可选）</div>
-          <el-input v-model="editorForm.description" type="textarea" placeholder="自定义说明1" :rows="2" maxlength="200" />
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.descriptionOptional') }}</div>
+          <el-input v-model="editorForm.description" type="textarea" :placeholder="$t('pages.plugins.customDescription')" :rows="2" maxlength="200" />
         </div>
 
         <div>
-          <div class="text-sm mb-1.5">期望插件（{{ editorForm.pluginIds.length }}）</div>
+          <div class="text-sm mb-1.5">{{ $t('pages.plugins.extra.expectedPlugins') }}（{{ editorForm.pluginIds.length }}）</div>
           <el-checkbox-group
             v-if="localPlugins.length"
             v-model="editorForm.pluginIds"
@@ -381,35 +379,35 @@
               class="plugin-pick"
             >
               <span class="text-sm">{{ p.name }}</span>
-              <span class="text-xs text-gray-400 font-mono ml-2">{{ p.pluginId || '（未识别 id）' }}</span>
+              <span class="text-xs text-gray-400 font-mono ml-2">{{ p.pluginId || $t('pages.plugins.unrecognizedId') }}</span>
             </el-checkbox>
           </el-checkbox-group>
-          <el-empty v-else :image-size="60" description="本地插件库是空的，先去市场导入或上传 .cipx" />
+          <el-empty v-else :image-size="60" :description="$t('pages.plugins.localPluginLibraryEmpty')" />
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <div class="text-sm">绑定班级（{{ editorForm.classIds.length }}）</div>
+            <div class="text-sm">{{ $t('pages.plugins.extra.boundClasses') }}（{{ editorForm.classIds.length }}）</div>
             <el-button
               v-if="editorForm.classIds.length"
               size="small"
               text
               @click="editorForm.classIds = []"
             >
-              清空
+              {{ $t('pages.plugins.extra.clear') }}
             </el-button>
           </div>
 
           <!-- 这里刻意不用 el-select：它的浮层默认 teleport 到 body，
-               而 ResponsiveDrawer（reka Dialog / vaul Drawer）是模态层，
-               会把 body 设成 pointer-events:none，浮层于是看得见点不着；
-               且浮层没有 data-dismissable-layer 祖先，会被判定为“点击外部”而关掉抽屉。
-               复选框在文档流内渲染，没有浮层，两个问题都不存在。 -->
+                而 ResponsiveDrawer（reka Dialog / vaul Drawer）是模态层，
+                会把 body 设成 pointer-events:none，浮层于是看得见点不着；
+                且浮层没有 data-dismissable-layer 祖先，会被判定为“点击外部”而关掉抽屉。
+                复选框在文档流内渲染，没有浮层，两个问题都不存在。 -->
           <el-input
             v-if="classes.length > 6"
             v-model="classSearch"
             size="small"
-            placeholder="搜索班级名称 / 标识"
+            :placeholder="$t('pages.plugins.searchClassHint')"
             clearable
             class="mb-2"
           >
@@ -428,37 +426,37 @@
               class="plugin-pick"
             >
               <span class="text-sm">{{ c.name || c.identity }}</span>
-              <span class="text-xs text-gray-400 font-mono ml-2">{{ c.identity || '无标识' }}</span>
+              <span class="text-xs text-gray-400 font-mono ml-2">{{ c.identity || $t('pages.plugins.noIdentity') }}</span>
             </el-checkbox>
           </el-checkbox-group>
-          <el-empty v-else :image-size="50" description="没有匹配的班级" />
+          <el-empty v-else :image-size="50" :description="$t('pages.plugins.noMatchingClasses')" />
 
           <div class="text-xs text-gray-400 mt-1">
-            只有班级标识（identity）与设备一致的机器才会被纳入对账。
+            {{ $t('pages.plugins.extra.identityMatchHint') }}
           </div>
         </div>
       </div>
       <template #footer>
-        <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" :loading="savingProfile" @click="saveProfile">保存</el-button>
+        <el-button @click="editorVisible = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="savingProfile" @click="saveProfile">{{ $t('pages.subaccounts.save') }}</el-button>
       </template>
     </ResponsiveDrawer>
 
     <!-- 对账结果 -->
-    <ResponsiveDrawer v-model:open="reportVisible" :title="`对账结果 · ${report?.profile?.name || ''}`">
+    <ResponsiveDrawer v-model:open="reportVisible" :title="`${$t('pages.plugins.extra.reconcileResult')} · ${report?.profile?.name || ''}`">
       <div class="py-2">
         <div class="grid grid-cols-3 gap-2 mb-4">
           <div class="report-stat">
             <div class="report-stat-num">{{ report?.summary?.targetDevices ?? 0 }}</div>
-            <div class="report-stat-label">目标设备</div>
+            <div class="report-stat-label">{{ $t('pages.plugins.noTargetDevices') }}</div>
           </div>
           <div class="report-stat">
             <div class="report-stat-num">{{ report?.summary?.pushed ?? 0 }}</div>
-            <div class="report-stat-label">已补发</div>
+            <div class="report-stat-label">{{ $t('pages.plugins.resent') }}</div>
           </div>
           <div class="report-stat">
             <div class="report-stat-num">{{ report?.summary?.noBootstrap ?? 0 }}</div>
-            <div class="report-stat-label">缺引导插件</div>
+            <div class="report-stat-label">{{ $t('pages.plugins.missingBootstrapPlugin') }}</div>
           </div>
         </div>
 
@@ -468,8 +466,8 @@
           :closable="false"
           show-icon
           class="mb-3"
-          title="有设备还没装引导插件"
-          description="这些机器收不到分发指令，请先按上方地址手动安装一次引导插件。"
+          :title="$t('pages.plugins.bootstrapPluginMissing')"
+          :description="$t('pages.plugins.installBootstrapManually')"
         />
         <el-alert
           v-if="report?.summary?.unknownPlugins?.length"
@@ -477,7 +475,7 @@
           :closable="false"
           show-icon
           class="mb-3"
-          :title="`有 ${report.summary.unknownPlugins.length} 个插件没识别出 id，已跳过`"
+          :title="`${$t('pages.plugins.extra.unknownPluginsPrefix')}${report.summary.unknownPlugins.length}${$t('pages.plugins.extra.unknownPluginsSuffix')}`"
           :description="report.summary.unknownPlugins.join('、')"
         />
 
@@ -493,22 +491,22 @@
             </div>
             <div class="text-xs text-gray-500 mt-1">{{ d.message }}</div>
             <div v-if="d.missing?.length" class="text-xs text-gray-400 mt-1">
-              本次补发：{{ d.missing.join('、') }}
+              {{ $t('pages.plugins.extra.resentThisTime') }}{{ d.missing.join('、') }}
             </div>
             <div v-if="d.installedCount !== null && d.installedCount !== undefined" class="text-xs text-gray-400 mt-1">
-              设备已装 {{ d.installedCount }} 个插件
+              {{ $t('pages.plugins.extra.deviceInstalled') }} {{ d.installedCount }} {{ $t('pages.plugins.extra.pluginsUnit') }}
             </div>
           </div>
         </div>
-        <el-empty v-else :image-size="80" description="没有目标设备" />
+        <el-empty v-else :image-size="80" :description="$t('pages.plugins.noTargetDevices')" />
 
         <div v-if="report?.baseUrl" class="text-xs text-gray-400 mt-4 break-all">
-          插件下载地址前缀：{{ report.baseUrl }}/api/v1/ci/plugin/…
+          {{ $t('pages.plugins.extra.downloadPrefix') }}{{ report.baseUrl }}/api/v1/ci/plugin/…
         </div>
       </div>
       <template #footer>
-        <el-button @click="reportVisible = false">关闭</el-button>
-        <el-button type="primary" @click="refreshAll">刷新</el-button>
+        <el-button @click="reportVisible = false">{{ $t('components.notifyqrdialog.extra.close') }}</el-button>
+        <el-button type="primary" @click="refreshAll">{{ $t('pages.security.extra.refresh') }}</el-button>
       </template>
     </ResponsiveDrawer>
   </div>
@@ -519,6 +517,8 @@ import { Search, Upload, Grid, Plus, Collection, MagicStick, Link, Refresh } fro
 import ResponsiveDrawer from "@/components/ui/ResponsiveDrawer.vue";
 
 definePageMeta({ title: "插件管理", protected: true });
+
+const { t } = useI18n();
 
 const tab = ref<"market" | "local" | "profile" | "compliance">("market");
 
@@ -558,9 +558,9 @@ async function fetchBootstrap() {
 async function copyBootstrap() {
   try {
     await navigator.clipboard.writeText(bootstrapForm.url);
-    ElMessage.success("已复制引导插件地址");
+    ElMessage.success(t('composables.usebootstrapplugin.bootstrapUrlCopied'));
   } catch {
-    ElMessage.error("复制失败");
+    ElMessage.error(t('components.cw2centralpanel.copyFailed'));
   }
 }
 
@@ -592,7 +592,7 @@ async function fetchMarket() {
     const res: any = await $fetch("/api/v1/console/ci/plugin/market", { headers: auth() });
     marketPlugins.value = res.data || [];
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "获取插件市场失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.fetchMarketFailed'));
   } finally {
     marketLoading.value = false;
   }
@@ -606,10 +606,10 @@ async function importFromMarket(p: any) {
       headers: auth(),
       body: { pluginId: p.id },
     });
-    ElMessage.success(`已导入「${p.name}」`);
+    ElMessage.success(`${t('pages.plugins.extra.importedPrefix')}「${p.name}」${t('pages.plugins.extra.importedSuffix')}`);
     await fetchLocal();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "导入失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.extra.importFailed'));
   } finally {
     importingId.value = "";
   }
@@ -649,10 +649,10 @@ function onFileChange(e: Event) {
         headers: auth(),
         body: { name: file.name.replace(/\.cipx$/i, ""), fileName: file.name, fileBase64: base64 },
       });
-      ElMessage.success("上传成功");
+      ElMessage.success(t('pages.plugins.uploadSucceeded'));
       await fetchLocal();
     } catch (err: any) {
-      ElMessage.error(err?.response?._data?.msg || "上传失败");
+      ElMessage.error(err?.response?._data?.msg || t('pages.plugins.uploadFailed'));
     } finally {
       input.value = "";
     }
@@ -667,14 +667,14 @@ async function removePlugin(p: any) {
   } catch (e: any) {
     const res = e?.response;
     if (res?.status !== 409) {
-      return ElMessage.error(res?._data?.msg || "删除失败");
+      return ElMessage.error(res?._data?.msg || t('pages.plugins.extra.deleteFailed'));
     }
     const names = (res?._data?.data?.usedBy || []).map((x: any) => x.name).join("、");
     try {
       await ElMessageBox.confirm(
-        `「${p.name}」正被这些配置组引用：${names}。删除后它们会缺少该插件。`,
-        "该插件正在被使用",
-        { type: "warning", confirmButtonText: "强制删除", cancelButtonText: "取消" },
+        `「${p.name}」${t('pages.plugins.extra.inUsePrefix')}${names}${t('pages.plugins.extra.inUseSuffix')}`,
+        t('pages.plugins.pluginInUse'),
+        { type: "warning", confirmButtonText: t('pages.plugins.forceDelete'), cancelButtonText: t('reauth.cancel') },
       );
     } catch {
       return; // 用户取消
@@ -682,11 +682,11 @@ async function removePlugin(p: any) {
     try {
       await $fetch(`/api/v1/console/ci/plugin/${p._id}?force=1`, { method: "DELETE", headers: auth() });
     } catch (err: any) {
-      return ElMessage.error(err?.response?._data?.msg || "删除失败");
+      return ElMessage.error(err?.response?._data?.msg || t('pages.plugins.extra.deleteFailed'));
     }
   }
 
-  ElMessage.success("已删除");
+  ElMessage.success(t('components.resourceeditor.deleted'));
   await Promise.all([fetchLocal(), fetchProfiles()]);
 }
 
@@ -704,7 +704,7 @@ function openRename(p: any) {
 
 async function saveRename() {
   const name = renameForm.name.trim();
-  if (!name) return ElMessage.warning("名称不能为空");
+  if (!name) return ElMessage.warning(t('composables.useciresource.nameRequired'));
   renaming.value = true;
   try {
     await $fetch(`/api/v1/console/ci/plugin/${renameForm._id}/rename`, {
@@ -712,11 +712,11 @@ async function saveRename() {
       headers: auth(),
       body: { name },
     });
-    ElMessage.success("已改名");
+    ElMessage.success(t('pages.plugins.renamed'));
     renameVisible.value = false;
     await Promise.all([fetchLocal(), fetchProfiles()]);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "改名失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.renameFailed'));
   } finally {
     renaming.value = false;
   }
@@ -733,10 +733,10 @@ async function updatePlugin(p: any) {
       method: "POST",
       headers: auth(),
     });
-    ElMessage.success(`已更新到 v${res.data?.version || "?"}`);
+    ElMessage.success(`${t('pages.plugins.extra.updatedToPrefix')}v${res.data?.version || "?"}`);
     await Promise.all([fetchLocal(), fetchProfiles()]);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "更新失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.updateFailed'));
   } finally {
     updatingId.value = "";
   }
@@ -759,15 +759,15 @@ async function checkUpdates() {
         .filter((i: any) => i.outdated)
         .map((i: any) => `${i.name}：${i.currentVersion || "?"} → ${i.latestVersion}`)
         .join("\n");
-      ElMessageBox.alert(lines, `有 ${d.updatable} 个插件可以更新（在卡片上点「更新到最新版」）`, {
+      ElMessageBox.alert(lines, `${t('pages.plugins.extra.updatablePrefix')}${d.updatable}${t('pages.plugins.extra.updatableSuffix')}`, {
         type: "info",
         customStyle: { whiteSpace: "pre-line" },
       });
     } else {
-      ElMessage.success("市场来源的插件都是最新版");
+      ElMessage.success(t('pages.plugins.marketPluginsUpToDate'));
     }
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "检查更新失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.checkUpdatesFailed'));
   } finally {
     checkingUpdates.value = false;
   }
@@ -782,17 +782,17 @@ async function dedupePlugins() {
     const res: any = await $fetch("/api/v1/console/ci/plugin/dedupe", { method: "POST", headers: auth() });
     const d = res.data || {};
     if (!d.removed?.length) {
-      ElMessage.success("没有重复条目");
+      ElMessage.success(t('pages.plugins.noDuplicates'));
       return;
     }
     await ElMessageBox.alert(
       d.removed.map((r: any) => `${r.name}（${r.pluginId}）`).join("\n"),
-      `已删除 ${d.removed.length} 条重复`,
+      `${t('pages.plugins.extra.deletedDuplicatesPrefix')}${d.removed.length}${t('pages.plugins.extra.deletedDuplicatesSuffix')}`,
       { type: "success", customStyle: { whiteSpace: "pre-line" } },
     );
     await Promise.all([fetchLocal(), fetchProfiles()]);
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "清理失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.cleanupFailed'));
   } finally {
     deduping.value = false;
   }
@@ -809,7 +809,7 @@ async function fetchCompliance() {
     const res: any = await $fetch("/api/v1/console/ci/plugin/compliance", { headers: auth() });
     compliance.value = res.data;
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "获取部署状态失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.fetchDeploymentStatusFailed'));
   } finally {
     complianceLoading.value = false;
   }
@@ -820,10 +820,10 @@ async function refreshAllDevices() {
   try {
     const res: any = await $fetch("/api/v1/console/ci/plugin/query-all", { method: "POST", headers: auth() });
     const d = res.data || {};
-    ElMessage.success(`已刷新 ${d.refreshed ?? 0}/${d.online ?? 0} 台在线设备`);
+    ElMessage.success(`${t('pages.plugins.extra.refreshedPrefix')}${d.refreshed ?? 0}/${d.online ?? 0}${t('pages.plugins.extra.refreshedSuffix')}`);
     await fetchCompliance();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "刷新失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.refreshFailed'));
   } finally {
     refreshing.value = false;
   }
@@ -837,11 +837,11 @@ function pluginLabel(id: string): string {
 function complianceLabel(s: string): string {
   return (
     {
-      ok: "已齐",
-      missing: "缺插件",
-      "no-bootstrap": "缺引导插件",
-      "no-expectation": "未绑定配置组",
-      unknown: "未采集",
+      ok: t('pages.plugins.allUpToDate'),
+      missing: t('pages.plugins.missingPlugins'),
+      "no-bootstrap": t('pages.plugins.missingBootstrapPlugin'),
+      "no-expectation": t('pages.plugins.noConfigGroupBound'),
+      unknown: t('pages.devices.notCollected'),
     } as Record<string, string>
   )[s] || s;
 }
@@ -862,10 +862,10 @@ function formatTime(t: string | null): string {
 
 /** 来源标识：市场 / 直链（不占存储）/ 本机托管（上传） */
 function sourceLabel(p: any): string {
-  if (p.source === "market") return "市场";
-  if (p.source === "upload") return "本机托管";
-  if (p.source === "url") return "直链";
-  return p.storedName ? "本机托管" : "直链";
+  if (p.source === "market") return t('pages.plugins.market');
+  if (p.source === "upload") return t('pages.plugins.localHosted');
+  if (p.source === "url") return t('pages.plugins.directLink');
+  return p.storedName ? t('pages.plugins.localHosted') : t('pages.plugins.directLink');
 }
 
 // ── 从 URL 添加 ──
@@ -875,7 +875,7 @@ const fromUrl = reactive({ url: "", name: "" });
 
 async function addFromUrl() {
   const u = fromUrl.url.trim();
-  if (!/^https?:\/\//i.test(u)) return ElMessage.warning("请填写以 http:// 或 https:// 开头的地址");
+  if (!/^https?:\/\//i.test(u)) return ElMessage.warning(t('pages.plugins.enterHttpUrl'));
   addingFromUrl.value = true;
   try {
     await $fetch("/api/v1/console/ci/plugin/from-url", {
@@ -883,13 +883,13 @@ async function addFromUrl() {
       headers: auth(),
       body: { url: u, name: fromUrl.name.trim() },
     });
-    ElMessage.success("已添加");
+    ElMessage.success(t('pages.plugins.added'));
     showFromUrl.value = false;
     fromUrl.url = "";
     fromUrl.name = "";
     await fetchLocal();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "添加失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.addFailed'));
   } finally {
     addingFromUrl.value = false;
   }
@@ -925,9 +925,9 @@ async function doDeliver() {
         headers: auth(),
         body: { pluginId: deliverTarget.value._id, all: true, baseUrl: publicBase() },
       });
-      ElMessage.success(`已下发（${res.data?.sent ?? 0} 台）`);
+      ElMessage.success(`${t('pages.plugins.extra.dispatchedPrefix')}${res.data?.sent ?? 0}${t('pages.plugins.extra.dispatchedSuffix')}`);
     } else {
-      if (!selectedCuis.value.length) return ElMessage.warning("请选择至少一台设备");
+      if (!selectedCuis.value.length) return ElMessage.warning(t('pages.plugins.selectAtLeastOneDevice'));
       let sent = 0;
       for (const cuid of selectedCuis.value) {
         const res: any = await $fetch("/api/v1/console/ci/plugin/deliver", {
@@ -937,11 +937,11 @@ async function doDeliver() {
         });
         sent += res.data?.sent ?? 0;
       }
-      ElMessage.success(`已下发（${sent} 台）`);
+      ElMessage.success(`${t('pages.plugins.extra.dispatchedPrefix')}${sent}${t('pages.plugins.extra.dispatchedSuffix')}`);
     }
     deliverVisible.value = false;
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "下发失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.extra.dispatchFailed'));
   } finally {
     delivering.value = false;
   }
@@ -978,7 +978,7 @@ async function fetchProfiles() {
     const res: any = await $fetch("/api/v1/console/ci/plugin/profile/list", { headers: auth() });
     profiles.value = res.data || [];
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "获取配置组失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.fetchConfigGroupsFailed'));
   } finally {
     profileLoading.value = false;
   }
@@ -1006,7 +1006,7 @@ async function openProfileEditor(g?: any) {
 }
 
 async function saveProfile() {
-  if (!editorForm.name.trim()) return ElMessage.warning("请填写配置组名称");
+  if (!editorForm.name.trim()) return ElMessage.warning(t('pages.plugins.enterConfigGroupName'));
   savingProfile.value = true;
   try {
     await $fetch("/api/v1/console/ci/plugin/profile", {
@@ -1020,11 +1020,11 @@ async function saveProfile() {
         classIds: editorForm.classIds,
       },
     });
-    ElMessage.success("已保存");
+    ElMessage.success(t('components.resourceeditor.saved'));
     editorVisible.value = false;
     await fetchProfiles();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "保存失败");
+    ElMessage.error(e?.response?._data?.msg || t('components.resourceeditor.saveFailed'));
   } finally {
     savingProfile.value = false;
   }
@@ -1033,10 +1033,10 @@ async function saveProfile() {
 async function removeProfile(g: any) {
   try {
     await $fetch(`/api/v1/console/ci/plugin/profile/${g._id}`, { method: "DELETE", headers: auth() });
-    ElMessage.success("已删除");
+    ElMessage.success(t('components.resourceeditor.deleted'));
     await fetchProfiles();
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "删除失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.extra.deleteFailed'));
   }
 }
 
@@ -1051,12 +1051,12 @@ async function applyProfile(g: any) {
     report.value = res.data;
     reportVisible.value = true;
     const s = res.data?.summary || {};
-    if (s.pushed) ElMessage.success(`已补发 ${s.pushed} 台设备`);
-    else if (s.noBootstrap) ElMessage.warning(`${s.noBootstrap} 台设备还没装引导插件`);
-    else if (s.offline || s.noResponse) ElMessage.warning("目标设备当前不可达");
-    else ElMessage.success("所有目标设备都已是最新");
+    if (s.pushed) ElMessage.success(`${t('pages.plugins.extra.resentPrefix')}${s.pushed}${t('pages.plugins.extra.resentSuffix')}`);
+    else if (s.noBootstrap) ElMessage.warning(`${s.noBootstrap}${t('pages.plugins.extra.noBootstrapWarningSuffix')}`);
+    else if (s.offline || s.noResponse) ElMessage.warning(t('pages.plugins.targetDevicesUnreachable'));
+    else ElMessage.success(t('pages.plugins.allTargetsUpToDate'));
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "对账失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.plugins.reconcileFailed'));
   } finally {
     applyingId.value = "";
   }
@@ -1065,12 +1065,12 @@ async function applyProfile(g: any) {
 function statusText(s: string): string {
   return (
     {
-      "up-to-date": "已是最新",
-      pushed: "已补发",
-      partial: "部分补发",
-      "no-bootstrap": "缺引导插件",
-      offline: "离线",
-      "no-response": "无响应",
+      "up-to-date": t('pages.plugins.upToDate'),
+      pushed: t('pages.plugins.resent'),
+      partial: t('pages.plugins.partiallyResent'),
+      "no-bootstrap": t('pages.plugins.missingBootstrapPlugin'),
+      offline: t('dashboard.offline'),
+      "no-response": t('pages.plugins.noResponse'),
     }[s] || s
   );
 }
