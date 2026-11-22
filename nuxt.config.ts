@@ -48,6 +48,9 @@ export default defineNuxtConfig({
       { code: "zh-TW", name: "繁體中文", file: "zh-TW.json" },
       { code: "en", name: "English", file: "en.json" },
     ],
+    compilation: {
+      strictMessage: false,
+    },
   },
   routeRules: {
     "/spa/**": { ssr: false },
@@ -58,9 +61,8 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         "/api": {
-          target: "http://127.0.0.1:7000/",
+          target: "https://mornheisland.heycrab.xyz",
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
         },
       },
     },

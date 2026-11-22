@@ -43,7 +43,7 @@
         <el-input
           v-model="subForm.login"
           size="large"
-          :placeholder="$t('login.subLoginPlaceholder')"
+          :placeholder="$t('login.subLoginPlaceholder', { at: '@' })"
           autocomplete="username"
           @keyup.enter="doSubLogin()"
         ></el-input>
@@ -73,7 +73,7 @@
 
       <p class="text-xs text-neutral-400 text-center">
         {{ $t('pages.login.subAccountHintBefore') }}
-        <b>{{ $t('pages.login.subAccountHintBold') }}</b>{{ $t('pages.login.subAccountHintAfter') }}
+        <b>{{ $t('pages.login.subAccountHintBold', { at: '@' }) }}</b>{{ $t('pages.login.subAccountHintAfter') }}
       </p>
     </template>
 
