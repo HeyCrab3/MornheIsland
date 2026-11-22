@@ -61,7 +61,9 @@
     <el-select
       :model-value="locale"
       size="small"
-      class="!fixed top-4 right-16 z-10 w-28"
+      class="!fixed !top-4 !right-14 !z-10 !w-32"
+      style="width: 128px !important"
+      popper-class="login-locale-popper"
       @change="(v: string) => setLocale(v)"
     >
       <el-option v-for="l in locales" :key="l.code" :label="l.name" :value="l.code" />
@@ -78,6 +80,13 @@
     </div>
   </div>
 </template>
+
+<style>
+.login-locale-popper {
+  width: 128px !important;
+  min-width: 128px !important;
+}
+</style>
 
 <style scoped>
 .login-bg {
