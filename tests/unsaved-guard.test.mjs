@@ -16,7 +16,7 @@ function load(file, globals = {}, expose = '') {
   return ctx;
 }
 const ref = value => ({ value });
-const base = { ref, reactive: x => x, computed: f => ({ get value() { return f(); } }), onMounted() {}, onUnmounted() {}, watch() {}, ElMessage: { warning() {}, success() {}, error() {} } };
+const base = { ref, reactive: x => x, computed: f => ({ get value() { return f(); } }), onMounted() {}, onUnmounted() {}, watch() {}, ElMessage: { warning() {}, success() {}, error() {} }, useI18n: () => ({ t: (k) => k }) };
 const plain = value => JSON.parse(JSON.stringify(value));
 
 test('cancel keeps both route and browser unload protection until saved', async () => {

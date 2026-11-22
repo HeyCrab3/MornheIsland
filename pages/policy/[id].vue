@@ -12,8 +12,8 @@
                     class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700"
                   >
                     <div>
-                      <div class="text-sm">{{ f.label }}</div>
-                      <div class="text-xs text-gray-400">{{ f.desc }}</div>
+                      <div class="text-sm">{{ t(f.label) }}</div>
+                      <div class="text-xs text-gray-400">{{ t(f.desc) }}</div>
                     </div>
                     <el-switch
                       v-model="policyData[f.key]"
@@ -55,46 +55,47 @@ definePageMeta({ title: "编辑策略", protected: true });
 
 const { t } = useI18n();
 
+// label/desc 存 i18n key，显示时再 t()，保证 no_prefix 切换语言后标签会更新
 const policyFields = [
   {
     key: "DisableProfileClassPlanEditing",
-    label: t('pages.policy.id.disableClassplanEditing'),
-    desc: t('pages.policy.id.disableClassplanEditingHint'),
+    label: 'pages.policy.id.disableClassplanEditing',
+    desc: 'pages.policy.id.disableClassplanEditingHint',
   },
   {
     key: "DisableProfileTimeLayoutEditing",
-    label: t('pages.policy.id.disableTimeLayoutEditing'),
-    desc: t('pages.policy.id.disableTimeLayoutEditingHint'),
+    label: 'pages.policy.id.disableTimeLayoutEditing',
+    desc: 'pages.policy.id.disableTimeLayoutEditingHint',
   },
   {
     key: "DisableProfileSubjectsEditing",
-    label: t('pages.policy.id.disableSubjectEditing'),
-    desc: t('pages.policy.id.disableSubjectEditingHint'),
+    label: 'pages.policy.id.disableSubjectEditing',
+    desc: 'pages.policy.id.disableSubjectEditingHint',
   },
   {
     key: "DisableProfileEditing",
-    label: t('pages.policy.id.disableArchiveEditing'),
-    desc: t('pages.policy.id.disableArchiveEditingHint'),
+    label: 'pages.policy.id.disableArchiveEditing',
+    desc: 'pages.policy.id.disableArchiveEditingHint',
   },
   {
     key: "DisableSettingsEditing",
-    label: t('pages.policy.id.disableSettingsChanges'),
-    desc: t('pages.policy.id.disableSettingsChangesHint'),
+    label: 'pages.policy.id.disableSettingsChanges',
+    desc: 'pages.policy.id.disableSettingsChangesHint',
   },
   {
     key: "DisableSplashCustomize",
-    label: t('pages.policy.id.disableCustomSplash'),
-    desc: t('pages.policy.id.clearCustomSplash'),
+    label: 'pages.policy.id.disableCustomSplash',
+    desc: 'pages.policy.id.clearCustomSplash',
   },
   {
     key: "DisableDebugMenu",
-    label: t('pages.policy.id.disableDebugMenu'),
-    desc: t('pages.policy.id.disableDebugMenuHint'),
+    label: 'pages.policy.id.disableDebugMenu',
+    desc: 'pages.policy.id.disableDebugMenuHint',
   },
   {
     key: "AllowExitManagement",
-    label: t('pages.policy.id.allowExitCentralControl'),
-    desc: t('pages.policy.id.allowExitCentralControlHint'),
+    label: 'pages.policy.id.allowExitCentralControl',
+    desc: 'pages.policy.id.allowExitCentralControlHint',
   },
 ];
 

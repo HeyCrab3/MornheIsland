@@ -16,7 +16,7 @@ function load(file, globals = {}, expose = '') {
   vm.runInContext(stripTypeScriptTypes(source) + '\n' + expose, ctx, { filename: file });
   return ctx;
 }
-const base = { ref, reactive, computed, watch, nextTick, onMounted() {}, onUnmounted() {}, ElMessage: { warning() {}, success() {}, error() {} } };
+const base = { ref, reactive, computed, watch, nextTick, onMounted() {}, onUnmounted() {}, ElMessage: { warning() {}, success() {}, error() {} }, useI18n: () => ({ t: (k) => k }) };
 const plain = value => JSON.parse(JSON.stringify(value));
 
 test('successful save updates the copy source to the submitted snapshot', async () => {

@@ -486,7 +486,7 @@ interface AttachedDef {
   texts?: { key: string; label: string }[];
 }
 
-const ATTACHED_DEFS: AttachedDef[] = [
+const ATTACHED_DEFS = computed<AttachedDef[]>(() => [
   {
     key: "classNotification",
     guid: "08F0D9C3-C770-4093-A3D0-02F3D90C24BC",
@@ -546,7 +546,7 @@ const ATTACHED_DEFS: AttachedDef[] = [
     ],
     numbers: [{ key: "CountdownSeconds", label: t('components.timelayouteditor.countdownSeconds'), min: 0, max: 3600, step: 10, fallback: 60 }],
   },
-];
+]);
 
 /** 在 AttachedObjects 里按 GUID 找键（JSON 键可能是任意大小写） */
 function findAttachedKey(obj: Record<string, any> | undefined, guid: string): string | undefined {

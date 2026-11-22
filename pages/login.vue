@@ -9,11 +9,12 @@
       class="mb-4"
       v-model="loginMode"
       :options="loginModeOptions"
+      :props="{ value: 'value', label: 'label' }"
       block
     />
   </div>
 
-  <template v-if="loginMode == loginModeOptions[0]">
+  <template v-if="loginMode === 'main'">
     <el-button
       :loading="loginLoading"
       type="primary"
@@ -36,7 +37,7 @@
     </el-button>
   </template>
 
-  <template v-if="loginMode == loginModeOptions[1]">
+  <template v-if="loginMode === 'sub'">
     <!-- 第一步：登录名 + 密码 -->
     <template v-if="!mfaTicket">
       <div class="mb-3">
@@ -179,10 +180,10 @@ const { t } = useI18n();
 
 const loginLoading = ref(false);
 const loginModeOptions = computed(() => [
-  t('login.modeMain'),
-  t('login.modeSub'),
+  { label: t('login.modeMain'), value: 'main' as const },
+  { label: t('login.modeSub'), value: 'sub' as const },
 ]);
-const loginMode = ref(loginModeOptions.value[0]);
+const loginMode = ref<'main' | 'sub'>('main');
 
 async function ssoLogin(
   channel: number,

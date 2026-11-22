@@ -41,7 +41,7 @@
 
         <el-row :gutter="16">
           <el-col :xs="24" :sm="12" v-for="sel in selectFields" :key="sel.key">
-            <el-form-item :label="sel.label" :required="sel.required">
+            <el-form-item :label="t(sel.label)" :required="sel.required">
               <el-select
                 v-model="form[sel.key]"
                 clearable
@@ -147,7 +147,7 @@
 
       <el-alert type="warning" :closable="false" show-icon>
         <template #title>
-          {{ $t('pages.classes.id.extra.linkBeforeDeploy') }}{{ missingRequired.map((s) => s.label).join("、") || $t('pages.classes.id.requiredResources') }}{{ $t('pages.classes.id.extra.linkBeforeDeployAfter') }}
+          {{ $t('pages.classes.id.extra.linkBeforeDeploy') }}{{ missingRequired.map((s) => t(s.label)).join("、") || $t('pages.classes.id.requiredResources') }}{{ $t('pages.classes.id.extra.linkBeforeDeployAfter') }}
         </template>
         {{ $t('pages.classes.id.extra.requiredFieldsNote') }}
       </el-alert>
@@ -211,12 +211,14 @@ const cls = ref<any>({
  * 真正的策略列表被写到了 resources[undefined]，页面上根本读不到。
  *
  * required 决定「部署下发」的门槛，也是表单上的必填标记；策略可选。
+ *
+ * label 存 i18n key，显示时再 t()，保证 no_prefix 切换语言后标签会更新。
  */
 const selectFields = [
-  { key: "classplanId", label: t("components.home.quickstartupguide.archive"), type: "classplan", listKey: "classplans", required: true },
-  { key: "timelayoutId", label: t("components.home.quickstartupguide.timeLayout"), type: "timelayout", listKey: "timelayouts", required: true },
-  { key: "subjectsId", label: t("components.home.quickstartupguide.subjects"), type: "subjects", listKey: "subjects", required: true },
-  { key: "policyId", label: t("composables.useciresource.policy"), type: "policy", listKey: "policies", required: false },
+  { key: "classplanId", label: "components.home.quickstartupguide.archive", type: "classplan", listKey: "classplans", required: true },
+  { key: "timelayoutId", label: "components.home.quickstartupguide.timeLayout", type: "timelayout", listKey: "timelayouts", required: true },
+  { key: "subjectsId", label: "components.home.quickstartupguide.subjects", type: "subjects", listKey: "subjects", required: true },
+  { key: "policyId", label: "composables.useciresource.policy", type: "policy", listKey: "policies", required: false },
 ] as const;
 
 const form = reactive<Record<string, string>>({
@@ -272,7 +274,7 @@ async function fetchAll() {
 
 async function doSave() {
   if (missingRequired.value.length) {
-    ElMessage.warning(t("pages.classes.id.extra.saveMissingBefore") + missingRequired.value.map((s) => s.label).join("、") + t("pages.classes.id.extra.saveMissingAfter"));
+    ElMessage.warning(t("pages.classes.id.extra.saveMissingBefore") + missingRequired.value.map((s) => t(s.label)).join("、") + t("pages.classes.id.extra.saveMissingAfter"));
     return;
   }
   saving.value = true;

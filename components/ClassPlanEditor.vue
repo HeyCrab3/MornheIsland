@@ -201,7 +201,7 @@ const forceRender = ref(0);
 /** ClassIsland 里 Guid.Empty 的字符串形态：空课时/空引用都要写它，不能写 null */
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
-const DAYS = [
+const DAYS = computed(() => [
   { value: "Monday", label: t('components.classplaneditor.monday'), weekDay: 1 },
   { value: "Tuesday", label: t('components.classplaneditor.tuesday'), weekDay: 2 },
   { value: "Wednesday", label: t('components.classplaneditor.wednesday'), weekDay: 3 },
@@ -209,13 +209,13 @@ const DAYS = [
   { value: "Friday", label: t('components.classplaneditor.friday'), weekDay: 5 },
   { value: "Saturday", label: t('components.classplaneditor.saturday'), weekDay: 6 },
   { value: "Sunday", label: t('components.classplaneditor.sunday'), weekDay: 0 },
-];
+]);
 
-const WEEK_TABS = [
+const WEEK_TABS = computed(() => [
   { value: 0, label: t('components.classplaneditor.everyWeek') },
   { value: 1, label: t('components.classplaneditor.oddWeek') },
   { value: 2, label: t('components.classplaneditor.evenWeek') },
-] as const;
+] as const);
 
 const activeDays = ref(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
 const timelayouts = ref<any[]>([]);
@@ -234,10 +234,10 @@ const grids = reactive<Record<0 | 1 | 2, Record<string, (string | null)[]>>>({ 0
 const enabledFlag = reactive<Record<0 | 1 | 2, Record<string, boolean[]>>>({ 0: {}, 1: {}, 2: {} });
 const existingUuids = reactive<Record<0 | 1 | 2, Record<string, string>>>({ 0: {}, 1: {}, 2: {} });
 
-const otherWeeks = computed(() => WEEK_TABS.filter((t) => t.value !== activeWeekDiv.value));
+const otherWeeks = computed(() => WEEK_TABS.value.filter((t) => t.value !== activeWeekDiv.value));
 
 function weekLabel(v: number): string {
-  return v === 0 ? t('components.classplaneditor.everyWeek') : v === 1 ? t('components.classplaneditor.oddWeek') : t('components.classplaneditor.evenWeek');
+  return WEEK_TABS.value.find((tab) => tab.value === v)?.label ?? "";
 }
 
 function authHeaders() {
@@ -289,7 +289,7 @@ function loadModel() {
     const entries = Object.entries(props.modelValue.classPlans || props.modelValue || {});
     for (const [uuid, entry] of entries as [string, any][]) {
       if (!entry?.TimeRule || !entry?.Classes) continue;
-      const dayKey = DAYS.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
+      const dayKey = DAYS.value.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
       if (!dayKey) continue;
       if (!activeDays.value.includes(dayKey)) activeDays.value.push(dayKey);
 
@@ -431,7 +431,7 @@ function doSave() {
   if (!tlUuid) return ElMessage.warning(t('components.classplaneditor.noAvailableTimePoints'));
 
   for (const d of activeDays.value) {
-    const dayInfo = DAYS.find((x) => x.value === d)!;
+    const dayInfo = DAYS.value.find((x) => x.value === d)!;
     for (const div of [0, 1, 2] as const) {
       if (!isDayTouched(div, d)) continue;
 

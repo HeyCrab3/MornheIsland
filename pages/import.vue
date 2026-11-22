@@ -195,15 +195,16 @@ const prefix = ref(t('pages.import.import'));
 const includeSettings = ref(true);
 const includePolicy = ref(true);
 
-/** 已知附加设置的 GUID → 中文名（来源：ClassIsland 的 AttachedSettingsControlInfo 特性） */
+/** 已知附加设置的 GUID → i18n key（来源：ClassIsland 的 AttachedSettingsControlInfo 特性）；显示时再 t()，切换语言后标签会更新 */
 const ATTACHED_NAMES: Record<string, string> = {
-  "08f0d9c3-c770-4093-a3d0-02f3d90c24bc": t('components.timelayouteditor.classReminder'),
-  "8fbc3a26-6d20-44dd-b895-b9411e3ddc51": t('pages.import.dismissalReminder'),
-  "7625de96-38aa-4b71-b478-3f156dd9458d": t('pages.import.weatherReminder'),
-  "58e5b69a-764a-472b-bcf7-003b6a8c7fdf": t('pages.import.courseDisplay'),
+  "08f0d9c3-c770-4093-a3d0-02f3d90c24bc": 'components.timelayouteditor.classReminder',
+  "8fbc3a26-6d20-44dd-b895-b9411e3ddc51": 'pages.import.dismissalReminder',
+  "7625de96-38aa-4b71-b478-3f156dd9458d": 'pages.import.weatherReminder',
+  "58e5b69a-764a-472b-bcf7-003b6a8c7fdf": 'pages.import.courseDisplay',
 };
 function attachedName(guid: string) {
-  return ATTACHED_NAMES[String(guid).toLowerCase()] || String(guid).slice(0, 8);
+  const key = ATTACHED_NAMES[String(guid).toLowerCase()];
+  return key ? t(key) : String(guid).slice(0, 8);
 }
 
 const totalWillCreate = computed(() => {

@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import api from "@/util/api";
 import { ElMessage as message } from "element-plus";
 import { userService } from "../services/user.service";
+import { translate } from "@/util/translate";
 import {
   INVALID_TOKEN_MSG,
   type UserData,
@@ -11,8 +12,6 @@ import {
 } from "../types/user";
 
 export const useUserStore = defineStore("user", () => {
-  const { t } = useI18n();
-
   // 使用useStorage替代useSessionStorage，支持持久化登录状态
   const user = useStorage<UserData>("user_data", {
     loggedIn: false,
@@ -25,7 +24,7 @@ export const useUserStore = defineStore("user", () => {
   const checkAuthentication = (): string | null => {
     const token = localStorage.getItem("token");
     if (!token) {
-      message.warning(t('api.notLoggedIn'));
+      message.warning(translate('api.notLoggedIn'));
       return null;
     }
     return token;
@@ -81,7 +80,7 @@ export const useUserStore = defineStore("user", () => {
 
       return { isSuccess: true };
     } catch (error: any) {
-      console.error(t('stores.user.fetchUserFailedWithColon'), error);
+      console.error(translate('stores.user.fetchUserFailedWithColon'), error);
 
       // 如果是token无效，清空登录状态
       if (error.message === INVALID_TOKEN_MSG) {
@@ -90,7 +89,7 @@ export const useUserStore = defineStore("user", () => {
 
       return {
         isSuccess: false,
-        msg: error.message || t('stores.user.fetchUserFailed'),
+        msg: error.message || translate('stores.user.fetchUserFailed'),
       };
     }
   };

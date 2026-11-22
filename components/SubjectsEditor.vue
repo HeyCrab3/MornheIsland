@@ -54,12 +54,11 @@ const saving = ref(false);
 
 const subjects = ref<SubjectRow[]>([]);
 
+// 默认科目使用固定的简体名称：这是写入 ClassIsland 的数据，不能随界面语言变化，
+// 否则切换语言后会把已有科目当作缺失项重复追加。
 const DEFAULT_NAMES = [
-  t('components.subjectseditor.chinese'), t('components.subjectseditor.math'), t('components.subjectseditor.english'),
-  t('components.subjectseditor.physics'), t('components.subjectseditor.chemistry'), t('components.subjectseditor.biology'),
-  t('components.subjectseditor.politics'), t('components.subjectseditor.history'), t('components.subjectseditor.geography'),
-  t('components.subjectseditor.music'), t('components.subjectseditor.pe'), t('components.subjectseditor.art'),
-  t('components.subjectseditor.informationTech'),
+  "语文", "数学", "英语", "物理", "化学", "生物",
+  "政治", "历史", "地理", "音乐", "体育", "美术", "信息技术",
 ];
 
 function loadSubjects() {
@@ -89,7 +88,7 @@ function loadSubjects() {
         name,
         initial: name.charAt(0),
         teacherName: "",
-        isOutDoor: name === t('components.subjectseditor.pe'),
+        isOutDoor: name === "体育",
       });
     }
   }

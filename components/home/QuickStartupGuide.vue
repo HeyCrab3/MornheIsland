@@ -45,7 +45,7 @@
 const { t } = useI18n();
 const collapseActive = ref<string[]>([]);
 
-const guideSteps = [
+const guideSteps = computed(() => [
   {
     title: t('components.home.quickstartupguide.createTimeLayout'),
     desc: t('components.home.quickstartupguide.timeLayoutIntro'),
@@ -106,7 +106,7 @@ const guideSteps = [
     action: t('components.home.quickstartupguide.goDispatch'),
     link: "/classes",
   },
-];
+]);
 
 const stepsActive = ref(0);
 

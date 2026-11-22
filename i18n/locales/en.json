@@ -698,8 +698,8 @@
       "grpcOnlineSummary": "Control gRPC {online}/{total} online · Static {static}",
       "grpcStatHint": "Control {online} online · Static {static}",
       "distributedIn": "Spread across {count} organizations",
-      "classTitle": "Class: {name} | Identity: {identity} | MAC: {mac}",
-      "ipTitle": "IP: {ip} | Last request: {path} | {count} requests in total"
+      "classTitle": "Class: {name} ｜ Identity: {identity} ｜ MAC: {mac}",
+      "ipTitle": "IP: {ip} ｜ Last request: {path} ｜ {count} requests in total"
     },
     "login": {
       "ownerLogin": "Main account sign-in",
@@ -1702,8 +1702,8 @@
       "createFailed": "Create failed",
       "extra": {
         "createPrefix": "New ",
-        "descA": "Manage reusable",
-        "descB": "resources; once created, they can be linked to classes",
+        "descA": "Manage reusable ",
+        "descB": " resources; once created, they can be linked to classes",
         "librarySuffix": " library",
         "readOnly": "Read-only",
         "rename": "Rename",
@@ -1854,7 +1854,7 @@
   },
   "common": {
     "siteName": "MornheIsland",
-    "defaultTitle": "MornheIsland - ClassIsland / Class Widgets 2 Management Platform | Schedule management · Plugin distribution · Device management · Class management",
+    "defaultTitle": "MornheIsland - ClassIsland / Class Widgets 2 Management Platform ｜ Schedule management · Plugin distribution · Device management · Class management",
     "version": "Version"
   },
   "sidebar": {

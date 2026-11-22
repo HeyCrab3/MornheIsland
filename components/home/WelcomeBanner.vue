@@ -64,17 +64,17 @@ const dismissWelcome = computed({
   set: (v) => (dismiss.value = v),
 });
 
-const platformFeaturesList = [
+const platformFeaturesList = computed(() => [
   { label: t('components.home.welcomebanner.resourceDispatch'), path: "/welcome" },
   { label: t('sidebar.items.devices'), path: "/welcome/track" },
   { label: t('components.home.welcomebanner.classPolicy'), path: "/welcome/setup" },
-];
+]);
 
 const resources = reactive<Record<string, any>>({});
 
 // 预加载所有内容
 onMounted(async () => {
-  for (const item of platformFeaturesList) {
+  for (const item of platformFeaturesList.value) {
     try {
       const r = await queryCollection("content").path(item.path).first();
       if (r) resources[item.path] = r;

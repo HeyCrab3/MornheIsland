@@ -2,6 +2,9 @@
 import { execSync } from "child_process";
 import tailwindcss from "@tailwindcss/vite";
 
+// 默认连本地后端；设置 API_TARGET=https://mornheisland.heycrab.xyz 可切换远程
+const apiTarget = process.env.API_TARGET || "http://127.0.0.1:7000";
+
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
@@ -61,8 +64,12 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         "/api": {
-          target: "https://mornheisland.heycrab.xyz",
+          target: apiTarget,
           changeOrigin: true,
+          rewrite: (path: string) =>
+            apiTarget.includes("mornheisland.heycrab.xyz")
+              ? path
+              : path.replace(/^\/api/, ""),
         },
       },
     },

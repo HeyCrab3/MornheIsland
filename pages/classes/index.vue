@@ -428,16 +428,16 @@ function openUpgrade(c: any) {
 }
 
 async function doUpgrade() {
-  const t = upgradeTarget.value;
-  if (!t) return;
+  const target = upgradeTarget.value;
+  if (!target) return;
   upgrading.value = true;
   try {
     const res: any = await $fetch("/api/v1/console/ci/schools/upgrade", {
       method: "POST",
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       body: {
-        classIds: t.classes.map((x: any) => x.id),
-        schoolName: upgradeName.value.trim() || t.orgName,
+        classIds: target.classes.map((x: any) => x.id),
+        schoolName: upgradeName.value.trim() || target.orgName,
       },
     });
     const d = res?.data || {};

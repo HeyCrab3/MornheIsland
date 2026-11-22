@@ -95,13 +95,15 @@ pnpm dev                          # 默认端口 6003，API 代理到 7000
 
 ## 国际化（i18n）
 
-前端已接入 `@nuxtjs/i18n`，只注册了 `zh-CN`，界面文案保持原样。
+前端已接入 `@nuxtjs/i18n`，注册了 `zh-CN`、`zh-TW`、`en` 三种语言。
 
-- 配置在 `nuxt.config.ts` 的 `i18n` 段，URL 不带语言前缀，不自动切换语言。
-- 字典在 `i18n/locales/zh-CN.json`，收录全站中文原文（860 条），按文件分组。key 是英文，value 是中文原文。
-- 页面标题可用 `defineI18nPageMeta("key")`。
+- 配置在 `nuxt.config.ts` 的 `i18n` 段，URL 不带语言前缀，语言选择保存在 cookie 中。
+- 字典在 `i18n/locales/`，每种语言一份（1832 条），key 为英文，按文件分组。
+- 登录页右上角、控制台侧边栏底部均可切换语言。
 
-加新语言：复制 `zh-CN.json` 改名为 `en.json` 并填入译文，在 `nuxt.config.ts` 的 `i18n.locales` 注册，然后把模板里的中文替换为 `$t("...")`。
+加新语言（如日语）：复制 `zh-CN.json` 为 `ja.json` 并填入译文，在 `nuxt.config.ts` 的 `i18n.locales` 注册即可。注意不要覆盖已有语言的字典。
+
+开发时代理默认连接本地后端（`http://127.0.0.1:7000`）。设置环境变量 `API_TARGET=https://mornheisland.heycrab.xyz` 可改用远程后端。
 
 ## ClassIsland 集成
 

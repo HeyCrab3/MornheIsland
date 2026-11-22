@@ -73,16 +73,18 @@ const TYPE_OF: Record<string, string> = {
   ci_settings: "settings",
   ci_policies: "policy",
 };
+// 存 i18n key，显示时再 t()，保证 no_prefix 切换语言后标签会更新
 const LABEL_OF: Record<string, string> = {
-  ci_classplans: t('composables.useciresource.plan'),
-  ci_timelayouts: t('components.home.quickstartupguide.timeLayout'),
-  ci_subjects: t('composables.useciresource.subject'),
-  ci_settings: t('composables.useciresource.settings'),
-  ci_policies: t('composables.useciresource.policy'),
+  ci_classplans: 'composables.useciresource.plan',
+  ci_timelayouts: 'components.home.quickstartupguide.timeLayout',
+  ci_subjects: 'composables.useciresource.subject',
+  ci_settings: 'composables.useciresource.settings',
+  ci_policies: 'composables.useciresource.policy',
 };
 
 function typeLabel(c: string) {
-  return LABEL_OF[c] || c;
+  const key = LABEL_OF[c];
+  return key ? t(key) : c;
 }
 
 function fmt(d: string) {

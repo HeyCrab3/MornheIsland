@@ -137,11 +137,11 @@
 
         <div class="text-xs space-y-1">
           <div v-for="(n, k) in nonZero(result.created)" :key="`c-${k}`" class="flex justify-between gap-2">
-            <span class="text-gray-500">{{ LABELS[k as string] || k }}</span>
+            <span class="text-gray-500">{{ labelOf(k as string) || k }}</span>
             <span>{{ $t('pages.backup.extra.statCreated') }} {{ n }}</span>
           </div>
           <div v-for="(n, k) in nonZero(result.updated)" :key="`u-${k}`" class="flex justify-between gap-2">
-            <span class="text-gray-500">{{ LABELS[k as string] || k }}</span>
+            <span class="text-gray-500">{{ labelOf(k as string) || k }}</span>
             <span>{{ $t('pages.backup.extra.statUpdated') }} {{ n }}</span>
           </div>
         </div>
@@ -178,16 +178,22 @@ definePageMeta({ title: "配置备份", protected: true });
 
 const { t } = useI18n();
 
+// 存 i18n key，使用时再 t()，保证 no_prefix 切换语言后标签会更新
 const LABELS: Record<string, string> = {
-  classes: t('dashboard.cards.classes'),
-  classplans: t('composables.useciresource.plan'),
-  timelayouts: t('components.home.quickstartupguide.timeLayout'),
-  subjects: t('components.home.quickstartupguide.subjects'),
-  settings: t('composables.useciresource.settings'),
-  policies: t('composables.useciresource.policy'),
-  plugins: t('pages.backup.plugins'),
-  pluginProfiles: t('pages.backup.pluginConfigGroups'),
+  classes: 'dashboard.cards.classes',
+  classplans: 'composables.useciresource.plan',
+  timelayouts: 'components.home.quickstartupguide.timeLayout',
+  subjects: 'components.home.quickstartupguide.subjects',
+  settings: 'composables.useciresource.settings',
+  policies: 'composables.useciresource.policy',
+  plugins: 'pages.backup.plugins',
+  pluginProfiles: 'pages.backup.pluginConfigGroups',
 };
+
+function labelOf(k: string) {
+  const key = LABELS[k];
+  return key ? t(key) : "";
+}
 
 function auth() {
   return { Authorization: `Bearer ${localStorage.getItem("token")}` };
@@ -286,7 +292,7 @@ const countsText = computed(() => {
   const c = parsed.value?.counts || {};
   const parts = Object.entries(c)
     .filter(([, n]) => Number(n) > 0)
-    .map(([k, n]) => `${LABELS[k] || k} ${n}`);
+    .map(([k, n]) => `${labelOf(k) || k} ${n}`);
   return parts.length ? parts.join(" · ") : t('pages.backup.emptyBackup');
 });
 
