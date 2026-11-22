@@ -98,6 +98,19 @@
           <el-icon><SwitchButton /></el-icon>
         </el-button>
       </div>
+      <el-select
+        :model-value="locale"
+        size="small"
+        class="w-full"
+        @change="(v: string) => setLocale(v)"
+      >
+        <el-option
+          v-for="l in locales"
+          :key="l.code"
+          :label="l.name"
+          :value="l.code"
+        />
+      </el-select>
       <div class="text-[11px] text-gray-400 text-center leading-relaxed">
         ©2019-2026 Crab Studio · 鲁ICP备2020045185号-2<br />
         <NuxtLink to="/terms" class="hover:underline">{{ $t('sidebar.userAgreement') }}</NuxtLink>
@@ -139,7 +152,7 @@ import {
   UserFilled,
 } from "@element-plus/icons-vue";
 
-const { t } = useI18n();
+const { t, locale, setLocale, locales } = useI18n();
 const dark = useDarkMode();
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();

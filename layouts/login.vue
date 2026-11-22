@@ -57,6 +57,16 @@
       </div>
     </div>
 
+    <!-- 语言切换 -->
+    <el-select
+      :model-value="locale"
+      size="small"
+      class="!fixed top-4 right-16 z-10 w-28"
+      @change="(v: string) => setLocale(v)"
+    >
+      <el-option v-for="l in locales" :key="l.code" :label="l.name" :value="l.code" />
+    </el-select>
+
     <!-- 暗色切换 -->
     <el-button class="!fixed top-4 right-4 z-10" circle size="small" @click="dark.toggle">
       <el-icon><Sunny v-if="dark.isDark.value" /><Moon v-else /></el-icon>
@@ -193,5 +203,6 @@
 <script setup lang="ts">
 import { Notebook, Monitor, Lock, Clock, Sunny, Moon } from "@element-plus/icons-vue";
 
+const { locale, setLocale, locales } = useI18n();
 const dark = useDarkMode();
 </script>
