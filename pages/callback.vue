@@ -1,7 +1,7 @@
 <template>
   <template v-if="!mfaVisible">
     <Spinner class="mx-auto" style="width: 16px" />
-    <p class="text-center mt-4 text-sm text-neutral-600">正在登录</p>
+    <p class="text-center mt-4 text-sm text-neutral-600">{{ $t('pages.callback.extra.loggingIn') }}</p>
   </template>
 
   <!-- 二步验证：SSO 已通过，还差一次动态码 -->
@@ -255,9 +255,9 @@
           </g>
         </svg>
       </div>
-      <h3 class="text-base font-semibold mt-2">二步验证</h3>
+      <h3 class="text-base font-semibold mt-2">{{ $t('login.mfaTitle') }}</h3>
       <p class="text-xs text-neutral-500 mt-1">
-        打开验证器 App，输入当前的 6 位动态码
+        {{ $t('login.mfaDesc') }}
       </p>
     </div>
 
@@ -266,7 +266,7 @@
       class="mt-4"
       size="large"
       maxlength="12"
-      placeholder="6 位动态码"
+      :placeholder="$t('login.codePlaceholder')"
       :disabled="mfaLoading"
       @keyup.enter="submitMfa"
     >
@@ -283,7 +283,7 @@
       :disabled="!mfaCode.trim()"
       @click="submitMfa"
     >
-      验证并登录
+      {{ $t('login.verifyAndLogin') }}
     </el-button>
 
     <p v-if="mfaError" class="text-xs text-red-500 mt-2 text-center">
@@ -291,28 +291,27 @@
     </p>
 
     <p class="text-xs text-neutral-400 mt-4 text-center leading-relaxed">
-      手机丢了？改用一枚恢复码登录。<br />
-      恢复码用过一次就作废。
+      {{ $t('login.recoveryHint') }}
     </p>
 
     <template v-if="mfaMethods.passkey">
-      <div class="mfa-or"><span>或者</span></div>
+      <div class="mfa-or"><span>{{ $t('login.or') }}</span></div>
       <el-button
         class="w-full"
         size="large"
         :loading="passkeyLoading"
         @click="submitPasskey"
       >
-        <el-icon class="mr-1"><Key /></el-icon>用通行密钥验证
+        <el-icon class="mr-1"><Key /></el-icon>{{ $t('login.passkey') }}
       </el-button>
       <p class="text-xs text-neutral-400 mt-2 text-center">
-        手机指纹、Windows Hello 或硬件密钥
+        {{ $t('login.passkeyHint') }}
       </p>
     </template>
 
     <p class="text-xs text-center mt-2">
       <a class="text-[var(--mi-brand)]" href="#" @click="$router.push('/login')"
-        >返回重新登录</a
+        >{{ $t('pages.callback.extra.backToLogin') }}</a
       >
     </p>
   </div>
@@ -323,6 +322,7 @@ import { Key } from "@element-plus/icons-vue";
 import api from "@/util/api";
 import { Spinner } from "@/components/ui/spinner";
 
+const { t } = useI18n();
 const router = useRouter();
 
 /** 二步验证票据：SSO 通过后由后端签发，只能换一次登录令牌 */
@@ -365,13 +365,13 @@ const login = async () => {
     const loginChannel = raw.get("loginChannel") || undefined;
 
     if (!code || !state || !loginChannel) {
-      ElMessageBox.alert("缺少必要参数", "错误", { type: "error" }).then(() =>
+      ElMessageBox.alert(t('pages.callback.missingRequiredParams'), t('pages.callback.error'), { type: "error" }).then(() =>
         router.push("/login"),
       );
       return;
     }
     if (loginChannel !== "1" && loginChannel !== "2") {
-      ElMessageBox.alert(`无效的登录渠道：${loginChannel}`, "错误", {
+      ElMessageBox.alert(t('pages.callback.invalidChannel', { channel: loginChannel }), t('pages.callback.error'), {
         type: "error",
       }).then(() => router.push("/login"));
       return;
@@ -392,12 +392,12 @@ const login = async () => {
       return;
     }
 
-    const t = pickToken(result);
-    if (t) {
-      finishLogin(t);
+    const tokenValue = pickToken(result);
+    if (tokenValue) {
+      finishLogin(tokenValue);
     }
   } catch (e) {
-    ElMessageBox.alert("登录失败，请重试: " + e, "错误", {
+    ElMessageBox.alert(t('pages.callback.loginFailedRetryWithColon') + e, t('pages.callback.error'), {
       type: "error",
     }).then(() => {
       router.push("/login");
@@ -419,19 +419,19 @@ async function submitMfa() {
     if (tok) {
       finishLogin(tok);
     } else {
-      mfaError.value = "登录失败，请重试";
+      mfaError.value = t('pages.callback.loginFailedRetry');
     }
   } catch (e: any) {
     // 票据过期 / 失败次数用尽 → 只能回登录页重来；验证码错 → 留在原地重试
     const msg = String(e?.message || "");
     if (msg.includes("票据") || msg.includes("重新登录")) {
       mfaError.value = msg;
-      ElMessageBox.alert("登录票据已失效，请重新登录", "提示", {
+      ElMessageBox.alert(t('pages.callback.ticketExpired'), t('composables.useunsavedguard.notice'), {
         type: "warning",
       }).then(() => router.push("/login"));
       return;
     }
-    mfaError.value = msg || "验证码不正确";
+    mfaError.value = msg || t('pages.callback.incorrectCaptcha');
     mfaCode.value = "";
   } finally {
     mfaLoading.value = false;
@@ -482,7 +482,7 @@ async function submitPasskey() {
       })),
     };
     const cred: any = await navigator.credentials.get({ publicKey });
-    if (!cred) throw new Error("没有拿到凭据");
+    if (!cred) throw new Error(t('login.errors.noCredential'));
     const r = cred.response;
 
     const token: any = await api.post("/v1/public/webauthn/login", {
@@ -502,17 +502,17 @@ async function submitPasskey() {
     if (tok) {
       finishLogin(tok);
     } else {
-      mfaError.value = "登录失败，请重试";
+      mfaError.value = t('pages.callback.loginFailedRetry');
     }
   } catch (e: any) {
     if (e?.name === "NotAllowedError") {
-      mfaError.value = "已取消";
+      mfaError.value = t('login.errors.cancelled');
       return;
     }
     const msg = String(e?.message || e || "");
-    mfaError.value = msg || "通行密钥验证失败";
+    mfaError.value = msg || t('login.errors.passkeyFailed');
     if (msg.includes("票据") || msg.includes("重新登录")) {
-      ElMessageBox.alert("登录票据已失效，请重新登录", "提示", {
+      ElMessageBox.alert(t('pages.callback.ticketExpired'), t('composables.useunsavedguard.notice'), {
         type: "warning",
       }).then(() => router.push("/login"));
     }

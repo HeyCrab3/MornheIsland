@@ -1,14 +1,14 @@
 <template>
   <el-result
-    title="页面未找到"
-    sub-title="抱歉，您访问的页面不存在。"
+    :title="$t('pages.slug.notFoundTitle')"
+    :sub-title="$t('pages.slug.notFoundDesc')"
   >
     <template #icon>
       <img :src="NotFoundImage" alt="Not Found Image"/>
     </template>
     <template #extra>
       <el-space>
-        <el-button type="primary" @click="$router.back()">带我回家！</el-button>
+        <el-button type="primary" @click="$router.back()">{{ $t('pages.slug.goHome') }}</el-button>
       </el-space>
     </template>
   </el-result>

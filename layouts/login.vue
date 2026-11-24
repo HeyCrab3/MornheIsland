@@ -6,10 +6,9 @@
         <h1 class="hero-title">
           <span class="text-[var(--mi-brand)]">Mornhe</span>Island · 莫宁岛
         </h1>
-        <p class="hero-sub text-gray-500 dark:text-gray-400">ClassIsland 非官方集控平台</p>
+        <p class="hero-sub text-gray-500 dark:text-gray-400">{{ $t('login.extra.heroSubtitle') }}</p>
         <p class="hero-desc text-gray-500 dark:text-gray-400">
-          一站式管理学校 ClassIsland 实例。统一分发课表、时间表、科目与策略，
-          实时追踪设备状态，让信息化管理不再繁琐。
+          {{ $t('login.extra.heroDescription') }}
         </p>
 
         <div class="features mt-8">
@@ -18,8 +17,8 @@
               <el-icon size="22"><Notebook /></el-icon>
             </div>
             <div>
-              <div class="font-medium text-sm">可视化课表编辑</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">拖拽式课表编辑器，所见即所得</div>
+              <div class="font-medium text-sm">{{ $t('login.extra.feature1Title') }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('login.extra.feature1Desc') }}</div>
             </div>
           </div>
           <div class="feature-item">
@@ -27,8 +26,8 @@
               <el-icon size="22"><Monitor /></el-icon>
             </div>
             <div>
-              <div class="font-medium text-sm">设备实时追踪</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">掌握每台设备的接入状态与活跃时间</div>
+              <div class="font-medium text-sm">{{ $t('login.extra.feature2Title') }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('login.extra.feature2Desc') }}</div>
             </div>
           </div>
           <div class="feature-item">
@@ -36,8 +35,8 @@
               <el-icon size="22"><Lock /></el-icon>
             </div>
             <div>
-              <div class="font-medium text-sm">策略集中管控</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">一键下发禁用编辑、锁定设置等策略</div>
+              <div class="font-medium text-sm">{{ $t('login.extra.feature3Title') }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('login.extra.feature3Desc') }}</div>
             </div>
           </div>
           <div class="feature-item">
@@ -45,8 +44,8 @@
               <el-icon size="22"><Clock /></el-icon>
             </div>
             <div>
-              <div class="font-medium text-sm">历史版本回溯</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">每次修改自动存档，随时恢复任意版本</div>
+              <div class="font-medium text-sm">{{ $t('login.extra.feature4Title') }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('login.extra.feature4Desc') }}</div>
             </div>
           </div>
         </div>
@@ -57,6 +56,18 @@
         <slot/>
       </div>
     </div>
+
+    <!-- 语言切换 -->
+    <el-select
+      :model-value="locale"
+      size="small"
+      class="!fixed !top-4 !right-14 !z-10 !w-32"
+      style="width: 128px !important"
+      popper-class="login-locale-popper"
+      @change="(v: string) => setLocale(v)"
+    >
+      <el-option v-for="l in locales" :key="l.code" :label="l.name" :value="l.code" />
+    </el-select>
 
     <!-- 暗色切换 -->
     <el-button class="!fixed top-4 right-4 z-10" circle size="small" @click="dark.toggle">
@@ -69,6 +80,13 @@
     </div>
   </div>
 </template>
+
+<style>
+.login-locale-popper {
+  width: 128px !important;
+  min-width: 128px !important;
+}
+</style>
 
 <style scoped>
 .login-bg {
@@ -194,5 +212,6 @@
 <script setup lang="ts">
 import { Notebook, Monitor, Lock, Clock, Sunny, Moon } from "@element-plus/icons-vue";
 
+const { locale, setLocale, locales } = useI18n();
 const dark = useDarkMode();
 </script>

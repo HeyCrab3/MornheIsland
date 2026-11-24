@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import api from "@/util/api";
 import { ElMessage as message } from "element-plus";
 import { userService } from "../services/user.service";
+import { translate } from "@/util/translate";
 import {
   INVALID_TOKEN_MSG,
   type UserData,
@@ -23,7 +24,7 @@ export const useUserStore = defineStore("user", () => {
   const checkAuthentication = (): string | null => {
     const token = localStorage.getItem("token");
     if (!token) {
-      message.warning("未登录");
+      message.warning(translate('api.notLoggedIn'));
       return null;
     }
     return token;
@@ -79,7 +80,7 @@ export const useUserStore = defineStore("user", () => {
 
       return { isSuccess: true };
     } catch (error: any) {
-      console.error("获取用户数据失败:", error);
+      console.error(translate('stores.user.fetchUserFailedWithColon'), error);
 
       // 如果是token无效，清空登录状态
       if (error.message === INVALID_TOKEN_MSG) {
@@ -88,7 +89,7 @@ export const useUserStore = defineStore("user", () => {
 
       return {
         isSuccess: false,
-        msg: error.message || "获取用户数据失败",
+        msg: error.message || translate('stores.user.fetchUserFailed'),
       };
     }
   };

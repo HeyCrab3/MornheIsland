@@ -2,6 +2,9 @@
 import { execSync } from "child_process";
 import tailwindcss from "@tailwindcss/vite";
 
+// 默认连本地后端；设置 API_TARGET=https://mornheisland.heycrab.xyz 可切换远程
+const apiTarget = process.env.API_TARGET || "http://127.0.0.1:7000";
+
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
@@ -39,6 +42,19 @@ export default defineNuxtConfig({
     importStyle: "scss",
     defaultLocale: "zh-CN"
   },
+  i18n: {
+    defaultLocale: "zh-CN",
+    strategy: "no_prefix",
+    detectBrowserLanguage: { useCookie: true, alwaysRedirect: false },
+    locales: [
+      { code: "zh-CN", name: "简体中文", file: "zh-CN.json" },
+      { code: "zh-TW", name: "繁體中文", file: "zh-TW.json" },
+      { code: "en", name: "English", file: "en.json" },
+    ],
+    compilation: {
+      strictMessage: false,
+    },
+  },
   routeRules: {
     "/spa/**": { ssr: false },
     "/callback": { ssr: false },
@@ -48,9 +64,12 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         "/api": {
-          target: "http://127.0.0.1:7000/",
+          target: apiTarget,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
+          rewrite: (path: string) =>
+            apiTarget.includes("mornheisland.heycrab.xyz")
+              ? path
+              : path.replace(/^\/api/, ""),
         },
       },
     },
@@ -124,6 +143,7 @@ export default defineNuxtConfig({
   modules: [
     "@pinia/nuxt",
     "@element-plus/nuxt",
+    "@nuxtjs/i18n",
     "@nuxt/content",
     "nuxt-gtag",
     "@vite-pwa/nuxt",

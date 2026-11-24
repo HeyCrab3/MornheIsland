@@ -13,14 +13,13 @@
       <p class="reauth-reason">{{ reason }}</p>
 
       <template v-if="!ready">
-        <p class="reauth-hint">正在读取你的安全设置…</p>
+        <p class="reauth-hint">{{ $t('reauth.loading') }}</p>
       </template>
 
       <template v-else-if="!canVerify">
         <el-alert type="warning" :closable="false" show-icon>
-          <template #title>这一步需要重新验证身份</template>
-          你的账号还没有开启两步验证，也没有绑定通行密钥。
-          请退出后重新登录（登录后 10 分钟内可以直接通过），或在「账号安全」里先开启两步验证。
+          <template #title>{{ $t('reauth.warningTitle') }}</template>
+          {{ $t('reauth.warningBody') }}
         </el-alert>
       </template>
 
@@ -31,14 +30,14 @@
             v-model="code"
             size="large"
             maxlength="20"
-            placeholder="6 位动态码，或一枚恢复码"
+            :placeholder="$t('reauth.codePlaceholder')"
             autocomplete="one-time-code"
             @keyup.enter="submitCode"
           />
         </template>
 
         <div v-if="methods.totp && methods.passkey" class="reauth-or">
-          <span>或者</span>
+          <span>{{ $t('reauth.or') }}</span>
         </div>
 
         <el-button
@@ -49,7 +48,7 @@
           @click="submitPasskey"
         >
           <el-icon class="mr-1"><Key /></el-icon>
-          用通行密钥验证
+          {{ $t('reauth.passkey') }}
         </el-button>
 
         <p v-if="error" class="reauth-error">{{ error }}</p>
@@ -57,7 +56,7 @@
     </div>
 
     <template #footer>
-      <el-button @click="cancel">取消</el-button>
+      <el-button @click="cancel">{{ $t('reauth.cancel') }}</el-button>
       <el-button
         v-if="canVerify && methods.totp"
         type="primary"
@@ -65,7 +64,7 @@
         :disabled="!code.trim()"
         @click="submitCode"
       >
-        验证
+        {{ $t('reauth.verify') }}
       </el-button>
     </template>
   </el-dialog>
@@ -84,6 +83,8 @@ import api from "@/util/api";
  * 这里用 el-dialog + append-to-body + 显式高 z-index，保证浮在最上层。
  */
 
+const { t } = useI18n();
+
 const emit = defineEmits<{ (e: "verified"): void }>();
 
 const visible = ref(false);
@@ -93,7 +94,7 @@ const passkeyLoading = ref(false);
 const code = ref("");
 const error = ref("");
 const reason = ref("");
-const title = ref("需要重新验证");
+const title = ref(t('reauth.title'));
 const methods = reactive({ totp: false, passkey: false });
 
 const canVerify = computed(() => methods.totp || methods.passkey);
@@ -103,8 +104,8 @@ let resolver: ((ok: boolean) => void) | null = null;
 
 /** 打开弹窗并等待结果；true 表示身份已复核通过 */
 async function ask(text?: string, heading?: string): Promise<boolean> {
-  reason.value = text || "这个操作会影响账号权限，需要先验证是你本人。";
-  title.value = heading || "需要重新验证";
+  reason.value = text || t('reauth.defaultReason');
+  title.value = heading || t('reauth.title');
   code.value = "";
   error.value = "";
   ready.value = false;
@@ -159,7 +160,7 @@ async function submitCode() {
   try {
     await api.post("/v1/user/security/mfa/verify", { code: value });
   } catch (e: any) {
-    error.value = e?.data?.msg || e?.message || "验证失败";
+    error.value = e?.data?.msg || e?.message || t('reauth.errors.verifyFailed');
     submitting.value = false;
     return;
   }
@@ -201,7 +202,7 @@ async function submitPasskey() {
     } as PublicKeyCredentialRequestOptions;
     const cred: any = await navigator.credentials.get({ publicKey });
     if (!cred) {
-      error.value = "没有拿到通行密钥的响应";
+      error.value = t('reauth.errors.noPasskeyResponse');
       passkeyLoading.value = false;
       return;
     }
@@ -219,7 +220,7 @@ async function submitPasskey() {
       },
     });
   } catch (e: any) {
-    error.value = e?.data?.msg || e?.message || "通行密钥验证失败";
+    error.value = e?.data?.msg || e?.message || t('reauth.errors.passkeyFailed');
     passkeyLoading.value = false;
     return;
   }

@@ -1,19 +1,19 @@
 <template>
-  <ResourceEditor collection="policy" label="策略">
+  <ResourceEditor collection="policy" :label="$t('composables.useciresource.policy')">
     <template #default="{ doc, save, saving }">
       <div v-if="doc" v-loading="!doc" class="w-full">
         <el-row class="w-full">
           <el-col :span="10">
             <!-- 图形化开关 -->
-            <el-card header="可视化配置" class="mb-4">
+            <el-card :header="$t('pages.policy.id.visualConfig')" class="mb-4">
               <el-row :gutter="16">
                 <el-col :span="12" v-for="f in policyFields" :key="f.key">
                   <div
                     class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700"
                   >
                     <div>
-                      <div class="text-sm">{{ f.label }}</div>
-                      <div class="text-xs text-gray-400">{{ f.desc }}</div>
+                      <div class="text-sm">{{ t(f.label) }}</div>
+                      <div class="text-xs text-gray-400">{{ t(f.desc) }}</div>
                     </div>
                     <el-switch
                       v-model="policyData[f.key]"
@@ -36,14 +36,14 @@
                 @input="onJsonChange"
               />
               <div class="text-xs text-gray-400 mt-1">
-                修改 JSON 后开关自动同步，保存时以 JSON 内容为准
+                {{ $t('pages.policy.id.extra.jsonSyncHint') }}
               </div>
             </el-card>
           </el-col>
         </el-row>
 
         <el-button type="primary" :loading="saving" @click="doSave"
-          >保存策略</el-button
+          >{{ $t('pages.policy.id.extra.savePolicy') }}</el-button
         >
       </div>
     </template>
@@ -53,46 +53,49 @@
 <script setup lang="ts">
 definePageMeta({ title: "编辑策略", protected: true });
 
+const { t } = useI18n();
+
+// label/desc 存 i18n key，显示时再 t()，保证 no_prefix 切换语言后标签会更新
 const policyFields = [
   {
     key: "DisableProfileClassPlanEditing",
-    label: "禁止编辑课表",
-    desc: "禁用课表创建、删除、编辑和Excel导入",
+    label: 'pages.policy.id.disableClassplanEditing',
+    desc: 'pages.policy.id.disableClassplanEditingHint',
   },
   {
     key: "DisableProfileTimeLayoutEditing",
-    label: "禁止编辑时间表",
-    desc: "禁用时间表创建、删除、编辑和Excel导入",
+    label: 'pages.policy.id.disableTimeLayoutEditing',
+    desc: 'pages.policy.id.disableTimeLayoutEditingHint',
   },
   {
     key: "DisableProfileSubjectsEditing",
-    label: "禁止编辑科目",
-    desc: "禁用科目的创建、删除和编辑",
+    label: 'pages.policy.id.disableSubjectEditing',
+    desc: 'pages.policy.id.disableSubjectEditingHint',
   },
   {
     key: "DisableProfileEditing",
-    label: "禁止编辑档案",
-    desc: "禁用档案内所有内容的编辑（不影响主页面编辑，开启此选项后可以关闭剩下三个禁止编辑）",
+    label: 'pages.policy.id.disableArchiveEditing',
+    desc: 'pages.policy.id.disableArchiveEditingHint',
   },
   {
     key: "DisableSettingsEditing",
-    label: "禁止修改设置",
-    desc: "用户无法调整应用设置（包括主页面布局，不推荐开启）",
+    label: 'pages.policy.id.disableSettingsChanges',
+    desc: 'pages.policy.id.disableSettingsChangesHint',
   },
   {
     key: "DisableSplashCustomize",
-    label: "禁止自定义启动图",
-    desc: "清除已有的启动界面自定义设置",
+    label: 'pages.policy.id.disableCustomSplash',
+    desc: 'pages.policy.id.clearCustomSplash',
   },
   {
     key: "DisableDebugMenu",
-    label: "禁用调试菜单",
-    desc: "用户无法进入调试页面（就算曾启用过调试页面也无法再次进入）",
+    label: 'pages.policy.id.disableDebugMenu',
+    desc: 'pages.policy.id.disableDebugMenuHint',
   },
   {
     key: "AllowExitManagement",
-    label: "允许退出集控",
-    desc: "关闭后用户无法自行退出集控",
+    label: 'pages.policy.id.allowExitCentralControl',
+    desc: 'pages.policy.id.allowExitCentralControlHint',
   },
 ];
 
@@ -142,7 +145,7 @@ function doSave() {
     // 验证所有字段
     for (const f of policyFields) {
       if (typeof data[f.key] !== "boolean") {
-        ElMessage.warning(`字段 ${f.key} 缺失或类型错误`);
+        ElMessage.warning(t('pages.policy.id.extra.fieldInvalid', { key: f.key }));
         return;
       }
     }
@@ -154,7 +157,7 @@ function doSave() {
     // fallback: 直接调 API
     saveViaApi(data);
   } catch {
-    ElMessage.error("JSON 格式错误");
+    ElMessage.error(t('components.resourceeditor.invalidJson'));
   }
 }
 
@@ -170,10 +173,10 @@ async function saveViaApi(data: any) {
       },
       body: { data },
     });
-    ElMessage.success("策略已保存，请重启CI以使更改生效");
+    ElMessage.success(t('pages.policy.id.policySavedRestartRequired'));
     syncJsonFromSwitches();
   } catch {
-    ElMessage.error("保存失败");
+    ElMessage.error(t('components.resourceeditor.saveFailed'));
   }
 }
 

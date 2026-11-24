@@ -2,21 +2,21 @@
   <div class="mnp-root">
     <div class="mnp-card">
       <div class="mnp-head">
-        <div class="mnp-title">班级通知</div>
+        <div class="mnp-title">{{ $t('pages.n.token.classNotification') }}</div>
         <div v-if="className" class="mnp-sub">{{ className }}</div>
       </div>
 
-      <div v-if="state === 'loading'" class="mnp-center">正在读取…</div>
+      <div v-if="state === 'loading'" class="mnp-center">{{ $t('pages.n.token.extra.loading') }}</div>
 
       <div v-else-if="state === 'invalid'" class="mnp-center">
-        <div class="mnp-invalid">这个二维码已失效</div>
-        <div class="mnp-hint">可能被班级管理员重置了，请找管理员要新的二维码。</div>
+        <div class="mnp-invalid">{{ $t('pages.n.token.extra.qrInvalid') }}</div>
+        <div class="mnp-hint">{{ $t('pages.n.token.extra.qrInvalidHint') }}</div>
       </div>
 
       <template v-else>
         <div class="mnp-status" :class="online ? 'is-on' : 'is-off'">
           <span class="mnp-dot"></span>
-          {{ online ? `${online} 台设备在线` : "设备当前不在线" }}
+          {{ online ? $t('pages.n.token.onlineDevices', { count: online }) : $t('pages.n.token.deviceOffline') }}
         </div>
 
         <el-input
@@ -25,20 +25,20 @@
           :rows="4"
           maxlength="200"
           show-word-limit
-          placeholder="输入要发到班级大屏上的通知内容"
+          :placeholder="$t('pages.n.token.enterNotificationForBoard')"
           class="mnp-textarea"
         />
 
         <div class="mnp-options">
-          <el-checkbox v-model="isEmergency">紧急</el-checkbox>
-          <el-checkbox v-model="isTopmost">置顶显示</el-checkbox>
-          <el-checkbox v-model="isSoundEnabled">提示音</el-checkbox>
+          <el-checkbox v-model="isEmergency">{{ $t('pages.n.token.extra.emergency') }}</el-checkbox>
+          <el-checkbox v-model="isTopmost">{{ $t('pages.n.token.extra.topmost') }}</el-checkbox>
+          <el-checkbox v-model="isSoundEnabled">{{ $t('pages.n.token.extra.sound') }}</el-checkbox>
         </div>
 
         <div class="mnp-slider">
-          <span class="mnp-slider-label">显示时长</span>
+          <span class="mnp-slider-label">{{ $t('pages.n.token.extra.durationLabel') }}</span>
           <el-slider v-model="durationSeconds" :min="0" :max="120" :step="10" class="mnp-slider-ctl" />
-          <span class="mnp-slider-val">{{ durationSeconds ? `${durationSeconds} 秒` : "不自动关闭" }}</span>
+          <span class="mnp-slider-val">{{ durationSeconds ? $t('pages.n.token.seconds', { count: durationSeconds }) : $t('pages.n.token.doNotAutoClose') }}</span>
         </div>
 
         <el-button
@@ -49,11 +49,11 @@
           :disabled="!online || !message.trim()"
           @click="send"
         >
-          发送通知
+          {{ $t('pages.n.token.extra.sendNotification') }}
         </el-button>
 
         <div class="mnp-warn">
-          ⚠️ 二维码请勿外传。转发出去后任何人都能向本班大屏发通知，可能干扰正常教学秩序。
+          {{ $t('pages.n.token.extra.qrWarning') }}
         </div>
       </template>
     </div>
@@ -62,6 +62,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false, title: "班级通知" });
+
+const { t } = useI18n();
 
 const route = useRoute();
 const token = String(route.params.token ?? "");
@@ -105,10 +107,10 @@ async function send() {
       },
     });
     const sent = Number(res?.data?.sent) || 0;
-    ElMessage.success(`已发送到 ${sent} 台设备`);
+    ElMessage.success(t('pages.n.token.sentTo', { count: sent }));
     message.value = "";
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "发送失败");
+    ElMessage.error(e?.data?.msg || t('pages.n.token.sendFailed'));
   } finally {
     sending.value = false;
   }

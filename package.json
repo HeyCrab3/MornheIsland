@@ -49,6 +49,7 @@
     "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
+    "@nuxtjs/i18n": "^10.6.0",
     "shadcn-nuxt": "^2.8.2"
   }
 }

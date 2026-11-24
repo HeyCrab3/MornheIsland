@@ -2,26 +2,26 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">学校（机构）</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('pages.schools.index.extra.pageTitle') }}</h1>
         <p class="text-sm text-gray-500">
-          同一所学校的班级聚在一起：共享时间表/课程表/设置/策略，设备和通知也能在校内统一处理。
+          {{ $t('pages.schools.index.extra.subtitle') }}
         </p>
       </div>
       <div class="flex items-center gap-2">
         <el-button type="primary" @click="createVisible = true">
-          <el-icon class="mr-1"><Plus /></el-icon>创建学校
+          <el-icon class="mr-1"><Plus /></el-icon>{{ $t('pages.schools.index.createSchool') }}
         </el-button>
-        <el-button :loading="loading" @click="load">刷新</el-button>
+        <el-button :loading="loading" @click="load">{{ $t('pages.schools.index.extra.refresh') }}</el-button>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>学校是怎么来的</template>
-      两条路：① 上面直接<b>创建学校</b>（只有 1 个班、或想先建好再挂班都行）；
-      ② 在「班级管理」里同机构有 <b>2 个及以上班级</b> 时会出现「建议升级为学校维度聚合管理」的提示，点一下建校并把共享资源带进来。
+      <template #title>{{ $t('pages.schools.index.extra.howSchoolsWork') }}</template>
+      {{ $t('pages.schools.index.extra.howBeforeCreate') }}<b>{{ $t('pages.schools.index.createSchool') }}</b>{{ $t('pages.schools.index.extra.howAfterCreate') }}
+      {{ $t('pages.schools.index.extra.howBeforeCandidate') }}<b>{{ $t('pages.schools.index.extra.howCandidateBold') }}</b>{{ $t('pages.schools.index.extra.howAfterCandidate') }}
       <br />
-      两种方式都<b>不会按机构名自动合并别人的学校</b>。要进别人已经建好的学校，只有一条路：让该校管理员在「学校 → 成员」里生成<b>邀请链接</b>，你登录后点链接加入。
-      没填机构的班级不会被处理，保持个人模式。
+      {{ $t('pages.schools.index.extra.howBeforeInvite') }}<b>{{ $t('pages.schools.index.extra.howInviteBold1') }}</b>{{ $t('pages.schools.index.extra.howMidInvite') }}<b>{{ $t('pages.schools.index.extra.howInviteBold2') }}</b>{{ $t('pages.schools.index.extra.howAfterInvite') }}
+      {{ $t('pages.schools.index.extra.howNoOrgHint') }}
     </el-alert>
 
     <div v-loading="loading" class="min-h-40">
@@ -45,9 +45,9 @@
                 </el-tag>
               </div>
               <div class="text-xs text-gray-400 mt-1">
-                {{ s.classCount }} 个班级 · {{ s.deviceCount }} 台设备
+                {{ $t('pages.schools.index.extra.classDeviceCount', { classes: s.classCount, devices: s.deviceCount }) }}
                 <span v-if="s.onlineDeviceCount" class="text-emerald-500">
-                  （{{ s.onlineDeviceCount }} 在线）
+                  （{{ $t('pages.schools.index.extra.onlineSuffix', { n: s.onlineDeviceCount }) }}）
                 </span>
               </div>
             </div>
@@ -55,32 +55,31 @@
         </el-card>
       </div>
 
-      <el-empty v-else :image-size="100" description="还没有学校。可以直接创建，也可以去班级管理升级同机构班级">
-        <el-button type="primary" @click="createVisible = true">创建学校</el-button>
-        <el-button @click="navigateTo('/classes')">去班级管理</el-button>
+      <el-empty v-else :image-size="100" :description="$t('pages.schools.index.noSchools')">
+        <el-button type="primary" @click="createVisible = true">{{ $t('pages.schools.index.createSchool') }}</el-button>
+        <el-button @click="navigateTo('/classes')">{{ $t('pages.schools.index.extra.goToClasses') }}</el-button>
       </el-empty>
     </div>
 
     <!-- 手动创建学校 -->
-    <el-dialog v-model="createVisible" title="创建学校" width="420px">
+    <el-dialog v-model="createVisible" :title="$t('pages.schools.index.createSchool')" width="420px">
       <el-alert type="info" :closable="false" show-icon class="mb-3">
-        创建后你就是这所学校的<b>创建者</b>，可以生成邀请链接让其他电教委员加入，
-        也能把学校级的资源统一分配给各班。
+        {{ $t('pages.schools.index.extra.createHintBefore') }}<b>{{ $t('pages.schools.index.creator') }}</b>{{ $t('pages.schools.index.extra.createHintAfter') }}
       </el-alert>
       <el-input
         v-model="createName"
         maxlength="60"
         show-word-limit
-        placeholder="学校全称，如 XX市第一中学"
+        :placeholder="$t('pages.schools.index.schoolFullNameHint')"
         @keyup.enter="doCreate"
       />
       <div class="text-xs text-gray-400 mt-2">
-        如果这个名字已经被其他账号建过，会让你走邀请链接加入，不会把两所学校合并。
+        {{ $t('pages.schools.index.extra.createNameHint') }}
       </div>
       <template #footer>
-        <el-button @click="createVisible = false">取消</el-button>
+        <el-button @click="createVisible = false">{{ $t('reauth.cancel') }}</el-button>
         <el-button type="primary" :loading="creating" :disabled="!createName.trim()" @click="doCreate">
-          创建
+          {{ $t('pages.subaccounts.create') }}
         </el-button>
       </template>
     </el-dialog>
@@ -91,6 +90,8 @@
 import { OfficeBuilding, Plus } from "@element-plus/icons-vue";
 
 definePageMeta({ title: "学校", protected: true });
+
+const { t } = useI18n();
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
@@ -112,7 +113,7 @@ async function doCreate() {
       headers: authHeaders(),
       body: { name },
     });
-    ElMessage.success(`已创建「${res?.data?.schoolName}」`);
+    ElMessage.success(t("pages.schools.index.extra.createdSchool", { name: res?.data?.schoolName }));
     createVisible.value = false;
     createName.value = "";
     navigateTo(`/schools/${res?.data?.schoolId}`);
@@ -126,17 +127,17 @@ async function doCreate() {
       return;
     }
     if (d?.data?.needInvite) {
-      ElMessageBox.alert(d.msg, "这所学校已存在", { type: "warning", confirmButtonText: "知道了" }).catch(() => {});
+      ElMessageBox.alert(d.msg, t("pages.schools.index.schoolAlreadyExists"), { type: "warning", confirmButtonText: t("composables.useciresource.gotIt") }).catch(() => {});
       return;
     }
-    ElMessage.error(d?.msg || "创建失败");
+    ElMessage.error(d?.msg || t("components.resourcelist.createFailed"));
   } finally {
     creating.value = false;
   }
 }
 
 function roleLabel(role: string) {
-  return role === "owner" ? "创建者" : role === "admin" ? "管理员" : "成员";
+  return role === "owner" ? t("pages.schools.index.creator") : role === "admin" ? t("pages.schools.index.admin") : t("pages.schools.index.member");
 }
 function roleType(role: string) {
   return role === "owner" ? "warning" : role === "admin" ? "success" : "info";
@@ -148,7 +149,7 @@ async function load() {
     const res: any = await $fetch("/api/v1/console/ci/schools", { headers: authHeaders() });
     schools.value = Array.isArray(res?.data) ? res.data : [];
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "读取学校列表失败");
+    ElMessage.error(e?.data?.msg || t("pages.schools.index.loadSchoolsFailed"));
   } finally {
     loading.value = false;
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="legal">
-    <h1>用户协议</h1>
+    <h1>{{ $t('sidebar.userAgreement') }}</h1>
     <p class="meta">
       生效日期：2026 年 11 月 14 日 ｜ 版本：v1.0 ｜ 运营者：Crab Studio
     </p>

@@ -1,5 +1,6 @@
 // 获取中台平台业务数据公共代码
 import axios from "axios";
+import { translate } from "@/util/translate";
 
 // 类型声明
 // Config: { key: value }，value 可以是 boolean / number / string / Object
@@ -106,8 +107,8 @@ const getSkuUrl = (sku: string) => {
   const baseUrl =
     "https://middleend-platform.crabapi.cn/api/bootstrap?product={0}&env={1}";
   if (!sku) {
-    log("缺少业务SKU", "error");
-    throw new TypeError("缺少业务SKU");
+    log(translate('util.getplatformdata.missingBusinessSku'), "error");
+    throw new TypeError(translate('util.getplatformdata.missingBusinessSku'));
   }
   const url = baseUrl.replace("{0}", sku).replace("{1}", getEnv());
   return url;
@@ -116,8 +117,8 @@ const getSkuUrl = (sku: string) => {
 // 获取中台数据结果
 const getPlatformData = async () => {
   if (!sku) {
-    log("缺少业务SKU", "error");
-    throw new TypeError("缺少业务SKU");
+    log(translate('util.getplatformdata.missingBusinessSku'), "error");
+    throw new TypeError(translate('util.getplatformdata.missingBusinessSku'));
   }
   try {
     log(`当前SKU：${sku}，运行环境：${getEnv()}`);

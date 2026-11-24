@@ -4,6 +4,7 @@
  *       数据变更时 isDirty.value = true，保存成功后 isDirty.value = false
  */
 export function useUnsavedGuard() {
+  const { t } = useI18n();
   const isDirty = ref(false);
 
   // 路由跳转拦截 — 弹出 Element Plus 确认框
@@ -11,9 +12,13 @@ export function useUnsavedGuard() {
     if (!isDirty.value) return true;
     try {
       await ElMessageBox.confirm(
-        "有未保存的内容，退出将丢失编辑器内所有未保存更改",
-        "提示",
-        { confirmButtonText: "放弃更改", cancelButtonText: "继续编辑", type: "warning" },
+        t('composables.useunsavedguard.unsavedChangesWarning'),
+        t('composables.useunsavedguard.notice'),
+        {
+          confirmButtonText: t('composables.useunsavedguard.discardChanges'),
+          cancelButtonText: t('composables.useunsavedguard.continueEditing'),
+          type: "warning",
+        },
       );
       return true;
     } catch {

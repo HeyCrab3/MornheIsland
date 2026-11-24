@@ -2,11 +2,11 @@
   <div>
     <div class="flex items-center justify-between mb-5">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">{{ label }}库</h1>
-        <p class="text-sm text-gray-500">管理可复用的{{ label }}资源，创建后可在班级中关联</p>
+        <h1 class="text-2xl font-semibold mb-1">{{ label }}{{ $t('components.resourcelist.extra.librarySuffix') }}</h1>
+        <p class="text-sm text-gray-500">{{ $t('components.resourcelist.extra.descA') }}{{ label }}{{ $t('components.resourcelist.extra.descB') }}</p>
       </div>
       <el-button type="primary" @click="showCreate = true">
-        <el-icon class="mr-1"><Plus /></el-icon>新建{{ label }}
+        <el-icon class="mr-1"><Plus /></el-icon>{{ $t('components.resourcelist.extra.createPrefix') }}{{ label }}
       </el-button>
     </div>
 
@@ -27,27 +27,27 @@
               <div class="flex items-center gap-1.5 min-w-0">
                 <div class="font-semibold text-base truncate">{{ item.name }}</div>
                 <el-tag v-if="item.isSchoolLevel" size="small" type="success" effect="plain" class="shrink-0">
-                  学校共享
+                  {{ $t('components.resourcelist.extra.schoolShared') }}
                 </el-tag>
               </div>
               <div class="text-xs text-gray-400 mt-1">
-                v{{ item.version }} · 更新于 {{ formatDate(item.updatedAt) }}
-                <span v-if="item.isSchoolLevel && !item.editable" class="text-amber-500"> · 只读</span>
+                v{{ item.version }} · {{ $t('components.resourcelist.extra.updatedAt') }} {{ formatDate(item.updatedAt) }}
+                <span v-if="item.isSchoolLevel && !item.editable" class="text-amber-500"> · {{ $t('components.resourcelist.extra.readOnly') }}</span>
               </div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-end gap-1.5">
             <el-button size="small" text type="primary" @click.stop="navigateTo(`/${collection}/${item._id}`)">
-              {{ item.editable === false ? "查看" : "编辑" }}
+              {{ item.editable === false ? $t('components.resourcelist.view') : $t('components.resourcelist.edit') }}
             </el-button>
             <template v-if="item.editable !== false">
               <el-button size="small" text @click.stop="rename(item._id, item.name)">
-                改名
+                {{ $t('components.resourcelist.extra.rename') }}
               </el-button>
-              <el-popconfirm :title="`确定删除「${item.name}」？`" @confirm="remove(item._id)">
+              <el-popconfirm :title="$t('components.resourcelist.extra.deleteConfirm', { name: item.name })" @confirm="remove(item._id)">
                 <template #reference>
-                  <el-button size="small" text type="danger" @click.stop>删除</el-button>
+                  <el-button size="small" text type="danger" @click.stop>{{ $t('components.resourceeditor.delete') }}</el-button>
                 </template>
               </el-popconfirm>
             </template>
@@ -55,18 +55,18 @@
         </el-card>
       </div>
 
-      <el-empty v-else :image-size="100" :description="`暂无${label}，点击右上角「新建${label}」开始`" />
+      <el-empty v-else :image-size="100" :description="$t('components.resourcelist.extra.emptyHint', { label })" />
     </div>
 
-    <el-dialog v-model="showCreate" :title="`新建${label}`" width="400px">
+    <el-dialog v-model="showCreate" :title="$t('components.resourcelist.extra.createTitle', { label })" width="400px">
       <el-form @submit.prevent="doCreate">
-        <el-form-item :label="`${label}名称`" required>
-          <el-input v-model="newName" :placeholder="`如「高中标准${label}」`" @keyup.enter="doCreate" />
+        <el-form-item :label="$t('components.resourcelist.extra.nameLabel', { label })" required>
+          <el-input v-model="newName" :placeholder="$t('components.resourcelist.extra.namePlaceholder', { label })" @keyup.enter="doCreate" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreate = false">取消</el-button>
-        <el-button type="primary" :loading="creating" @click="doCreate">确定</el-button>
+        <el-button @click="showCreate = false">{{ $t('reauth.cancel') }}</el-button>
+        <el-button type="primary" :loading="creating" @click="doCreate">{{ $t('components.resourceeditor.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -76,6 +76,7 @@
 import { Plus, Notebook, Timer, Collection, Lock, Document } from "@element-plus/icons-vue";
 
 const props = defineProps<{ collection: string; label: string }>();
+const { t } = useI18n();
 const { items, loading, fetchList, createItem, removeItem, renameItem } = useCiResource(props.collection, props.label);
 const remove = removeItem;
 const rename = renameItem;
@@ -101,12 +102,12 @@ async function doCreate() {
   creating.value = true;
   try {
     await createItem(newName.value.trim());
-    ElMessage.success(`${props.label}已创建`);
+    ElMessage.success(t('components.resourcelist.extra.created', { label: props.label }));
     showCreate.value = false;
     newName.value = "";
     await fetchList();
   } catch {
-    ElMessage.error("创建失败");
+    ElMessage.error(t('components.resourcelist.createFailed'));
   } finally {
     creating.value = false;
   }

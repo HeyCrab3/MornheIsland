@@ -6,7 +6,7 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="这份课表是学校共享的，你只有查看权限；需要修改请找学校管理员，或复制一份成自己的。"
+      :title="$t('components.classplaneditor.sharedPlanReadOnlyNotice')"
     />
     <el-alert
       v-else-if="mobile"
@@ -14,24 +14,24 @@
       :closable="false"
       show-icon
       class="mb-4"
-      title="课表网格编辑在手机上体验有限，以下为只读预览，请在电脑上编辑。"
+      :title="$t('components.classplaneditor.mobileReadOnlyNotice')"
     />
 
     <div v-if="!mobile" class="mb-4 flex items-center gap-4 flex-wrap">
-      <span class="text-sm font-medium">时间表：</span>
+      <span class="text-sm font-medium">{{ $t('components.classplaneditor.extra.timeLayoutLabel') }}</span>
       <el-select
         v-model="selectedTimelayoutId"
-        placeholder="必选"
+        :placeholder="$t('components.classplaneditor.required')"
         :disabled="viewOnly"
         @change="onTimelayoutChange"
         class="w-48"
       >
         <el-option v-for="t in timelayouts" :key="t._id" :label="t.name" :value="t._id" />
       </el-select>
-      <span class="text-sm font-medium ml-4">课程表：</span>
+      <span class="text-sm font-medium ml-4">{{ $t('components.classplaneditor.extra.subjectsLabel') }}</span>
       <el-select
         v-model="selectedSubjectsId"
-        placeholder="必选"
+        :placeholder="$t('components.classplaneditor.required')"
         :disabled="viewOnly"
         @change="onSubjectsChange"
         class="w-48"
@@ -42,7 +42,7 @@
 
     <!-- 周次轮换：每周 / 单周 / 双周 -->
     <div v-if="!mobile" class="mb-4 flex items-center gap-3 flex-wrap">
-      <span class="text-sm font-medium">周次：</span>
+      <span class="text-sm font-medium">{{ $t('components.classplaneditor.extra.weekLabel') }}</span>
       <el-radio-group v-model="activeWeekDiv" @change="forceRender++">
         <el-radio-button v-for="t in WEEK_TABS" :key="t.value" :value="t.value">
           {{ t.label }}
@@ -50,7 +50,7 @@
       </el-radio-group>
       <el-dropdown v-if="!viewOnly" @command="copyWeekTo">
         <el-button size="small" text type="primary">
-          复制当前周到…<el-icon class="ml-1"><ArrowDown /></el-icon>
+          {{ $t('components.classplaneditor.extra.copyWeekTo') }}<el-icon class="ml-1"><ArrowDown /></el-icon>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
@@ -60,18 +60,18 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <span class="text-xs text-gray-400">每周 = 不轮换；单周 + 双周 = 两周轮换</span>
+      <span class="text-xs text-gray-400">{{ $t('components.classplaneditor.extra.weekRuleHint') }}</span>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-3">
-      <template #title>和 ClassIsland 对齐的两条规则</template>
-      ① 每个课时有独立的<b>启用</b>开关：取消勾选就是"这节课不上"（比如自习、考试占场），
-      跟"有没有科目"无关；② 一天里<b>最后一个启用的课时之后视为放学</b>，后面的课时会自动按未启用处理。
+      <template #title>{{ $t('components.classplaneditor.extra.rulesTitle') }}</template>
+      {{ $t('components.classplaneditor.extra.ruleA') }}<b>{{ $t('components.classplaneditor.extra.ruleEnabled') }}</b>{{ $t('components.classplaneditor.extra.ruleB') }}
+      <b>{{ $t('components.classplaneditor.extra.ruleAfterSchool') }}</b>{{ $t('components.classplaneditor.extra.ruleC') }}
     </el-alert>
 
     <template v-if="timePoints.length > 0 && subjectPool.length > 0">
       <div v-if="!mobile" class="mb-3 flex items-center gap-2 flex-wrap">
-        <span class="text-sm text-gray-500">上课日：</span>
+        <span class="text-sm text-gray-500">{{ $t('components.classplaneditor.extra.classDaysLabel') }}</span>
         <el-checkbox-group
           v-model="activeDays"
           size="small"
@@ -83,7 +83,7 @@
 
       <div class="flex gap-4">
         <div v-if="!mobile" class="w-32 shrink-0">
-          <div class="text-sm font-medium mb-2">科目</div>
+          <div class="text-sm font-medium mb-2">{{ $t('composables.useciresource.subject') }}</div>
           <div class="space-y-1">
             <div
               v-for="s in subjectPool"
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="text-xs text-gray-400 mt-2 leading-relaxed">
-            选中科目后点格子填入；再点一次取消选择，此时点格子会清空科目。
+            {{ $t('components.classplaneditor.extra.pickHint') }}
           </div>
         </div>
 
@@ -104,7 +104,7 @@
           <table class="border-collapse w-full">
             <thead>
               <tr>
-                <th class="th-cell w-24">节次</th>
+                <th class="th-cell w-24">{{ $t('components.classplaneditor.extra.periodColumn') }}</th>
                 <th v-for="d in activeDays" :key="d" class="th-cell min-w-32">
                   {{ DAYS.find((x) => x.value === d)?.label }}
                 </th>
@@ -113,7 +113,7 @@
             <tbody>
               <tr v-for="(tp, tpi) in timePoints" :key="tpi">
                 <td class="border p-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-600 align-top">
-                  <div class="font-medium">{{ tp.TimePointName || `第${tpi + 1}节` }}</div>
+                  <div class="font-medium">{{ tp.TimePointName || $t('components.classplaneditor.extra.periodLabel', { index: tpi + 1 }) }}</div>
                   <div class="text-gray-400">{{ tp.Start }}-{{ tp.End }}</div>
                 </td>
                 <td
@@ -132,7 +132,7 @@
                     @click="setCell(d, tpi)"
                   >
                     <span class="cell-subject">
-                      {{ getCellSubjectName(d, tpi) || (isEnabled(d, tpi) ? "空课" : "—") }}
+                      {{ getCellSubjectName(d, tpi) || (isEnabled(d, tpi) ? $t('components.classplaneditor.emptyClass') : "—") }}
                     </span>
                     <el-checkbox
                       :model-value="isEnabled(d, tpi)"
@@ -144,7 +144,7 @@
                     />
                   </div>
                   <div v-if="isAfterSchoolStart(d, tpi)" class="text-[10px] text-amber-500 text-center">
-                    放学
+                    {{ $t('components.classplaneditor.extra.dismissal') }}
                   </div>
                 </td>
               </tr>
@@ -154,9 +154,9 @@
       </div>
 
       <div class="mt-3 text-xs text-gray-400">
-        当前周次「{{ weekLabel(activeWeekDiv) }}」的放学线：
+        {{ $t('components.classplaneditor.extra.dismissalLineA') }}{{ weekLabel(activeWeekDiv) }}{{ $t('components.classplaneditor.extra.dismissalLineB') }}
         <span class="text-gray-500">
-          {{ activeDays.map((d) => `${DAYS.find((x) => x.value === d)?.label}第${lastEnabled(d) + 1}节`).join(" · ") }}
+          {{ activeDays.map((d) => DAYS.find((x) => x.value === d)?.label + $t('components.classplaneditor.extra.periodLabel', { index: lastEnabled(d) + 1 })).join(" · ") }}
         </span>
       </div>
 
@@ -167,11 +167,11 @@
         class="mt-4"
         @click="doSave"
       >
-        保存课表
+        {{ $t('components.classplaneditor.extra.savePlan') }}
       </el-button>
     </template>
 
-    <el-empty v-else :description="!timePoints.length ? '请先选择时间表' : '请先选择课程表'" />
+    <el-empty v-else :description="!timePoints.length ? $t('components.classplaneditor.selectTimeLayoutFirst') : $t('components.classplaneditor.selectSubjectsFirst')" />
   </div>
 </template>
 
@@ -193,6 +193,7 @@ interface TimePoint {
 
 const props = defineProps<{ modelValue: any; viewOnly?: boolean }>();
 const emit = defineEmits<{ save: [data: any] }>();
+const { t } = useI18n();
 const saving = ref(false);
 const loading = ref(false);
 const forceRender = ref(0);
@@ -200,21 +201,21 @@ const forceRender = ref(0);
 /** ClassIsland 里 Guid.Empty 的字符串形态：空课时/空引用都要写它，不能写 null */
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
-const DAYS = [
-  { value: "Monday", label: "周一", weekDay: 1 },
-  { value: "Tuesday", label: "周二", weekDay: 2 },
-  { value: "Wednesday", label: "周三", weekDay: 3 },
-  { value: "Thursday", label: "周四", weekDay: 4 },
-  { value: "Friday", label: "周五", weekDay: 5 },
-  { value: "Saturday", label: "周六", weekDay: 6 },
-  { value: "Sunday", label: "周日", weekDay: 0 },
-];
+const DAYS = computed(() => [
+  { value: "Monday", label: t('components.classplaneditor.monday'), weekDay: 1 },
+  { value: "Tuesday", label: t('components.classplaneditor.tuesday'), weekDay: 2 },
+  { value: "Wednesday", label: t('components.classplaneditor.wednesday'), weekDay: 3 },
+  { value: "Thursday", label: t('components.classplaneditor.thursday'), weekDay: 4 },
+  { value: "Friday", label: t('components.classplaneditor.friday'), weekDay: 5 },
+  { value: "Saturday", label: t('components.classplaneditor.saturday'), weekDay: 6 },
+  { value: "Sunday", label: t('components.classplaneditor.sunday'), weekDay: 0 },
+]);
 
-const WEEK_TABS = [
-  { value: 0, label: "每周" },
-  { value: 1, label: "单周" },
-  { value: 2, label: "双周" },
-] as const;
+const WEEK_TABS = computed(() => [
+  { value: 0, label: t('components.classplaneditor.everyWeek') },
+  { value: 1, label: t('components.classplaneditor.oddWeek') },
+  { value: 2, label: t('components.classplaneditor.evenWeek') },
+] as const);
 
 const activeDays = ref(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
 const timelayouts = ref<any[]>([]);
@@ -233,10 +234,10 @@ const grids = reactive<Record<0 | 1 | 2, Record<string, (string | null)[]>>>({ 0
 const enabledFlag = reactive<Record<0 | 1 | 2, Record<string, boolean[]>>>({ 0: {}, 1: {}, 2: {} });
 const existingUuids = reactive<Record<0 | 1 | 2, Record<string, string>>>({ 0: {}, 1: {}, 2: {} });
 
-const otherWeeks = computed(() => WEEK_TABS.filter((t) => t.value !== activeWeekDiv.value));
+const otherWeeks = computed(() => WEEK_TABS.value.filter((t) => t.value !== activeWeekDiv.value));
 
 function weekLabel(v: number): string {
-  return v === 0 ? "每周" : v === 1 ? "单周" : "双周";
+  return WEEK_TABS.value.find((tab) => tab.value === v)?.label ?? "";
 }
 
 function authHeaders() {
@@ -288,7 +289,7 @@ function loadModel() {
     const entries = Object.entries(props.modelValue.classPlans || props.modelValue || {});
     for (const [uuid, entry] of entries as [string, any][]) {
       if (!entry?.TimeRule || !entry?.Classes) continue;
-      const dayKey = DAYS.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
+      const dayKey = DAYS.value.find((d) => d.weekDay === entry.TimeRule.WeekDay)?.value;
       if (!dayKey) continue;
       if (!activeDays.value.includes(dayKey)) activeDays.value.push(dayKey);
 
@@ -415,22 +416,22 @@ function copyWeekTo(dst: number) {
     enabledFlag[target][d] = [...(enabledFlag[src]?.[d] || [])];
   }
   existingUuids[target] = {};
-  ElMessage.success(`已将「${weekLabel(src)}」复制到「${weekLabel(target)}」`);
+  ElMessage.success(t('components.classplaneditor.extra.weekCopied', { from: weekLabel(src), to: weekLabel(target) }));
   forceRender.value++;
 }
 
 function doSave() {
-  if (!selectedTimelayoutId.value) return ElMessage.warning("请先选择时间表");
-  if (!selectedSubjectsId.value) return ElMessage.warning("请先选择课程表");
-  if (!activeDays.value.length) return ElMessage.warning("请至少选择一个上课日");
+  if (!selectedTimelayoutId.value) return ElMessage.warning(t('components.classplaneditor.selectTimeLayoutFirst'));
+  if (!selectedSubjectsId.value) return ElMessage.warning(t('components.classplaneditor.selectSubjectsFirst'));
+  if (!activeDays.value.length) return ElMessage.warning(t('components.classplaneditor.selectAtLeastOneDay'));
 
   const classPlans: Record<string, any> = {};
   const tl = timelayouts.value.find((t: any) => t._id === selectedTimelayoutId.value);
   const tlUuid = tl?.data ? Object.keys(tl.data)[0] || "" : "";
-  if (!tlUuid) return ElMessage.warning("这份时间表里没有可用的时间轴，请先修时间表");
+  if (!tlUuid) return ElMessage.warning(t('components.classplaneditor.noAvailableTimePoints'));
 
   for (const d of activeDays.value) {
-    const dayInfo = DAYS.find((x) => x.value === d)!;
+    const dayInfo = DAYS.value.find((x) => x.value === d)!;
     for (const div of [0, 1, 2] as const) {
       if (!isDayTouched(div, d)) continue;
 
@@ -490,7 +491,7 @@ function doSave() {
   }
 
   if (Object.keys(classPlans).length === 0) {
-    return ElMessage.warning("课表为空，请先填入课程或勾选启用");
+    return ElMessage.warning(t('components.classplaneditor.planEmptyHint'));
   }
 
   const data: any = { classPlans, timelayoutId: selectedTimelayoutId.value, subjectsId: selectedSubjectsId.value };

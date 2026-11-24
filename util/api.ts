@@ -2,6 +2,22 @@ import axios from 'axios';
 import { ElMessage as message } from 'element-plus';
 import { INVALID_TOKEN_MSG } from '../types/user';
 
+// 拦截器没有 Vue 上下文，取不到 i18n 时退回中文原文，避免把 key 暴露给用户。
+const FALLBACK: Record<string, string> = {
+  notLoggedIn: '未登录',
+  networkError: '网络错误',
+};
+function tr(key: string): string {
+  const short = key.split('.').pop()!;
+  try {
+    const app = useNuxtApp();
+    return (app as any).$i18n?.t?.(key) ?? FALLBACK[short] ?? key;
+  } catch {
+    return FALLBACK[short] ?? key;
+  }
+}
+
+
 const api = axios.create({
   baseURL: process.env.API_BASE_URL || '/api',
   timeout: 10000,
@@ -48,7 +64,7 @@ api.interceptors.response.use(
       if (errorMsg !== INVALID_TOKEN_MSG) {
         message.error(errorMsg);
       } else {
-        message.warning('未登录');
+        message.warning(tr('api.notLoggedIn'));
       }
       // 把后端的整包数据挂在错误上：调用方要判断 needReauth / 票据是否失效，
       // 只给一个字符串就只能拿文案去 includes，迟早被改文案改坏。
@@ -69,8 +85,8 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    message.error(error.response?.data?.msg || '网络错误');
-    const err: any = new Error(error.response?.data?.msg || '网络错误');
+    message.error(error.response?.data?.msg || tr('api.networkError'));
+    const err: any = new Error(error.response?.data?.msg || tr('api.networkError'));
     err.code = error.response?.data?.code;
     err.data = error.response?.data;
     err.needReauth = !!error.response?.data?.needReauth;

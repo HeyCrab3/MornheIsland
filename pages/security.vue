@@ -2,37 +2,37 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">账号安全</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.security') }}</h1>
         <p class="text-sm text-gray-500">
-          二步验证、登录记录、下线设备。账号被盗时，这里是你能第一时间踩刹车的地方。
+          {{ $t('pages.security.extra.subtitle') }}
         </p>
       </div>
-      <el-button :loading="loading" @click="load">刷新</el-button>
+      <el-button :loading="loading" @click="load">{{ $t('pages.security.extra.refresh') }}</el-button>
     </div>
 
     <!-- 概览 -->
     <div class="flex flex-wrap gap-3 mb-5">
       <div class="stat-card">
         <div class="stat-num" :class="overview?.mfaEnabled ? 'text-emerald-500' : 'text-amber-500'">
-          {{ overview?.mfaEnabled ? "已开启" : "未开启" }}
+          {{ overview?.mfaEnabled ? $t('pages.security.enabled') : $t('pages.security.disabled') }}
         </div>
-        <div class="stat-label">二步验证</div>
+        <div class="stat-label">{{ $t('pages.security.twoFactorAuth') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ overview?.eventCount7d ?? "-" }}</div>
-        <div class="stat-label">近 7 天安全事件</div>
+        <div class="stat-label">{{ $t('pages.security.extra.events7d') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" :class="overview?.newIpCount90d ? 'text-amber-500' : ''">
           {{ overview?.newIpCount90d ?? "-" }}
         </div>
-        <div class="stat-label">近 90 天新 IP 登录</div>
+        <div class="stat-label">{{ $t('pages.security.extra.newIps90d') }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num text-sm leading-tight !font-normal">
-          {{ overview?.lastLogin ? fmtTime(overview.lastLogin.at) : "暂无记录" }}
+          {{ overview?.lastLogin ? fmtTime(overview.lastLogin.at) : $t('pages.security.noRecords') }}
         </div>
-        <div class="stat-label">最近登录{{ overview?.lastLogin?.newIp ? "（新 IP）" : "" }}</div>
+        <div class="stat-label">{{ $t('pages.security.extra.lastLogin') }}{{ overview?.lastLogin?.newIp ? $t('pages.security.newIp') : "" }}</div>
       </div>
     </div>
 
@@ -41,24 +41,24 @@
       <el-card>
         <template #header>
           <div class="flex items-center justify-between">
-            <span class="font-medium">二步验证</span>
+            <span class="font-medium">{{ $t('pages.security.twoFactorAuth') }}</span>
             <el-tag :type="overview?.mfaEnabled ? 'success' : 'info'" size="small">
-              {{ overview?.mfaEnabled ? "已开启" : "未开启" }}
+              {{ overview?.mfaEnabled ? $t('pages.security.enabled') : $t('pages.security.disabled') }}
             </el-tag>
           </div>
         </template>
 
         <p class="text-sm text-gray-500 leading-relaxed">
-          除了 SSO 登录，再要第二种验证：验证器 App 里的 6 位动态码，或者一把通行密钥（指纹 / 面容 / 安全密钥）。
-          <span class="text-gray-400">两种是并列关系，任意一种可用就算二步验证已开启。</span>
+          {{ $t('pages.security.extra.totpDesc') }}
+          <span class="text-gray-400">{{ $t('pages.security.extra.totpDescHint') }}</span>
         </p>
 
         <div class="mt-3 flex flex-wrap gap-2">
           <el-tag :type="overview?.methods?.totp ? 'success' : 'info'" size="small" effect="plain">
-            动态码 · {{ overview?.methods?.totp ? "已开启" : "未开启" }}
+            {{ $t('pages.security.extra.totpLabel') }} {{ overview?.methods?.totp ? $t('pages.security.enabled') : $t('pages.security.disabled') }}
           </el-tag>
           <el-tag :type="overview?.methods?.passkey ? 'success' : 'info'" size="small" effect="plain">
-            通行密钥 · {{ overview?.passkeyCount || 0 }} 把
+            {{ $t('pages.security.extra.passkeyCount', { count: overview?.passkeyCount || 0 }) }}
           </el-tag>
         </div>
 
@@ -69,41 +69,39 @@
           show-icon
           class="mt-3"
         >
-          <template #title>强烈建议开启</template>
-          你的账号里有全校的课表和时间表。这里没有密码可以泄漏，但令牌一旦被拷走，
-          对方就能一直用到 30 天后。
+          <template #title>{{ $t('pages.security.extra.stronglyRecommend') }}</template>
+          {{ $t('pages.security.extra.mfaWarning') }}
         </el-alert>
 
         <div v-if="overview?.mfaEnabledAt" class="text-xs text-gray-400 mt-3">
-          动态码开启于 {{ fmtTime(overview.mfaEnabledAt) }}
+          {{ $t('pages.security.extra.totpEnabledAtTime', { time: fmtTime(overview.mfaEnabledAt) }) }}
         </div>
 
         <div class="mt-4 flex gap-2">
           <el-button v-if="!overview?.methods?.totp" type="primary" :loading="setupLoading" @click="startSetup">
-            绑定动态码
+            {{ $t('pages.security.extra.bindTotp') }}
           </el-button>
-          <el-button v-else type="danger" plain @click="disableMfa">关闭动态码</el-button>
+          <el-button v-else type="danger" plain @click="disableMfa">{{ $t('pages.security.disableOtp') }}</el-button>
         </div>
       </el-card>
 
       <!-- 登录凭证 -->
       <el-card>
         <template #header>
-          <span class="font-medium">登录凭证</span>
+          <span class="font-medium">{{ $t('pages.security.extra.credentials') }}</span>
         </template>
 
         <p class="text-sm text-gray-500 leading-relaxed">
-          登录令牌在别的设备上被拷走，靠改密码是没用的（这里没有密码）。
-          一键吊销会让所有已签发的令牌立即失效。
+          {{ $t('pages.security.extra.credentialsDesc') }}
         </p>
-        <div class="text-xs text-gray-400 mt-2">当前凭证版本：v{{ overview?.tokenVersion ?? 0 }}</div>
+        <div class="text-xs text-gray-400 mt-2">{{ $t('pages.security.extra.tokenVersionValue', { version: overview?.tokenVersion ?? 0 }) }}</div>
 
         <div class="mt-4 flex flex-wrap gap-2">
-          <el-button :loading="revoking" @click="revokeOthers">下线其他设备</el-button>
-          <el-button type="danger" plain :loading="revoking" @click="revokeAll">全部下线</el-button>
+          <el-button :loading="revoking" @click="revokeOthers">{{ $t('pages.security.signOutOtherDevices') }}</el-button>
+          <el-button type="danger" plain :loading="revoking" @click="revokeAll">{{ $t('pages.security.signOutAll') }}</el-button>
         </div>
         <p class="text-xs text-gray-400 mt-3">
-          「下线其他设备」会保留当前浏览器；「全部下线」连自己一起踢，需要重新登录。
+          {{ $t('pages.security.extra.revokeHint') }}
         </p>
       </el-card>
 
@@ -111,16 +109,16 @@
       <el-card class="lg:col-span-2">
         <template #header>
           <div class="flex items-center justify-between">
-            <span class="font-medium">通行密钥（Passkey）</span>
+            <span class="font-medium">{{ $t('pages.security.extra.passkeyTitle') }}</span>
             <el-tag :type="passkeys.length ? 'success' : 'info'" size="small">
-              {{ passkeys.length ? `已绑定 ${passkeys.length} 个` : "未绑定" }}
+              {{ passkeys.length ? $t('pages.security.extra.boundCount', { count: passkeys.length }) : $t('pages.security.notBound') }}
             </el-tag>
           </div>
         </template>
 
         <p class="text-sm text-gray-500 leading-relaxed">
-          用手机指纹、Windows Hello 或硬件密钥代替动态码，登录时按一下就行，不用再抄 6 位数字。
-          和动态码是<strong>并列</strong>的两种方式，绑了钥匙也可以继续用动态码。
+          {{ $t('pages.security.extra.passkeyDesc1') }}
+          {{ $t('pages.security.extra.passkeyDesc2Prefix') }}<strong>{{ $t('pages.security.extra.passkeyDesc2Bold') }}</strong>{{ $t('pages.security.extra.passkeyDesc2Suffix') }}
         </p>
 
         <el-alert
@@ -130,8 +128,8 @@
           show-icon
           class="mt-3"
         >
-          <template #title>至少配一种</template>
-          绑通行密钥或开启动态码都可以，两者都没有时，令牌被拷走就等于账号被接管。
+          <template #title>{{ $t('pages.security.extra.configureOneTitle') }}</template>
+          {{ $t('pages.security.extra.configureOneBody') }}
         </el-alert>
 
         <div v-if="passkeys.length" class="mt-3">
@@ -141,20 +139,20 @@
                 <el-icon class="align-middle mr-1"><Key /></el-icon>{{ p.name }}
               </div>
               <div class="text-xs text-gray-400">
-                绑定于 {{ fmtTime(p.createdAt) }}
-                <span v-if="p.lastUsedAt"> · 最后使用 {{ fmtTime(p.lastUsedAt) }}</span>
-                <span v-else> · 还没用过</span>
+                {{ $t('pages.security.extra.boundAtTime', { time: fmtTime(p.createdAt) }) }}
+                <span v-if="p.lastUsedAt">{{ $t('pages.security.extra.lastUsedAtTime', { time: fmtTime(p.lastUsedAt) }) }}</span>
+                <span v-else> · {{ $t('pages.security.extra.neverUsed') }}</span>
               </div>
             </div>
-            <el-button size="small" type="danger" plain @click="removePasskey(p)">删除</el-button>
+            <el-button size="small" type="danger" plain @click="removePasskey(p)">{{ $t('components.resourceeditor.delete') }}</el-button>
           </div>
         </div>
 
         <div class="mt-4">
           <el-button type="primary" :loading="passkeyLoading" @click="addPasskey">
-            添加通行密钥
+            {{ $t('pages.security.addPasskey') }}
           </el-button>
-          <span class="text-xs text-gray-400 ml-3">同一把钥匙只能绑一个账号</span>
+          <span class="text-xs text-gray-400 ml-3">{{ $t('pages.security.extra.oneKeyOneAccount') }}</span>
         </div>
       </el-card>
     </div>
@@ -163,49 +161,49 @@
     <el-card class="max-w-5xl mt-4" v-loading="logsLoading">
       <template #header>
         <div class="flex items-center justify-between flex-wrap gap-2">
-          <span class="font-medium">登录与安全记录</span>
+          <span class="font-medium">{{ $t('pages.security.extra.securityLogs') }}</span>
           <el-select v-model="eventFilter" size="small" style="width: 150px" @change="loadLogs">
-            <el-option label="全部事件" value="" />
-            <el-option label="登录成功" value="login" />
-            <el-option label="登录失败" value="login_fail" />
-            <el-option label="敏感操作" value="sensitive" />
-            <el-option label="吊销凭证" value="token_revoke" />
-            <el-option label="二步验证" value="mfa_enable" />
-            <el-option label="验证失败" value="mfa_fail" />
+            <el-option :label="$t('pages.security.allEvents')" value="" />
+            <el-option :label="$t('login.errors.loginSuccess')" value="login" />
+            <el-option :label="$t('pages.security.loginFailed')" value="login_fail" />
+            <el-option :label="$t('pages.security.sensitiveAction')" value="sensitive" />
+            <el-option :label="$t('pages.security.revokeCredential')" value="token_revoke" />
+            <el-option :label="$t('pages.security.twoFactorAuth')" value="mfa_enable" />
+            <el-option :label="$t('pages.security.verificationFailed')" value="mfa_fail" />
           </el-select>
         </div>
       </template>
 
-      <el-empty v-if="!logsLoading && !logs.length" description="还没有记录" :image-size="80" />
+      <el-empty v-if="!logsLoading && !logs.length" :description="$t('pages.security.noRecordsYet')" :image-size="80" />
 
       <el-table v-else :data="logs" size="small" style="width: 100%">
-        <el-table-column label="时间" width="150">
+        <el-table-column :label="$t('pages.security.extra.time')" width="150">
           <template #default="{ row }">{{ fmtTime(row.at) }}</template>
         </el-table-column>
-        <el-table-column label="事件" width="130">
+        <el-table-column :label="$t('pages.security.event')" width="130">
           <template #default="{ row }">
             <el-tag :type="eventMeta(row.event).type" size="small">{{ eventMeta(row.event).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="结果" width="70">
+        <el-table-column :label="$t('pages.security.result')" width="70">
           <template #default="{ row }">
             <span :class="row.success === false ? 'text-red-500' : 'text-emerald-600'">
-              {{ row.success === false ? "失败" : "成功" }}
+              {{ row.success === false ? $t('pages.security.failure') : $t('pages.security.success') }}
             </span>
           </template>
         </el-table-column>
         <el-table-column label="IP" width="140">
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.ip || "-" }}</span>
-            <el-tag v-if="row.newIp" type="warning" size="small" class="ml-1">新</el-tag>
+            <el-tag v-if="row.newIp" type="warning" size="small" class="ml-1">{{ $t('pages.security.extra.new') }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="设备" width="140">
+        <el-table-column :label="$t('dashboard.cards.devices')" width="140">
           <template #default="{ row }">
             <span class="text-xs text-gray-500">{{ shortUa(row.ua) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="说明" min-width="180">
+        <el-table-column :label="$t('pages.security.description')" min-width="180">
           <template #default="{ row }">
             <span class="text-xs text-gray-500">{{ row.detail || "-" }}</span>
           </template>
@@ -214,45 +212,44 @@
     </el-card>
 
     <!-- 绑定二步验证 -->
-    <el-dialog v-model="setupVisible" title="绑定二步验证" width="440px" :close-on-click-modal="false">
+    <el-dialog v-model="setupVisible" :title="$t('pages.security.bindTwoFactor')" width="440px" :close-on-click-modal="false">
       <div v-if="setupData">
         <p class="text-sm text-gray-500 mb-3">
-          用验证器 App（Microsoft Authenticator、Google Authenticator、1Password 等）扫描二维码：
+          {{ $t('pages.security.extra.scanAuthenticator') }}
         </p>
         <div class="flex justify-center py-2 bg-white rounded-lg">
           <QrcodeVue :value="setupData.otpauth" :size="180" level="M" render-as="svg" />
         </div>
-        <p class="text-xs text-gray-400 mt-2 text-center">扫不了？手动输入密钥：</p>
+        <p class="text-xs text-gray-400 mt-2 text-center">{{ $t('pages.security.extra.manualKeyHint') }}</p>
         <el-input :model-value="setupData.secret" readonly size="small" class="mt-1 font-mono">
           <template #append>
-            <el-button @click="copy(setupData.secret)">复制</el-button>
+            <el-button @click="copy(setupData.secret)">{{ $t('components.notifyqrdialog.extra.copy') }}</el-button>
           </template>
         </el-input>
 
         <el-alert type="warning" :closable="false" show-icon class="mt-4">
-          <template #title>恢复码只显示这一次</template>
-          手机丢了就靠它们登录，每枚只能用一次。请抄到纸上或存进离线笔记，
-          不要截图放在这台电脑上。
+          <template #title>{{ $t('pages.security.extra.recoveryOnceTitle') }}</template>
+          {{ $t('pages.security.extra.recoveryOnceBody') }}
         </el-alert>
         <div class="recovery-grid mt-2">
           <code v-for="c in setupData.recoveryCodes" :key="c">{{ c }}</code>
         </div>
         <el-button size="small" class="mt-2" @click="copy(setupData.recoveryCodes.join('\n'))">
-          复制全部恢复码
+          {{ $t('pages.security.extra.copyAllRecoveryCodes') }}
         </el-button>
 
-        <p class="text-sm mt-4 mb-1">输入验证器里显示的 6 位动态码以完成绑定：</p>
+        <p class="text-sm mt-4 mb-1">{{ $t('pages.security.extra.enterCodeToBind') }}</p>
         <el-input
           v-model="setupCode"
           maxlength="6"
-          placeholder="6 位动态码"
+          :placeholder="$t('login.codePlaceholder')"
           @keyup.enter="confirmEnable"
         />
       </div>
       <template #footer>
-        <el-button @click="setupVisible = false">稍后再说</el-button>
+        <el-button @click="setupVisible = false">{{ $t('pages.profile.later') }}</el-button>
         <el-button type="primary" :loading="enableLoading" :disabled="!setupCode.trim()" @click="confirmEnable">
-          完成绑定
+          {{ $t('pages.security.extra.finishBinding') }}
         </el-button>
       </template>
     </el-dialog>
@@ -307,6 +304,8 @@ import { Key } from "@element-plus/icons-vue";
 import api from "@/util/api";
 
 definePageMeta({ title: "账号安全", protected: true });
+
+const { t } = useI18n();
 
 const loading = ref(false);
 const overview = ref<any>(null);
@@ -367,20 +366,20 @@ function guessKeyName(): string {
   const ua = navigator.userAgent;
   if (/Windows/i.test(ua)) return "Windows Hello";
   if (/iPhone|iPad|iOS/i.test(ua)) return "iPhone / iPad";
-  if (/Macintosh/i.test(ua)) return "Mac 触控 ID";
-  if (/Android/i.test(ua)) return "Android 手机";
-  return "通行密钥";
+  if (/Macintosh/i.test(ua)) return t('pages.security.macTouchId');
+  if (/Android/i.test(ua)) return t('pages.security.androidPhone');
+  return t('pages.security.passkey');
 }
 
 async function addPasskey() {
   if (!window.PublicKeyCredential) {
-    ElMessage.error("这个浏览器不支持通行密钥");
+    ElMessage.error(t('pages.security.passkeyUnsupported'));
     return;
   }
-  const named = await ElMessageBox.prompt("给这个通行密钥起个名字", "添加通行密钥", {
+  const named = await ElMessageBox.prompt(t('pages.security.namePasskey'), t('pages.security.addPasskey'), {
     inputValue: guessKeyName(),
-    confirmButtonText: "开始绑定",
-    cancelButtonText: "取消",
+    confirmButtonText: t('pages.security.startBinding'),
+    cancelButtonText: t('reauth.cancel'),
   }).catch(() => null);
   if (!named) return;
 
@@ -397,7 +396,7 @@ async function addPasskey() {
       })),
     };
     const cred: any = await navigator.credentials.create({ publicKey });
-    if (!cred) throw new Error("没有拿到凭据");
+    if (!cred) throw new Error(t('login.errors.noCredential'));
 
     const res: any = await api.post("/v1/user/security/webauthn/register", {
       challenge: opt.challenge,
@@ -412,22 +411,22 @@ async function addPasskey() {
       },
     });
 
-    ElMessage.success("已绑定通行密钥");
+    ElMessage.success(t('pages.security.passkeyBound'));
     if (res?.recoveryCodes?.length) {
       await ElMessageBox.alert(
-        `<div style="line-height:1.9">绑好了。再送你一组恢复码 —— 万一哪天钥匙丢了、手机也没了，这是最后一条路。<br/><br/><code style="font-family:ui-monospace;letter-spacing:.08em">${res.recoveryCodes.join(
+        `<div style="line-height:1.9">${t('pages.security.extra.recoveryGift')}<br/><br/><code style="font-family:ui-monospace;letter-spacing:.08em">${res.recoveryCodes.join(
           "　",
-        )}</code><br/><br/><span style="color:#b45309">只显示这一次，请自己存好。</span></div>`,
-        "恢复码",
-        { dangerouslyUseHTMLString: true, confirmButtonText: "我已保存" },
+        )}</code><br/><br/><span style="color:#b45309">${t('pages.security.extra.saveItOnce')}</span></div>`,
+        t('pages.security.recoveryCodes'),
+        { dangerouslyUseHTMLString: true, confirmButtonText: t('pages.security.savedIt') },
       ).catch(() => null);
     }
     await load();
   } catch (e: any) {
     if (e?.name === "NotAllowedError") {
-      ElMessage.info("已取消");
+      ElMessage.info(t('login.errors.cancelled'));
     } else {
-      ElMessage.error(e?.data?.msg || e?.message || "绑定失败");
+      ElMessage.error(e?.data?.msg || e?.message || t('pages.security.bindFailed'));
     }
   } finally {
     passkeyLoading.value = false;
@@ -473,13 +472,13 @@ async function removePasskey(p: any, retried = false, confirmed = false) {
   if (!confirmed) {
     const okConfirm = await ElMessageBox.confirm(
       lastOne
-        ? `「${p.name}」是你最后一种两步验证方式。删除后两步验证会被关闭——之后只凭一枚登录令牌就能进入你的账号，令牌被拷走就能一直用到 30 天后。确定要删除吗？`
-        : `删除后「${p.name}」就不能用来登录了，确定吗？`,
-      lastOne ? "这将会关闭两步验证" : "删除通行密钥",
+        ? t('pages.security.extra.lastMethodWarning', { name: p.name })
+        : t('pages.security.extra.deletePasskeyMessage', { name: p.name }),
+      lastOne ? t('pages.security.willDisableTwoFactor') : t('pages.security.deletePasskey'),
       {
         type: "warning",
-        confirmButtonText: lastOne ? "仍然删除" : "删除",
-        cancelButtonText: "取消",
+        confirmButtonText: lastOne ? t('pages.security.stillDelete') : t('components.resourceeditor.delete'),
+        cancelButtonText: t('reauth.cancel'),
       },
     ).catch(() => null);
     if (!okConfirm) return;
@@ -490,21 +489,21 @@ async function removePasskey(p: any, retried = false, confirmed = false) {
       `/v1/user/security/webauthn/${p._id}`,
       lastOne ? { data: { confirmDisableMfa: true } } : undefined,
     );
-    ElMessage.success(lastOne ? "已删除，两步验证已关闭" : "已删除");
+    ElMessage.success(lastOne ? t('pages.security.deletedTwoFactorOff') : t('components.resourceeditor.deleted'));
     await load();
     await loadLogs();
   } catch (e: any) {
     if (e?.data?.needReauth && !retried) {
       const done = await reauthViaPasskey();
       if (done) return removePasskey(p, true, true);
-      ElMessage.warning("请先在「二步验证」里完成一次验证，或重新登录后再试");
+      ElMessage.warning(t('pages.security.verifyFirst'));
       return;
     }
     if (e?.data?.needConfirm) {
       // 本地状态过期（例如另一个标签页刚开了动态码），按服务端要求再确认一次
       return removePasskey(p, retried, true);
     }
-    ElMessage.error(e?.data?.msg || "删除失败");
+    ElMessage.error(e?.data?.msg || t('pages.security.extra.deleteFailed'));
   }
 }
 
@@ -536,7 +535,7 @@ async function confirmEnable() {
   enableLoading.value = true;
   try {
     await api.post("/v1/user/security/mfa/enable", { code });
-    ElMessage.success("二步验证已开启");
+    ElMessage.success(t('pages.security.twoFactorEnabled'));
     setupVisible.value = false;
     setupData.value = null;
     await load();
@@ -551,13 +550,13 @@ async function disableMfa() {
   try {
     const { value } = await ElMessageBox.prompt(
       stillHasPasskey
-        ? "关闭后就不再需要输入动态码，两步验证将由通行密钥承担。请输入当前的 6 位动态码（或用一枚恢复码）确认。"
-        : "关闭二步验证后，只凭一枚令牌就能登录。请输入当前的 6 位动态码（或用一枚恢复码）确认。",
-      stillHasPasskey ? "关闭动态码" : "关闭二步验证",
-      { inputPlaceholder: "6 位动态码", confirmButtonText: "确认关闭", cancelButtonText: "算了" },
+        ? t('pages.security.disableOtpWithPasskeyHint')
+        : t('pages.security.disableTwoFactorHint'),
+      stillHasPasskey ? t('pages.security.disableOtp') : t('pages.security.disableTwoFactor'),
+      { inputPlaceholder: t('login.codePlaceholder'), confirmButtonText: t('pages.security.confirmDisable'), cancelButtonText: t('pages.security.neverMind') },
     );
     await api.post("/v1/user/security/mfa/disable", { code: value });
-    ElMessage.success(stillHasPasskey ? "已关闭动态码，通行密钥仍有效" : "已关闭二步验证");
+    ElMessage.success(stillHasPasskey ? t('pages.security.otpDisabledPasskeyValid') : t('pages.security.twoFactorDisabled'));
     await load();
     await loadLogs();
   } catch {
@@ -568,14 +567,14 @@ async function disableMfa() {
 async function revokeOthers() {
   try {
     await ElMessageBox.confirm(
-      "其他设备上的登录会立即失效，当前浏览器保持登录。确定吗？",
-      "下线其他设备",
-      { type: "warning", confirmButtonText: "确定", cancelButtonText: "取消" },
+      t('pages.security.signOutOthersConfirm'),
+      t('pages.security.signOutOtherDevices'),
+      { type: "warning", confirmButtonText: t('components.resourceeditor.confirm'), cancelButtonText: t('reauth.cancel') },
     );
     revoking.value = true;
     const data: any = await api.post("/v1/user/security/revoke-all", { keepCurrent: true });
     if (data?.token) localStorage.setItem("token", data.token);
-    ElMessage.success("已下线其他设备");
+    ElMessage.success(t('pages.security.signedOutOtherDevices'));
     await load();
     await loadLogs();
   } catch {
@@ -588,13 +587,13 @@ async function revokeOthers() {
 async function revokeAll() {
   try {
     await ElMessageBox.confirm(
-      "所有设备（包括当前浏览器）都会被强制下线，你需要重新登录一次。确定吗？",
-      "全部下线",
-      { type: "warning", confirmButtonText: "全部下线", cancelButtonText: "取消" },
+      t('pages.security.signOutAllConfirm'),
+      t('pages.security.signOutAll'),
+      { type: "warning", confirmButtonText: t('pages.security.signOutAll'), cancelButtonText: t('reauth.cancel') },
     );
     revoking.value = true;
     await api.post("/v1/user/security/revoke-all", { keepCurrent: false });
-    ElMessage.success("已全部下线，正在跳转登录");
+    ElMessage.success(t('pages.security.signedOutAll'));
     setTimeout(() => {
       localStorage.removeItem("token");
       window.location.href = "/login";
@@ -615,20 +614,20 @@ function fmtTime(v: any) {
 }
 
 const EVENT_META: Record<string, { label: string; type: any }> = {
-  login: { label: "登录成功", type: "success" },
-  login_fail: { label: "登录失败", type: "danger" },
-  logout: { label: "退出登录", type: "info" },
-  reauth: { label: "二次校验", type: "warning" },
-  reauth_fail: { label: "校验失败", type: "danger" },
-  token_revoke: { label: "吊销凭证", type: "warning" },
-  sensitive: { label: "敏感操作", type: "danger" },
-  mfa_enable: { label: "开启验证", type: "success" },
-  mfa_disable: { label: "关闭验证", type: "warning" },
-  mfa_fail: { label: "验证失败", type: "danger" },
+  login: { label: t('login.errors.loginSuccess'), type: "success" },
+  login_fail: { label: t('pages.security.loginFailed'), type: "danger" },
+  logout: { label: t('sidebar.logout'), type: "info" },
+  reauth: { label: t('pages.security.secondaryVerification'), type: "warning" },
+  reauth_fail: { label: t('pages.security.verificationFailed'), type: "danger" },
+  token_revoke: { label: t('pages.security.revokeCredential'), type: "warning" },
+  sensitive: { label: t('pages.security.sensitiveAction'), type: "danger" },
+  mfa_enable: { label: t('pages.security.enableVerification'), type: "success" },
+  mfa_disable: { label: t('pages.security.disableVerification'), type: "warning" },
+  mfa_fail: { label: t('pages.security.verificationFailed'), type: "danger" },
 };
 
 function eventMeta(e: string) {
-  return EVENT_META[e] || { label: e || "未知", type: "info" };
+  return EVENT_META[e] || { label: e || t('nuxt_config.unknown'), type: "info" };
 }
 
 function shortUa(ua?: string | null) {
@@ -659,9 +658,9 @@ function shortUa(ua?: string | null) {
 async function copy(text: string) {
   try {
     await navigator.clipboard.writeText(text);
-    ElMessage.success("已复制");
+    ElMessage.success(t('components.resourceeditor.copied'));
   } catch {
-    ElMessage.warning("复制失败，请手动选中");
+    ElMessage.warning(t('pages.security.copyFailedManual'));
   }
 }
 

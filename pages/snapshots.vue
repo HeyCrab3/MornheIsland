@@ -2,37 +2,35 @@
   <div>
     <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-semibold mb-1">数据恢复</h1>
+        <h1 class="text-2xl font-semibold mb-1">{{ $t('sidebar.items.snapshots') }}</h1>
         <p class="text-sm text-gray-500">
-          每次修改、删除、导入覆盖、批量修复之前，系统都会自动把当时的完整数据存一份。
+          {{ $t('pages.snapshots.extra.pageDesc') }}
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <el-button :loading="loading" @click="load">刷新</el-button>
+        <el-button :loading="loading" @click="load">{{ $t('pages.snapshots.extra.refresh') }}</el-button>
       </div>
     </div>
 
     <el-alert type="info" :closable="false" show-icon class="mb-4 max-w-4xl">
-      <template #title>这份东西和「历史版本」不一样</template>
-      「历史版本」按版本号记，只有保存/回滚会写；这里按<b>动作</b>记，连<b>删除前</b>、
-      <b>导入覆盖前</b>、<b>批量修复前</b>都留。资源被删掉之后，历史版本跟着没了，快照还在 ——
-      所以在这里可以把已经删掉的资源原地恢复回来。
+      <template #title>{{ $t('pages.snapshots.extra.alertTitle') }}</template>
+      {{ $t('pages.snapshots.extra.alertBody1') }}<b>{{ $t('pages.snapshots.extra.alertBold1') }}</b>{{ $t('pages.snapshots.extra.alertBody2') }}<b>{{ $t('pages.snapshots.extra.alertBold2') }}</b>{{ $t('pages.snapshots.extra.alertBody3') }}<b>{{ $t('pages.snapshots.extra.alertBold3') }}</b>{{ $t('pages.snapshots.extra.alertBody4') }}<b>{{ $t('pages.snapshots.extra.alertBold4') }}</b>{{ $t('pages.snapshots.extra.alertBody5') }}
     </el-alert>
 
     <div class="flex flex-wrap items-center gap-2 mb-3">
       <el-radio-group v-model="filter" size="small" @change="load">
-        <el-radio-button value="">全部</el-radio-button>
-        <el-radio-button value="ci_classplans">课表</el-radio-button>
-        <el-radio-button value="ci_timelayouts">时间表</el-radio-button>
-        <el-radio-button value="ci_subjects">科目</el-radio-button>
-        <el-radio-button value="ci_settings">设置</el-radio-button>
-        <el-radio-button value="ci_policies">策略</el-radio-button>
+        <el-radio-button value="">{{ $t('pages.devices.extra.all') }}</el-radio-button>
+        <el-radio-button value="ci_classplans">{{ $t('composables.useciresource.plan') }}</el-radio-button>
+        <el-radio-button value="ci_timelayouts">{{ $t('components.home.quickstartupguide.timeLayout') }}</el-radio-button>
+        <el-radio-button value="ci_subjects">{{ $t('composables.useciresource.subject') }}</el-radio-button>
+        <el-radio-button value="ci_settings">{{ $t('composables.useciresource.settings') }}</el-radio-button>
+        <el-radio-button value="ci_policies">{{ $t('composables.useciresource.policy') }}</el-radio-button>
       </el-radio-group>
     </div>
 
     <el-card v-loading="loading" class="max-w-5xl">
       <div v-if="rows.length === 0 && !loading" class="py-8 text-sm text-gray-400 text-center">
-        还没有任何快照。修改或删除资源之后，这里会自动出现记录。
+        {{ $t('pages.snapshots.extra.empty') }}
       </div>
       <div
         v-for="r in rows"
@@ -42,7 +40,7 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <el-tag size="small" effect="plain" type="info">{{ r.reasonLabel }}</el-tag>
-            <span class="font-medium truncate">{{ r.name || "未命名" }}</span>
+            <span class="font-medium truncate">{{ r.name || $t('components.resourceeditor.untitled') }}</span>
             <el-tag size="small" effect="plain" round>{{ typeLabel(r.collection) }}</el-tag>
             <span v-if="r.version" class="text-xs text-gray-400 font-mono">v{{ r.version }}</span>
           </div>
@@ -51,7 +49,7 @@
             <span v-if="r.detail"> · {{ r.detail }}</span>
           </div>
         </div>
-        <el-button size="small" type="primary" text @click="restore(r)">恢复到这一刻</el-button>
+        <el-button size="small" type="primary" text @click="restore(r)">{{ $t('pages.snapshots.extra.restoreToMoment') }}</el-button>
       </div>
     </el-card>
   </div>
@@ -59,6 +57,8 @@
 
 <script setup lang="ts">
 definePageMeta({ title: "数据恢复", protected: true });
+
+const { t } = useI18n();
 
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 
@@ -73,16 +73,18 @@ const TYPE_OF: Record<string, string> = {
   ci_settings: "settings",
   ci_policies: "policy",
 };
+// 存 i18n key，显示时再 t()，保证 no_prefix 切换语言后标签会更新
 const LABEL_OF: Record<string, string> = {
-  ci_classplans: "课表",
-  ci_timelayouts: "时间表",
-  ci_subjects: "科目",
-  ci_settings: "设置",
-  ci_policies: "策略",
+  ci_classplans: 'composables.useciresource.plan',
+  ci_timelayouts: 'components.home.quickstartupguide.timeLayout',
+  ci_subjects: 'composables.useciresource.subject',
+  ci_settings: 'composables.useciresource.settings',
+  ci_policies: 'composables.useciresource.policy',
 };
 
 function typeLabel(c: string) {
-  return LABEL_OF[c] || c;
+  const key = LABEL_OF[c];
+  return key ? t(key) : c;
 }
 
 function fmt(d: string) {
@@ -98,7 +100,7 @@ async function load() {
     });
     rows.value = res.data || [];
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "加载失败");
+    ElMessage.error(e?.data?.msg || t('pages.snapshots.loadFailed'));
   } finally {
     loading.value = false;
   }
@@ -106,13 +108,13 @@ async function load() {
 
 async function restore(r: any) {
   const type = TYPE_OF[r.collection];
-  if (!type) return ElMessage.error("不支持的资源类型");
+  if (!type) return ElMessage.error(t('pages.snapshots.unsupportedResourceType'));
   try {
     await ElMessageBox.confirm(
-      `将把「${r.name || "未命名"}」恢复成 ${fmt(r.at)} 时的内容。\n` +
-        `当前内容会先另存一份快照，所以这一步也能反悔。`,
-      `恢复到「${r.reasonLabel}」`,
-      { type: "warning", confirmButtonText: "恢复", cancelButtonText: "取消" },
+      t('pages.snapshots.extra.restoreConfirm', { name: r.name || t('components.resourceeditor.untitled'), time: fmt(r.at) }) + "\n" +
+        t('pages.snapshots.snapshotBeforeRestore'),
+      t('pages.snapshots.extra.restoreTitle', { reason: r.reasonLabel }),
+      { type: "warning", confirmButtonText: t('components.resourceeditor.restore'), cancelButtonText: t('reauth.cancel') },
     );
   } catch {
     return;
@@ -123,10 +125,10 @@ async function restore(r: any) {
       { method: "POST", headers: authHeaders() },
     );
     const recreated = res?.data?.recreated;
-    ElMessage.success(recreated ? "资源已从快照重建" : `已恢复（新版本 v${res?.data?.version}）`);
+    ElMessage.success(recreated ? t('pages.snapshots.resourceRebuilt') : t('pages.snapshots.extra.restoredNewVersion', { version: res?.data?.version }));
     await load();
   } catch (e: any) {
-    ElMessage.error(e?.data?.msg || "恢复失败");
+    ElMessage.error(e?.data?.msg || t('pages.snapshots.restoreFailed'));
   }
 }
 

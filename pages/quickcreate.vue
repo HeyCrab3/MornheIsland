@@ -10,22 +10,22 @@
         <div class="ai-badge">
           <el-icon :size="18"><MagicStick /></el-icon>
         </div>
-        <h1 class="text-2xl font-semibold">快速创建资源</h1>
+        <h1 class="text-2xl font-semibold">{{ $t('pages.quickcreate.quickCreateResource') }}</h1>
       </div>
-      <p class="text-sm text-gray-500 mb-6">上传作息表或课表照片，AI 自动识别并生成可编辑的结构化数据</p>
+      <p class="text-sm text-gray-500 mb-6">{{ $t('pages.quickcreate.extra.subtitle') }}</p>
 
       <el-steps :active="step" finish-status="success" align-center simple class="mb-7">
-        <el-step title="上传图片" />
-        <el-step title="确认结果" />
-        <el-step title="保存资源" />
+        <el-step :title="$t('pages.quickcreate.uploadImage')" />
+        <el-step :title="$t('pages.quickcreate.confirmResult')" />
+        <el-step :title="$t('pages.quickcreate.saveResource')" />
       </el-steps>
 
       <!-- ==================== Step 0: 上传 ==================== -->
       <div v-if="step === 0" class="max-w-lg mx-auto">
-        <div class="text-sm font-medium mb-2">创建类型</div>
+        <div class="text-sm font-medium mb-2">{{ $t('pages.quickcreate.extra.createType') }}</div>
         <el-radio-group v-model="resourceType" class="mb-4">
-          <el-radio-button value="timelayout">作息时间表</el-radio-button>
-          <el-radio-button value="classplan">课程表</el-radio-button>
+          <el-radio-button value="timelayout">{{ $t('pages.quickcreate.extra.scheduleType') }}</el-radio-button>
+          <el-radio-button value="classplan">{{ $t('components.home.quickstartupguide.subjects') }}</el-radio-button>
         </el-radio-group>
 
         <div
@@ -38,13 +38,13 @@
           <template v-if="!previewUrl">
             <el-icon size="30" class="text-gray-300 mb-2"><UploadFilled /></el-icon>
             <p class="text-sm text-gray-400">
-              拖拽图片到此处，或
+              {{ $t('pages.quickcreate.extra.dragHint') }}
               <label class="text-[var(--mi-brand)] cursor-pointer underline">
-                点击选择
+                {{ $t('pages.quickcreate.extra.clickSelect') }}
                 <input type="file" accept="image/*" hidden @change="onFileChange" />
               </label>
             </p>
-            <p class="text-xs text-gray-300 mt-1">支持作息表 / 课程表照片</p>
+            <p class="text-xs text-gray-300 mt-1">{{ $t('pages.quickcreate.extra.supportedPhotos') }}</p>
           </template>
           <img v-else :src="previewUrl" class="max-h-56 rounded-lg mx-auto" />
         </div>
@@ -57,7 +57,7 @@
           :disabled="!imageBase64"
           @click="doAnalyze"
         >
-          <el-icon class="mr-1"><MagicStick /></el-icon>开始 AI 识别
+          <el-icon class="mr-1"><MagicStick /></el-icon>{{ $t('pages.quickcreate.extra.startRecognize') }}
         </el-button>
       </div>
 
@@ -68,7 +68,7 @@
           <div>
             <div class="text-sm font-medium mb-2 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full" style="background: var(--mi-accent)" />
-              原图（AI 识别区域）
+              {{ $t('pages.quickcreate.extra.originalImage') }}
             </div>
             <div v-if="previewUrl" class="relative rounded-lg overflow-hidden border dark:border-neutral-700 bg-white">
               <img :src="previewUrl" class="w-full block" />
@@ -81,7 +81,7 @@
               />
             </div>
             <el-collapse class="mt-3">
-              <el-collapse-item title="查看 OCR 识别原文">
+              <el-collapse-item :title="$t('pages.quickcreate.viewOcrOriginal')">
                 <pre class="text-xs whitespace-pre-wrap bg-gray-50 dark:bg-neutral-700 rounded p-3 max-h-48 overflow-auto m-0">{{ result.ocrText }}</pre>
               </el-collapse-item>
             </el-collapse>
@@ -91,7 +91,7 @@
           <div>
             <div class="text-sm font-medium mb-2 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full" style="background: #8B5CF6" />
-              AI 结构化结果（可编辑）
+              {{ $t('pages.quickcreate.extra.aiStructured') }}
             </div>
 
             <!-- 时间表 -->
@@ -100,17 +100,17 @@
                 <el-table-column label="#" width="50">
                   <template #default="{ $index }">{{ $index + 1 }}</template>
                 </el-table-column>
-                <el-table-column label="名称" min-width="110">
+                <el-table-column :label="$t('components.cw2centralpanel.name')" min-width="110">
                   <template #default="{ row }">
                     <el-input v-model="row.name" size="small" />
                   </template>
                 </el-table-column>
-                <el-table-column label="开始" width="110">
+                <el-table-column :label="$t('components.timelayouteditor.start')" width="110">
                   <template #default="{ row }">
                     <el-input v-model="row.start" size="small" />
                   </template>
                 </el-table-column>
-                <el-table-column label="结束" width="110">
+                <el-table-column :label="$t('components.timelayouteditor.end')" width="110">
                   <template #default="{ row }">
                     <el-input v-model="row.end" size="small" />
                   </template>
@@ -120,11 +120,11 @@
 
             <!-- 课表 -->
             <template v-if="result?.type === 'classplan'">
-              <div class="mb-1 text-xs text-gray-400">识别到的科目</div>
+              <div class="mb-1 text-xs text-gray-400">{{ $t('pages.quickcreate.extra.recognizedSubjects') }}</div>
               <div class="flex flex-wrap gap-1 mb-3">
                 <el-tag v-for="s in result.subjects" :key="s" size="small">{{ s }}</el-tag>
               </div>
-              <div class="text-xs text-gray-400 mb-2">课程表预览（可在创建后进入编辑器调整）</div>
+              <div class="text-xs text-gray-400 mb-2">{{ $t('pages.quickcreate.extra.schedulePreview') }}</div>
               <div v-for="day in result.days || []" :key="day" class="mb-2">
                 <div class="text-xs font-medium mb-1">{{ day }}</div>
                 <div class="flex flex-wrap gap-1">
@@ -139,26 +139,26 @@
         </div>
 
         <div class="flex gap-3 mt-6">
-          <el-button @click="step = 0">返回重传</el-button>
-          <el-button type="primary" class="ai-btn" @click="step = 2">确认，下一步</el-button>
+          <el-button @click="step = 0">{{ $t('pages.quickcreate.extra.backAndReupload') }}</el-button>
+          <el-button type="primary" class="ai-btn" @click="step = 2">{{ $t('pages.quickcreate.extra.confirmNext') }}</el-button>
         </div>
       </div>
 
       <!-- ==================== Step 2: 保存 ==================== -->
       <div v-if="step === 2" class="max-w-md mx-auto">
         <el-form label-position="top">
-          <el-form-item label="资源名称" required>
-            <el-input v-model="saveName" placeholder="如：高一标准作息" />
+          <el-form-item :label="$t('pages.quickcreate.resourceName')" required>
+            <el-input v-model="saveName" :placeholder="$t('pages.quickcreate.resourceNameExample')" />
           </el-form-item>
           <el-button type="primary" class="ai-btn w-full" :loading="saving" @click="doSave">
-            保存资源
+            {{ $t('pages.quickcreate.saveResource') }}
           </el-button>
         </el-form>
         <div v-if="savedId" class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded text-sm">
-          资源已保存！
-          <el-button size="small" type="primary" class="ml-3" @click="goBind">绑定到班级</el-button>
+          {{ $t('pages.quickcreate.extra.saved') }}
+          <el-button size="small" type="primary" class="ml-3" @click="goBind">{{ $t('pages.quickcreate.extra.bindToClass') }}</el-button>
           <el-button size="small" class="ml-2" @click="navigateTo(resourceType === 'timelayout' ? '/timelayout' : '/classplan')">
-            返回资源库
+            {{ $t('pages.quickcreate.extra.backToResources') }}
           </el-button>
         </div>
       </div>
@@ -171,6 +171,7 @@ import { UploadFilled, MagicStick } from "@element-plus/icons-vue";
 import AIBackground from '@/assets/images/ai_background.jpeg'
 
 definePageMeta({ title: "快速创建资源", protected: true });
+const { t } = useI18n();
 
 const step = ref(0);
 const resourceType = ref<"timelayout" | "classplan">("timelayout");
@@ -257,7 +258,7 @@ async function doAnalyze() {
     result.value = res.data;
     step.value = 1;
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "识别失败");
+    ElMessage.error(e?.response?._data?.msg || t('pages.quickcreate.recognitionFailed'));
   } finally {
     analyzing.value = false;
   }
@@ -265,7 +266,7 @@ async function doAnalyze() {
 
 async function doSave() {
   if (!saveName.value.trim()) {
-    ElMessage.warning("请输入资源名称");
+    ElMessage.warning(t('pages.quickcreate.enterResourceName'));
     return;
   }
   saving.value = true;
@@ -277,9 +278,9 @@ async function doSave() {
       body: { name: saveName.value, data: result.value.data },
     });
     savedId.value = res.data._id;
-    ElMessage.success("资源已创建");
+    ElMessage.success(t('pages.quickcreate.resourceCreated'));
   } catch (e: any) {
-    ElMessage.error(e?.response?._data?.msg || "保存失败");
+    ElMessage.error(e?.response?._data?.msg || t('components.resourceeditor.saveFailed'));
   } finally {
     saving.value = false;
   }

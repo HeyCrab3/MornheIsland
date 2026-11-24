@@ -1,5 +1,5 @@
 <template>
-  <ResourceEditor collection="subjects" label="科目">
+  <ResourceEditor collection="subjects" :label="$t('composables.useciresource.subject')">
     <template #default="{ doc, save }">
       <SubjectsEditor v-if="doc" :model-value="doc.data" @save="save" />
     </template>

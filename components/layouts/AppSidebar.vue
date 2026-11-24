@@ -9,7 +9,7 @@
       />
       <div class="leading-tight">
         <div class="font-semibold tracking-wide">MornheIsland</div>
-        <div class="text-xs text-gray-400">莫宁岛 · 集控平台</div>
+        <div class="text-xs text-gray-400">{{ $t('sidebar.brandSubtitle') }}</div>
       </div>
     </div>
 
@@ -88,21 +88,34 @@
           {{ (userStore.userName || '?').charAt(0).toUpperCase() }}
         </el-avatar>
         <div class="flex-1 min-w-0">
-          <div class="text-sm font-medium truncate">{{ userStore.userName || '未登录' }}</div>
+          <div class="text-sm font-medium truncate">{{ userStore.userName || $t('sidebar.notLoggedIn') }}</div>
           <div class="text-xs text-gray-400 font-mono truncate">{{ userStore.userId }}</div>
         </div>
-        <el-button circle text size="small" title="切换主题" @click="dark.toggle">
+        <el-button circle text size="small" :title="$t('sidebar.switchTheme')" @click="dark.toggle">
           <el-icon><Sunny v-if="dark.isDark.value" /><Moon v-else /></el-icon>
         </el-button>
-        <el-button circle text size="small" title="退出登录" @click="logout">
+        <el-button circle text size="small" :title="$t('sidebar.logout')" @click="logout">
           <el-icon><SwitchButton /></el-icon>
         </el-button>
       </div>
+      <el-select
+        :model-value="locale"
+        size="small"
+        class="w-full"
+        @change="(v: string) => setLocale(v)"
+      >
+        <el-option
+          v-for="l in locales"
+          :key="l.code"
+          :label="l.name"
+          :value="l.code"
+        />
+      </el-select>
       <div class="text-[11px] text-gray-400 text-center leading-relaxed">
         ©2019-2026 Crab Studio · 鲁ICP备2020045185号-2<br />
-        <NuxtLink to="/terms" class="hover:underline">用户协议</NuxtLink>
+        <NuxtLink to="/terms" class="hover:underline">{{ $t('sidebar.userAgreement') }}</NuxtLink>
         <span class="mx-1">·</span>
-        <NuxtLink to="/privacy" class="hover:underline">隐私政策</NuxtLink>
+        <NuxtLink to="/privacy" class="hover:underline">{{ $t('sidebar.privacyPolicy') }}</NuxtLink>
         <span class="mx-1">·</span>
         v{{ runtimeConfig.public.VERSION }}
       </div>
@@ -139,6 +152,7 @@ import {
   UserFilled,
 } from "@element-plus/icons-vue";
 
+const { t, locale, setLocale, locales } = useI18n();
 const dark = useDarkMode();
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();
@@ -181,62 +195,62 @@ interface NavGroup {
 const menuGroups: NavGroup[] = [
   {
     key: "overview",
-    label: "概览",
+    label: t('sidebar.groups.overview'),
     collapsible: false,
     items: [
-      { path: "/", label: "仪表盘", icon: HomeFilled },
-      { path: "/quickcreate", label: "快速创建", icon: MagicStick, restricted: true },
+      { path: "/", label: t('sidebar.items.dashboard'), icon: HomeFilled },
+      { path: "/quickcreate", label: t('sidebar.items.quickCreate'), icon: MagicStick, restricted: true },
       // 看板是裸页面（layout: false），新标签页打开，不会把控制台顶掉
-      { path: "/board", label: "大屏看板", icon: Picture, target: "_blank" },
+      { path: "/board", label: t('sidebar.items.board'), icon: Picture, target: "_blank" },
     ],
   },
   {
     key: "resources",
-    label: "教学资源",
+    label: t('sidebar.groups.resources'),
     icon: Notebook,
     collapsible: true,
     items: [
-      { path: "/classplan", label: "档案库", icon: Notebook },
-      { path: "/import", label: "导入档案", icon: UploadFilled, cap: "resource.edit" },
-      { path: "/timelayout", label: "时间表库", icon: Timer },
-      { path: "/subjects", label: "课程表库", icon: Collection },
-      { path: "/policy", label: "策略库", icon: Lock },
-      { path: "/exams", label: "考试安排", icon: Calendar },
+      { path: "/classplan", label: t('sidebar.items.archive'), icon: Notebook },
+      { path: "/import", label: t('sidebar.items.importArchive'), icon: UploadFilled, cap: "resource.edit" },
+      { path: "/timelayout", label: t('sidebar.items.timeLayout'), icon: Timer },
+      { path: "/subjects", label: t('sidebar.items.subjects'), icon: Collection },
+      { path: "/policy", label: t('sidebar.items.policy'), icon: Lock },
+      { path: "/exams", label: t('sidebar.items.exams'), icon: Calendar },
     ],
   },
   {
     key: "org",
-    label: "组织",
+    label: t('sidebar.groups.org'),
     icon: School,
     collapsible: true,
     items: [
-      { path: "/classes", label: "班级管理", icon: School },
-      { path: "/schools", label: "学校", icon: OfficeBuilding, restricted: true },
-      { path: "/grants", label: "委托管理", icon: Share, restricted: true },
-      { path: "/subaccounts", label: "子账户", icon: UserFilled, restricted: true },
+      { path: "/classes", label: t('sidebar.items.classes'), icon: School },
+      { path: "/schools", label: t('sidebar.items.schools'), icon: OfficeBuilding, restricted: true },
+      { path: "/grants", label: t('sidebar.items.grants'), icon: Share, restricted: true },
+      { path: "/subaccounts", label: t('sidebar.items.subaccounts'), icon: UserFilled, restricted: true },
     ],
   },
   {
     key: "ops",
-    label: "集控运维",
+    label: t('sidebar.groups.ops'),
     icon: Monitor,
     collapsible: true,
     items: [
-      { path: "/devices", label: "设备追踪", icon: Monitor, cap: "device.control" },
-      { path: "/plugins", label: "插件管理", icon: Grid, cap: "device.control" },
-      { path: "/health", label: "档案体检", icon: FirstAidKit },
+      { path: "/devices", label: t('sidebar.items.devices'), icon: Monitor, cap: "device.control" },
+      { path: "/plugins", label: t('sidebar.items.plugins'), icon: Grid, cap: "device.control" },
+      { path: "/health", label: t('sidebar.items.health'), icon: FirstAidKit },
     ],
   },
   {
     key: "system",
-    label: "系统",
+    label: t('sidebar.groups.system'),
     icon: Setting,
     collapsible: true,
     items: [
-      { path: "/backup", label: "配置备份", icon: Download, restricted: true },
-      { path: "/snapshots", label: "数据恢复", icon: RefreshLeft },
-      { path: "/profile", label: "用户中心", icon: User },
-      { path: "/security", label: "账号安全", icon: Key },
+      { path: "/backup", label: t('sidebar.items.backup'), icon: Download, restricted: true },
+      { path: "/snapshots", label: t('sidebar.items.snapshots'), icon: RefreshLeft },
+      { path: "/profile", label: t('sidebar.items.profile'), icon: User },
+      { path: "/security", label: t('sidebar.items.security'), icon: Key },
     ],
   },
 ];
